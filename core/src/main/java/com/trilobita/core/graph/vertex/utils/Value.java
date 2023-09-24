@@ -1,5 +1,6 @@
 package com.trilobita.core.graph.vertex.utils;
 
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

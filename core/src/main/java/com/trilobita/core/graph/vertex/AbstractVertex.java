@@ -4,6 +4,7 @@ import com.trilobita.commons.Mail;
 import com.trilobita.commons.MailType;
 import com.trilobita.core.graph.vertex.utils.Sender;
 import com.trilobita.core.graph.vertex.utils.Value;
+import com.trilobita.commons.Message;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
