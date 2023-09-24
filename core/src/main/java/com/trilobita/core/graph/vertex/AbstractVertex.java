@@ -1,4 +1,4 @@
-package com.trilobita.core.graph.Vertex;
+package com.trilobita.core.graph.vertex;
 
 import com.trilobita.commons.Message;
 import lombok.AllArgsConstructor;
