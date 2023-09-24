@@ -2,6 +2,7 @@ package com.trilobita.commons;
 
 public enum MailType {
     BARRIER,
-    NORMAL
+    NORMAL,
+    FINISH_INDICATOR,
 }
 

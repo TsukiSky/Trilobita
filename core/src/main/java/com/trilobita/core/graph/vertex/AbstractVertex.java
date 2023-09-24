@@ -1,6 +1,8 @@
 package com.trilobita.core.graph.vertex;
 
 import com.trilobita.commons.Mail;
+import com.trilobita.commons.MailType;
+import com.trilobita.core.graph.vertex.utils.Sender;
 import com.trilobita.core.graph.vertex.utils.Value;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -17,6 +19,16 @@ public abstract class AbstractVertex {
     private Value state;
     private List<Edge> edges;
     private BlockingQueue<Mail> incomingQueue;
+    private boolean stepFinish;
+    private Sender sender;
+
+
+    public void sendFinish(){
+//        tell the server that the vertex has finished its job
+        Mail mail = new Mail(id,-1,null, MailType.FINISH_INDICATOR);
+        this.getSender().addToQueue(mail);
+    }
+
     public void send(Mail mail){
 
     };

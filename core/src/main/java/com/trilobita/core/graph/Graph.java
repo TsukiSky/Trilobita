@@ -9,7 +9,6 @@ import java.util.List;
 
 @Data
 @AllArgsConstructor
-@NoArgsConstructor
 public class Graph extends VertexGroup {
     public void addVertex(AbstractVertex v){
         this.VertexSet.add(v);

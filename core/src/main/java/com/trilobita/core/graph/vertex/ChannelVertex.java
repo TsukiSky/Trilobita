@@ -13,12 +13,30 @@ import java.util.concurrent.BlockingQueue;
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class ChannelVertex extends FunctionalVertex{
-    private BlockingQueue<Message> readQueue;
-    private BlockingQueue<Message> updateQueue;
+    private BlockingQueue<Mail> readQueue;
+    private BlockingQueue<Mail> updateQueue;
     private HashMap<Integer, Set<Integer>> directConnections;
+    private HashMap<Integer, Set<Integer>> allConnections;
+
+    public void updateConnection(Mail mail){
+        int senderId = mail.getFromVertexId();
+        int receiverId = mail.getToVertexId();
+        allConnections.get(senderId).add(receiverId);
+    }
+
     @Override
     public void function() {
 //        forward message
+        if (this.isStepFinish()){
+            while (!updateQueue.isEmpty()){
+                Mail mail = updateQueue.poll();
+                allConnections.get(mail.getFromVertexId()).add(mail.getToVertexId());
+            }
+            this.sendFinish();
+        }
+        else {
+
+        }
     }
 
     @Override
@@ -28,14 +46,15 @@ public class ChannelVertex extends FunctionalVertex{
 //        otherwise added to the read queue
         int senderId = mail.getFromVertexId();
         int receiverId = mail.getToVertexId();
-        Message msg = mail.getMessage();
         MailType mailType = mail.getMailType();
         if (mailType == MailType.NORMAL){
            if (directConnections.get(senderId).contains(receiverId)){
-               updateQueue.add(msg);
+               updateQueue.add(mail);
            }
            else {
-               readQueue.add(msg);
+               if (allConnections.get(senderId).contains(receiverId)){
+                   readQueue.add(mail);
+               }
            }
         }
     }

@@ -7,7 +7,7 @@ import java.util.concurrent.BlockingQueue;
 
 public class Sender {
     private BlockingQueue<Mail> mails;
-    private void addToQueue(Mail mail){
+    public void addToQueue(Mail mail){
         mails.add(mail);
     }
 }
