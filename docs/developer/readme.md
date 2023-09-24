@@ -1,0 +1,1 @@
+This folder contains all docs proposed during the development stage.
