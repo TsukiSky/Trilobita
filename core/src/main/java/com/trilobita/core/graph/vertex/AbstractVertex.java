@@ -1,6 +1,7 @@
-package com.trilobita.core.graph.Vertex;
+package com.trilobita.core.graph.vertex;
 
-import com.trilobita.commons.Message;
+import com.trilobita.commons.Mail;
+import com.trilobita.core.graph.vertex.utils.Value;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,12 +16,12 @@ public abstract class AbstractVertex {
     private int id;
     private Value state;
     private List<Edge> edges;
-    private BlockingQueue<Message> incomingQueue;
-    public void sendTo(Message msg, int vertexId){
+    private BlockingQueue<Mail> incomingQueue;
+    public void send(Mail mail){
 
     };
-    public void onReceive(Message msg){
-        incomingQueue.add(msg);
+    public void onReceive(Mail mail){
+        incomingQueue.add(mail);
     };
 
 }

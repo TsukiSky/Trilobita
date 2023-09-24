@@ -1,4 +1,4 @@
-package com.trilobita.core.graph.Vertex;
+package com.trilobita.core.graph.vertex;
 
 public class AggregatorVertex extends FunctionalVertex{
 

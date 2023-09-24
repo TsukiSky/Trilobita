@@ -1,8 +1,8 @@
-package com.trilobita.core.graph.Vertex;
+package com.trilobita.core.graph.vertex;
 
 import com.trilobita.commons.Mail;
 import com.trilobita.commons.Message;
-import com.trilobita.commons.MessageType;
+import com.trilobita.commons.MailType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -29,7 +29,8 @@ public class ChannelVertex extends FunctionalVertex{
         int senderId = mail.getFromVertexId();
         int receiverId = mail.getToVertexId();
         Message msg = mail.getMessage();
-        if (msg.getMessageType()== MessageType.NORMAL){
+        MailType mailType = mail.getMailType();
+        if (mailType == MailType.NORMAL){
            if (directConnections.get(senderId).contains(receiverId)){
                updateQueue.add(msg);
            }

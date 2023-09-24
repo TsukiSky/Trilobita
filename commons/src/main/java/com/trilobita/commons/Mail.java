@@ -11,5 +11,8 @@ public class Mail {
     private int fromVertexId;
     private int toVertexId;
     private Message message;
-
+    private MailType mailType;
 }
+
+
+

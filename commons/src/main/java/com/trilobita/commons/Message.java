@@ -10,5 +10,4 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Message<T> {
     private T content;
-    private MessageType messageType;
 }

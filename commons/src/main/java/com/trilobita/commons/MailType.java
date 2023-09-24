@@ -1,6 +1,6 @@
 package com.trilobita.commons;
 
-public enum MessageType {
+public enum MailType {
     BARRIER,
     NORMAL
 }
