@@ -16,7 +16,11 @@ public abstract class AbstractVertex {
     private Value state;
     private List<Edge> edges;
     private BlockingQueue<Message> incomingQueue;
-    abstract void sendTo(Message msg, int vertexId);
-    abstract void onReceive(Message msg);
+    public void sendTo(Message msg, int vertexId){
+
+    };
+    public void onReceive(Message msg){
+        incomingQueue.add(msg);
+    };
 
 }
