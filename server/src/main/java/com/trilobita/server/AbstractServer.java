@@ -2,6 +2,7 @@ package com.trilobita.server;
 
 import com.trilobita.commons.Address;
 import com.trilobita.commons.Mail;
+import com.trilobita.core.graph.VertexGroup;
 import com.trilobita.server.scheduler.AbstractScheduler;
 import com.trilobita.server.util.Status;
 
@@ -15,6 +16,7 @@ public abstract class AbstractServer {
     private Address address;
     private Status status;
     private AbstractScheduler schduler;
+    private VertexGroup vertexGroup;
     private BlockingQueue<Mail> outMailQueue;
     private BlockingQueue<Mail> inMailQueue;
 
@@ -29,5 +31,5 @@ public abstract class AbstractServer {
     public void postMail() {
         // post one mail to its destination
         // TODO: implement single mail post method for server
-    };
+    }
 }

@@ -1,11 +1,12 @@
 package com.trilobita.server.masterserver;
 
+import com.trilobita.core.graph.Graph;
 import com.trilobita.server.AbstractServer;
 import com.trilobita.server.masterserver.partitioner.AbstractPartitionner;
 import com.trilobita.server.workerserver.WorkerServer;
 
 public class MasterServer extends AbstractServer {
-    //    Graph graph;  // TODO: Add Graph
+    Graph graph;
     AbstractPartitionner graphPartitioner;
     WorkerServer[] workerCluster;
 
