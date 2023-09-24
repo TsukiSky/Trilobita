@@ -1,7 +1,13 @@
 package com.trilobita.commons;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
 
 @Data
-public class Message {
+@AllArgsConstructor
+@NoArgsConstructor
+public class Message<T> {
+    private T content;
 }
