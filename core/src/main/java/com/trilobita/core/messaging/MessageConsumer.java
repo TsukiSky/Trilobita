@@ -1,11 +1,14 @@
 package com.trilobita.core.messaging;
 
 import com.trilobita.core.common.util.Util;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.*;
 
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Properties;
+import java.util.UUID;
 
 public interface MessageConsumer {
 
@@ -13,9 +16,9 @@ public interface MessageConsumer {
 
     void stop();
 
-    void consume();
     Properties props = Util.loadConfig("core/src/main/resources/kafka.properties");
 
+    @Slf4j
     class DefaultMessageConsumer implements MessageConsumer {
         private boolean runFlag = false;
         String topic;
@@ -30,7 +33,18 @@ public interface MessageConsumer {
         public void start() {
             runFlag = true;
             new Thread(() -> {
-                consume();
+                props.put(ConsumerConfig.GROUP_INSTANCE_ID_CONFIG,("consumer-kafka-trilobita-"+ UUID.randomUUID()));
+                try (Consumer<String, String> consumer = new KafkaConsumer<>(props)) {
+                    consumer.subscribe(Collections.singletonList(topic));
+                    while (runFlag) {
+                        ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(100));
+                        for (ConsumerRecord<String, String> consumerRecord : records) {
+                            log.info("Consumer Record: Topic: {}, key: {}, value: {}, partition: {}, offset: {}",
+                                    topic, consumerRecord.key(), consumerRecord.value(),
+                                    consumerRecord.partition(), consumerRecord.offset());
+                        }
+                    }
+                }
             }).start();
         }
 
@@ -39,20 +53,6 @@ public interface MessageConsumer {
             runFlag = false;
         }
 
-        @Override
-        public void consume() {
-            try (final org.apache.kafka.clients.consumer.Consumer<String, String> consumer = new KafkaConsumer<>(props)) {
-                consumer.subscribe(Arrays.asList(topic));
-                while (runFlag) {
-                    ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(1000));
-                    for (ConsumerRecord<String, String> record : records) {
-                        System.out.printf("Consumer Record:(%d, %s, %d, %d)\n",
-                                record.key(), record.value(),
-                                record.partition(), record.offset());
-                    }
-                }
-            }
-        }
     }
 
 }
