@@ -12,6 +12,19 @@ public class Mail {
     private int toVertexId;
     private Message<?> message;
     private MailType mailType;
+
+    @Override
+    public boolean equals(Object o){
+        if (o == this){
+            return true;
+        }
+        if (!(o instanceof Mail)){
+            return false;
+        }
+        Mail mail = (Mail) o;
+        return this.fromVertexId==mail.fromVertexId && this.toVertexId==mail.toVertexId
+                && this.message==mail.message && this.mailType==mail.mailType;
+    }
 }
 
 

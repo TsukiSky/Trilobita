@@ -24,15 +24,56 @@ public abstract class AbstractVertex {
     private Sender sender;
 
 
+    /**
+     * <p>
+     *     Send the finish signal to the server
+     * </p>
+     */
     public void sendFinish(){
 //        tell the server that the vertex has finished its job
         Mail mail = new Mail(id,-1,null, MailType.FINISH_INDICATOR);
         this.getSender().addToQueue(mail);
     }
 
-    public void send(Mail mail){
+    /**
+     * <p>
+     *     Push the mail to the server's queue to be sent
+     *     to the destination vertex
+     * </p>
+     * @param mail contains from, to index and message
+     */
+    public void sendMail(Mail mail){
+        this.getSender().addToQueue(mail);
+    }
 
-    };
+    /**
+     * <p>
+     *     send message to neighbors with the sendMail function
+     * </p>
+     * @param edge to embed the id of the destination node to a mail
+     * @param message the message to be sent
+     */
+    public void sendToNeighbor(Edge edge, Message<?> message){
+        Mail mail = new Mail(this.getId(), edge.getTo().id, message, MailType.NORMAL);
+        sendMail(mail);
+    }
+
+    /**
+     * <p>
+     *     send message to neighbors with the sendMail function
+     * </p>
+     * @param to the id of the destination vertex
+     * @param message the message to be sent
+     */
+    public void sendTo(int to, Message<?> message){
+        Mail mail = new Mail(this.getId(), to, message, MailType.NORMAL);
+        sendMail(mail);
+    }
+
+    /**
+     * Add the mail to the incoming queue of the vertex
+     * @param mail
+     */
     public void onReceive(Mail mail){
         incomingQueue.add(mail);
     };

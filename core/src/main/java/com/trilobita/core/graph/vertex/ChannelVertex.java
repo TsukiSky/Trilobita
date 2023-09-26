@@ -18,10 +18,18 @@ public class ChannelVertex extends FunctionalVertex{
     private HashMap<Integer, Set<Integer>> directConnections;
     private HashMap<Integer, Set<Integer>> allConnections;
 
+
+    /**
+     * <p>
+     *      Update the hash map for vertex connection
+     * </p>
+     * @param mail parse from, to vertex id from the mail
+     */
     public void updateConnection(Mail mail){
         int senderId = mail.getFromVertexId();
         int receiverId = mail.getToVertexId();
         allConnections.get(senderId).add(receiverId);
+        allConnections.get(receiverId).add(senderId);
     }
 
     @Override

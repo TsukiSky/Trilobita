@@ -1,8 +1,18 @@
 package com.trilobita.core.graph.vertex;
 
-public class CombinerVertex extends FunctionalVertex{
+import com.trilobita.commons.Message;
+
+public class CombinerVertex extends FunctionalVertex implements Combiner {
     @Override
     public void function() {
-//        combine
+
+    }
+
+    @Override
+    public Message<?> combine(Iterable<?> iterable){
+        if (iterable.iterator().hasNext()){
+            return null;
+        }
+        return new Message<>();
     }
 }
