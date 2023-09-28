@@ -1,7 +1,6 @@
 package com.trilobita.core.graph;
 
-
-import com.trilobita.core.graph.Vertex.AbstractVertex;
+import com.trilobita.core.graph.vertex.AbstractVertex;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

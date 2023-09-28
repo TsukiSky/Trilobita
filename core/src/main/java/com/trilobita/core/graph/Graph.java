@@ -1,17 +1,19 @@
 package com.trilobita.core.graph;
 
-import com.trilobita.core.graph.Vertex.AbstractVertex;
-import com.trilobita.core.graph.Vertex.Edge;
+import com.trilobita.core.graph.vertex.AbstractVertex;
+import com.trilobita.core.graph.vertex.Edge;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.util.List;
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
 public class Graph extends VertexGroup {
 
+
+    public Graph(List<AbstractVertex> vertexList){
+        this.VertexSet = vertexList;
+    }
     public void setVertexSet(List<AbstractVertex> vertexSet) {
         this.VertexSet = vertexSet;
     }
