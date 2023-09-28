@@ -1,16 +1,12 @@
 package com.trilobita.core.messaging;
 
-import com.trilobita.core.common.util.Util;
+import com.trilobita.core.common.Util;
 import org.apache.kafka.clients.admin.AdminClient;
-import org.apache.kafka.clients.admin.CreateTopicsResult;
 import org.apache.kafka.clients.admin.ListTopicsResult;
-import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.common.KafkaFuture;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;

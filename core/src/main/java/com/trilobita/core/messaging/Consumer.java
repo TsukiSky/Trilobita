@@ -1,9 +1,8 @@
 package com.trilobita.core.messaging;
 
-import com.trilobita.core.common.util.Util;
+import com.trilobita.core.common.Util;
 import org.apache.kafka.clients.consumer.*;
 
-import java.io.File;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Properties;

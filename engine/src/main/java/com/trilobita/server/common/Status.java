@@ -1,4 +1,4 @@
-package com.trilobita.server.util;
+package com.trilobita.server.common;
 
 /**
  * STATUS of Server

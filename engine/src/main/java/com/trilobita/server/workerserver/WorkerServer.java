@@ -28,8 +28,4 @@ public class WorkerServer extends AbstractServer {
     public void distributeMail(Mail mail) {
 
     }
-
-    public static void main(String[] args) {
-
-    }
 }

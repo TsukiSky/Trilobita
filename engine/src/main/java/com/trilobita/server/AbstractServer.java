@@ -4,7 +4,7 @@ import com.trilobita.commons.Address;
 import com.trilobita.commons.Mail;
 import com.trilobita.core.graph.VertexGroup;
 import com.trilobita.server.scheduler.AbstractScheduler;
-import com.trilobita.server.util.Status;
+import com.trilobita.server.common.Status;
 
 import java.util.concurrent.BlockingQueue;
 
@@ -26,8 +26,8 @@ public abstract class AbstractServer {
     public void post() {
         // post all mails to its destination
         // TODO: implement post method for server
-
     }
+
     public void postMail() {
         // post one mail to its destination
         // TODO: implement single mail post method for server
