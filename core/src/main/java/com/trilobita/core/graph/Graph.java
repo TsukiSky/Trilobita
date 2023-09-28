@@ -11,6 +11,11 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Graph extends VertexGroup {
+
+    public void setVertexSet(List<AbstractVertex> vertexSet) {
+        this.VertexSet = vertexSet;
+    }
+
     public void addVertex(AbstractVertex v){
         this.VertexSet.add(v);
     }

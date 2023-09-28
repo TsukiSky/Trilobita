@@ -12,6 +12,8 @@ import java.util.List;
 @NoArgsConstructor
 public abstract class VertexGroup {
     protected List<AbstractVertex> VertexSet;
+    public abstract void setVertexSet(List<AbstractVertex> list);
+
 }
 
 
