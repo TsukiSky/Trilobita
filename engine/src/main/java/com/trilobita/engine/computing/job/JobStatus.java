@@ -1,4 +1,4 @@
-package com.trilobita.computing.job;
+package com.trilobita.engine.computing.job;
 
 /**
  * JobStatus indicates the status of a Job

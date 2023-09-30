@@ -1,4 +1,4 @@
-package com.trilobita.computing.task;
+package com.trilobita.engine.computing.task;
 
 /**
  * TaskStatus indicates the status of a Task

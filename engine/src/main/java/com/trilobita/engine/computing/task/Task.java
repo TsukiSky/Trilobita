@@ -1,4 +1,4 @@
-package com.trilobita.computing.task;
+package com.trilobita.engine.computing.task;
 
 /**
  * Task is the smallest schedulable unit in a Server

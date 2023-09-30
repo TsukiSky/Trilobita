@@ -1,4 +1,4 @@
-package com.trilobita.server.masterserver.partitioner;
+package com.trilobita.engine.server.masterserver.partitioner;
 
 
 /**

@@ -1,10 +1,10 @@
-package com.trilobita.server;
+package com.trilobita.engine.server;
 
 import com.trilobita.commons.Address;
 import com.trilobita.commons.Mail;
 import com.trilobita.core.graph.VertexGroup;
-import com.trilobita.server.scheduler.AbstractScheduler;
-import com.trilobita.server.common.Status;
+import com.trilobita.engine.server.common.ServerStatus;
+import com.trilobita.engine.server.scheduler.AbstractScheduler;
 
 import java.util.concurrent.BlockingQueue;
 
@@ -14,14 +14,17 @@ import java.util.concurrent.BlockingQueue;
 public abstract class AbstractServer {
     private Integer serverId;   // unique id of a server
     private Address address;
-    private Status status;
-    private AbstractScheduler schduler;
+    private ServerStatus serverStatus;
+    private AbstractScheduler scheduler;
     private VertexGroup vertexGroup;
     private BlockingQueue<Mail> outMailQueue;
     private BlockingQueue<Mail> inMailQueue;
 
     public abstract void start();
-    public abstract void stop();
+    public abstract void shutdown();
+
+    // server initialize
+    public abstract void initialize();
 
     public void post() {
         // post all mails to its destination
