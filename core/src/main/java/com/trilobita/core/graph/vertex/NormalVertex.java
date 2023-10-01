@@ -19,9 +19,9 @@ public class NormalVertex extends AbstractVertex{
             }
             mails.add(mail);
         }
-        compute(mails);
+        compute();
     }
-    public void compute(List<Mail> mails){
+    public void compute(){
 //        update the state according to the incoming messages
 
     }

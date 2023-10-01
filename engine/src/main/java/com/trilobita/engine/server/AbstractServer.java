@@ -4,23 +4,35 @@ import com.trilobita.commons.Address;
 import com.trilobita.commons.Mail;
 import com.trilobita.core.graph.VertexGroup;
 import com.trilobita.engine.server.common.ServerStatus;
-import com.trilobita.engine.server.scheduler.AbstractScheduler;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * The abstract parent class for all server instances
  */
+@Getter
 public abstract class AbstractServer {
-    private Integer serverId;   // unique id of a server
-    private Address address;
+    private final Integer serverId;   // unique id of a server
+    private final Address address;
+    @Setter
     private ServerStatus serverStatus;
-    private AbstractScheduler scheduler;
+    @Setter
     private VertexGroup vertexGroup;
-    private BlockingQueue<Mail> outMailQueue;
-    private BlockingQueue<Mail> inMailQueue;
+    private final BlockingQueue<Mail> outMailQueue;
+    private final BlockingQueue<Mail> inMailQueue;
+
+    public AbstractServer(int serverId, Address address) {
+        this.serverId = serverId;
+        this.address = address;
+        this.outMailQueue = new LinkedBlockingQueue<>();
+        this.inMailQueue = new LinkedBlockingQueue<>();
+    }
 
     public abstract void start();
+    public abstract void pause();
     public abstract void shutdown();
 
     // server initialize

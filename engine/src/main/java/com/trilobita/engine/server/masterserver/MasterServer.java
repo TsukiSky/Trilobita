@@ -1,5 +1,6 @@
 package com.trilobita.engine.server.masterserver;
 
+import com.trilobita.commons.Address;
 import com.trilobita.core.graph.Graph;
 import com.trilobita.engine.server.AbstractServer;
 import com.trilobita.engine.server.masterserver.partitioner.AbstractPartitioner;
@@ -18,15 +19,20 @@ public class MasterServer extends AbstractServer {
     Integer nDownWorkers;
 
     @Getter
-    private static final MasterServer instance = new MasterServer();    // Singleton implementation of MasterServer
+    private static final MasterServer instance = new MasterServer(0, new Address());    // Singleton implementation of MasterServer TODO: add the method of MasterServer initialization
 
-    private MasterServer() {}
+    private MasterServer(int serverId, Address address) {
+        super(serverId, address);
+    }
 
     @Override
     public void initialize() {}
 
     @Override
     public void start() {}
+
+    @Override
+    public void pause() {}
 
     @Override
     public void shutdown() {}
