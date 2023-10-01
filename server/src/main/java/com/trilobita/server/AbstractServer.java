@@ -16,9 +16,7 @@ public abstract class AbstractServer {
     private Address address;
     private Status status;
     private AbstractScheduler schduler;
-    private VertexGroup vertexGroup;
-    private BlockingQueue<Mail> outMailQueue;
-    private BlockingQueue<Mail> inMailQueue;
+    private Context context;
 
     public abstract void start();
     public abstract void stop();
