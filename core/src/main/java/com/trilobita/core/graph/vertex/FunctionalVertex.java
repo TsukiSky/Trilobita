@@ -2,9 +2,8 @@ package com.trilobita.core.graph.vertex;
 
 
 import com.trilobita.commons.Mail;
-import com.trilobita.commons.Message;
 
-public abstract class FunctionalVertex extends AbstractVertex {
+public abstract class FunctionalVertex extends Vertex {
     public abstract void function();
 
     public void onReceive(Mail mail){

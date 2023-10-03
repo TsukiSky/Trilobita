@@ -2,29 +2,27 @@ package com.trilobita.commons;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@EqualsAndHashCode
 public class Mail {
-    private int fromVertexId;
     private int toVertexId;
-    private Message<?> message;
+    private List<Message<?>> messages;
     private MailType mailType;
 
-    @Override
-    public boolean equals(Object o){
-        if (o == this){
-            return true;
-        }
-        if (!(o instanceof Mail)){
-            return false;
-        }
-        Mail mail = (Mail) o;
-        return this.fromVertexId==mail.fromVertexId && this.toVertexId==mail.toVertexId
-                && this.message==mail.message && this.mailType==mail.mailType;
+    public void add(Mail mail){
+        this.messages.addAll(mail.getMessages());
     }
+    public void add(Message message){
+        this.messages.add(message);
+    }
+
 }
 
 

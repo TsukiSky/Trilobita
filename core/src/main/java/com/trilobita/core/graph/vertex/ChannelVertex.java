@@ -1,7 +1,6 @@
 package com.trilobita.core.graph.vertex;
 
 import com.trilobita.commons.Mail;
-import com.trilobita.commons.Message;
 import com.trilobita.commons.MailType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -26,7 +25,6 @@ public class ChannelVertex extends FunctionalVertex{
      * @param mail parse from, to vertex id from the mail
      */
     public void updateConnection(Mail mail){
-        int senderId = mail.getFromVertexId();
         int receiverId = mail.getToVertexId();
         allConnections.get(senderId).add(receiverId);
         allConnections.get(receiverId).add(senderId);

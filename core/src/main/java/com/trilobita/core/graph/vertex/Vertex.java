@@ -17,7 +17,7 @@ import java.util.concurrent.BlockingQueue;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public abstract class AbstractVertex {
+public abstract class Vertex {
     private int id;
     private Value state;
     private List<Edge> edges;
