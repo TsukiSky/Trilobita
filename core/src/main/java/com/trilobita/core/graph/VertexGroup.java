@@ -1,6 +1,5 @@
 package com.trilobita.core.graph;
 
-
 import com.trilobita.core.graph.vertex.AbstractVertex;
 import com.trilobita.exception.TrilobitaException;
 import lombok.AllArgsConstructor;
@@ -14,6 +13,8 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public abstract class VertexGroup {
+    protected List<AbstractVertex> VertexSet;
+    public abstract void setVertexSet(List<AbstractVertex> list);
     private List<AbstractVertex> vertexSet;
 
     public AbstractVertex getVertexById(int id) throws TrilobitaException {

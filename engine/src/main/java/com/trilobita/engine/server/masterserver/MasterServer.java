@@ -2,10 +2,14 @@ package com.trilobita.engine.server.masterserver;
 
 import com.trilobita.commons.Address;
 import com.trilobita.core.graph.Graph;
+import com.trilobita.core.graph.VertexGroup;
 import com.trilobita.engine.server.AbstractServer;
 import com.trilobita.engine.server.masterserver.partitioner.AbstractPartitioner;
 import com.trilobita.engine.server.workerserver.WorkerServer;
+import com.trilobita.engine.server.masterserver.partitioner.Partitioner;
 import lombok.Getter;
+
+import java.util.ArrayList;
 
 /**
  * Master Server is the master of a server cluster, coordinate the start and the end of a Superstep
@@ -41,5 +45,9 @@ public class MasterServer extends AbstractServer {
 
     public void sendStartSignal() {}
 
-    public void partitionGraph() {}
+    public void partitionGraph(Graph graph, Integer nWorkers) {
+        ArrayList<VertexGroup> vertexGroupArrayList;
+        Partitioner partitioner = new Partitioner();
+        vertexGroupArrayList = partitioner.Partition(graph, nWorkers);
+    }
 }

@@ -8,8 +8,16 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 @Data
-@AllArgsConstructor
 public class Graph extends VertexGroup {
+
+
+    public Graph(List<AbstractVertex> vertexList){
+        this.VertexSet = vertexList;
+    }
+    public void setVertexSet(List<AbstractVertex> vertexSet) {
+        this.VertexSet = vertexSet;
+    }
+
     public void addVertex(AbstractVertex v){
         this.VertexSet.add(v);
     }
