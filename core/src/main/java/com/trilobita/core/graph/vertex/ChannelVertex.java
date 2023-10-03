@@ -1,7 +1,6 @@
 package com.trilobita.core.graph.vertex;
 
 import com.trilobita.commons.Mail;
-import com.trilobita.commons.Message;
 import com.trilobita.commons.MailType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -12,19 +11,26 @@ import java.util.concurrent.BlockingQueue;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class ChannelVertex extends FunctionalVertex{
+public class ChannelVertex extends Vertex{
     private BlockingQueue<Mail> readQueue;
     private BlockingQueue<Mail> updateQueue;
     private HashMap<Integer, Set<Integer>> directConnections;
     private HashMap<Integer, Set<Integer>> allConnections;
 
+
+    /**
+     * <p>
+     *      Update the hash map for vertex connection
+     * </p>
+     * @param mail parse from, to vertex id from the mail
+     */
     public void updateConnection(Mail mail){
-        int senderId = mail.getFromVertexId();
         int receiverId = mail.getToVertexId();
+        int senderId = mail.getFromVertexId();
         allConnections.get(senderId).add(receiverId);
+        allConnections.get(receiverId).add(senderId);
     }
 
-    @Override
     public void function() {
 //        forward message
         if (this.isStepFinish()){
