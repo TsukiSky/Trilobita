@@ -1,6 +1,6 @@
 package com.trilobita.core.messaging;
 
-import com.trilobita.core.common.util.Util;
+import com.trilobita.core.common.Util;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.CreateTopicsResult;
 import org.apache.kafka.clients.admin.ListTopicsResult;

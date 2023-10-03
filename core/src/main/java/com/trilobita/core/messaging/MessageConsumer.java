@@ -3,7 +3,7 @@ package com.trilobita.core.messaging;
 import com.trilobita.commons.Mail;
 import com.trilobita.commons.MailType;
 import com.trilobita.commons.Message;
-import com.trilobita.core.common.util.Util;
+import com.trilobita.core.common.Util;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.*;
 import org.springframework.messaging.MessageChannel;
