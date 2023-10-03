@@ -1,9 +1,7 @@
 package com.trilobita.engine.server.workerserver;
 
-import com.trilobita.commons.Address;
 import com.trilobita.commons.Mail;
 import com.trilobita.core.graph.vertex.AbstractVertex;
-import com.trilobita.core.graph.vertex.NormalVertex;
 import com.trilobita.engine.computing.task.MailingTask;
 import com.trilobita.engine.computing.task.Task;
 import com.trilobita.engine.server.AbstractServer;
@@ -22,13 +20,13 @@ public class WorkerServer extends AbstractServer {
     private ConcurrentHashMap<Integer, CopyOnWriteArrayList<Mail>> outMailTable;
     private ScheduledExecutorService inMailService;
 
-    public WorkerServer(int serverId, Address address) {
-        super(serverId, address);
+    public WorkerServer(int serverId) {
+        super(serverId);
         initialize();
     }
 
-    public WorkerServer(int serverId, Address address, int numOfExecutor) {
-        super(serverId, address);
+    public WorkerServer(int serverId, int numOfExecutor) {
+        super(serverId);
         initialize();
         this.executorService = Executors.newFixedThreadPool(numOfExecutor);
     }
@@ -96,10 +94,6 @@ public class WorkerServer extends AbstractServer {
         // TODO: send mail to the corresponding vertex
     }
 
-    private int findServerByVertexId(int vertexId) {
-        // TODO: do findServerByVertexId
-        return 0;
-    }
 
     private AbstractVertex findVertexById(int vertexId) {
         try {
