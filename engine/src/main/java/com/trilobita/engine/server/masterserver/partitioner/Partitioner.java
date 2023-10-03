@@ -1,4 +1,4 @@
-package com.trilobita.server.masterserver.partitioner;
+package com.trilobita.engine.server.masterserver.partitioner;
 
 import com.trilobita.core.graph.Graph;
 import com.trilobita.core.graph.VertexGroup;

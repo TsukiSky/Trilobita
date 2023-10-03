@@ -13,6 +13,3 @@ public class Mail {
     private Message message;
     private MailType mailType;
 }
-
-
-

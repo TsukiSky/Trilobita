@@ -1,4 +1,4 @@
-package com.trilobita.computing.job;
+package com.trilobita.engine.computing.job;
 
 /**
  * Job is the entity to be run in the system
@@ -6,4 +6,8 @@ package com.trilobita.computing.job;
 public abstract class Job {
     private int id;
     private JobStatus status;
+
+    public enum JobStatus {
+        RUNNING, SUCCEEDED, FAILED, RECOVERING
+    }
 }
