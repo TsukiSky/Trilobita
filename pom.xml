@@ -12,7 +12,7 @@
     <module>config</module>
     <module>examples</module>
     <module>runtime</module>
-    <module>server</module>
+    <module>engine</module>
     <module>core</module>
     <module>examples</module>
   </modules>

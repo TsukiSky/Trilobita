@@ -8,17 +8,16 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Sender {
-    private ConcurrentHashMap<Integer, Mail> messageQueue;
-    public Sender(ConcurrentHashMap<Integer, Mail> mail){
-        this.messageQueue = mail;
+    private BlockingQueue<Mail> messageQueue;
+    public Sender(BlockingQueue<Mail> messageQueue){
+        this.messageQueue = messageQueue;
     }
 
-    public void setMails(ConcurrentHashMap<Integer, Mail> mail){
-        this.messageQueue = mail;
+    public void setMails(BlockingQueue<Mail> messageQueue){
+        this.messageQueue = messageQueue;
     }
 
     public void addToQueue(Mail mail){
-        this.messageQueue.putIfAbsent(mail.getToVertexId(), mail);
-        this.messageQueue.get(mail.getToVertexId()).add(mail);
+        this.messageQueue.add(mail);
     }
 }

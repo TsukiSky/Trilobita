@@ -1,4 +1,4 @@
-package com.trilobita.server.scheduler;
+package com.trilobita.engine.server.scheduler;
 
 /**
  * Abstract Scheduler class for all scheduler instances

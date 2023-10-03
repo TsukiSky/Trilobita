@@ -12,17 +12,14 @@ import java.util.List;
 @NoArgsConstructor
 @EqualsAndHashCode
 public class Mail {
+    private int fromVertexId;
     private int toVertexId;
     private List<Message<?>> messages;
     private MailType mailType;
 
-    public void add(Mail mail){
-        this.messages.addAll(mail.getMessages());
+    public void add(Message<?> message){
+        messages.add(message);
     }
-    public void add(Message message){
-        this.messages.add(message);
-    }
-
 }
 
 

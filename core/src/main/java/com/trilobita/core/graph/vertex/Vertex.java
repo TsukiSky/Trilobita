@@ -34,7 +34,7 @@ public abstract class Vertex {
      */
     public void sendFinish(){
 //        tell the server that the vertex has finished its job
-        Mail mail = new Mail(-1,null, MailType.FINISH_INDICATOR);
+        Mail mail = new Mail(-1,-1,null, MailType.FINISH_INDICATOR);
         this.getSender().addToQueue(mail);
     }
 
@@ -57,8 +57,8 @@ public abstract class Vertex {
      * @param message the message to be sent
      */
     public void sendToNeighbor(Edge edge, Message<?> message){
-        Mail mail = new Mail(edge.getTo().id, new ArrayList<>(), MailType.NORMAL);
-        mail.add(mail);
+        Mail mail = new Mail(this.id, edge.getTo().id, new ArrayList<>(), MailType.NORMAL);
+        mail.add(message);
         sendMail(mail);
     }
 
@@ -70,7 +70,7 @@ public abstract class Vertex {
      * @param message the message to be sent
      */
     public void sendTo(int to, Message<?> message){
-        Mail mail = new Mail(to, new ArrayList<>(), MailType.NORMAL);
+        Mail mail = new Mail(this.id, to, new ArrayList<>(), MailType.NORMAL);
         mail.add(message);
         sendMail(mail);
     }
@@ -84,7 +84,7 @@ public abstract class Vertex {
     };
 
 
-    public void process(){
+    public void compute(){
         List<Message<?>> processMessages = new ArrayList<>();
         while (!this.getIncomingQueue().isEmpty()){
 //            process the message until it reaches the barrier message
@@ -97,7 +97,7 @@ public abstract class Vertex {
                 processMessages.add(message);
             }
         }
-        compute(processMessages);
+        process(processMessages);
     }
 
     /**
@@ -106,7 +106,7 @@ public abstract class Vertex {
      * </p>
      * @param messages a list of mails used for computing the new state
      */
-    public void compute(List<Message<?>> messages){
+    public void process(List<Message<?>> messages){
 //        update the state according to the incoming messages
 
     }

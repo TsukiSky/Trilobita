@@ -11,7 +11,7 @@ import java.util.concurrent.BlockingQueue;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class ChannelVertex extends FunctionalVertex{
+public class ChannelVertex extends Vertex{
     private BlockingQueue<Mail> readQueue;
     private BlockingQueue<Mail> updateQueue;
     private HashMap<Integer, Set<Integer>> directConnections;
@@ -26,11 +26,11 @@ public class ChannelVertex extends FunctionalVertex{
      */
     public void updateConnection(Mail mail){
         int receiverId = mail.getToVertexId();
+        int senderId = mail.getFromVertexId();
         allConnections.get(senderId).add(receiverId);
         allConnections.get(receiverId).add(senderId);
     }
 
-    @Override
     public void function() {
 //        forward message
         if (this.isStepFinish()){
