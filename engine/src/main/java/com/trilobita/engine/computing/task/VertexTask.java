@@ -1,10 +1,9 @@
 package com.trilobita.engine.computing.task;
 
-import com.trilobita.core.graph.vertex.AbstractVertex;
-import com.trilobita.core.graph.vertex.NormalVertex;
+import com.trilobita.core.graph.vertex.Vertex;
 
 public class VertexTask extends Task {
-    private NormalVertex vertex;
+    private Vertex vertex;
 
     @Override
     public void run() {
