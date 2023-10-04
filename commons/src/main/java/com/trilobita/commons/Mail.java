@@ -14,6 +14,7 @@ import java.util.List;
 public class Mail {
     private int fromVertexId;
     private int toVertexId;
+
     private List<Message<?>> messages;
     private MailType mailType;
 
