@@ -24,7 +24,7 @@ public abstract class Vertex {
     private boolean flag;
     private BlockingQueue<Mail> incomingQueue;
     private boolean stepFinish;
-    private Sender sender;
+    private BlockingQueue<Mail> serverQueue;
 
 
     /**
@@ -35,7 +35,7 @@ public abstract class Vertex {
     public void sendFinish(){
 //        tell the server that the vertex has finished its job
         Mail mail = new Mail(-1,-1,null, MailType.FINISH_INDICATOR);
-        this.getSender().addToQueue(mail);
+        this.serverQueue.add(mail);
     }
 
     /**
@@ -46,7 +46,7 @@ public abstract class Vertex {
      * @param mail contains from, to index and message
      */
     public void sendMail(Mail mail){
-        this.getSender().addToQueue(mail);
+        this.serverQueue.add(mail);
     }
 
     /**

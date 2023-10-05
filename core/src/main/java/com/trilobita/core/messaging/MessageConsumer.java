@@ -64,7 +64,7 @@ public class MessageConsumer {
      * @author Guo Ziniu: ziniu@catroll.io
      */
     public void start() throws ExecutionException, InterruptedException {
-        Set<String> existing = messageAdmin.getTopic();
+        Set<String> existing = messageAdmin.getTopics();
         if (!existing.contains(topic)) {
             log.info("existing topic: {} do not contain {}! Stopping...", existing, topic);
             return;

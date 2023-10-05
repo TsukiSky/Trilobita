@@ -11,7 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 public class Graph extends VertexGroup {
     public void addVertex(Vertex v){
-        this.VertexSet.add(v);
+        this.vertexSet.add(v);
     }
 
     public void addEdge(Vertex v1, Vertex v2){

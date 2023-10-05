@@ -10,6 +10,7 @@ import com.trilobita.engine.server.common.ServerStatus;
 import com.trilobita.engine.util.Hardware;
 import com.trilobita.exception.TrilobitaException;
 
+import java.util.HashMap;
 import java.util.concurrent.*;
 
 /**
@@ -20,6 +21,7 @@ public class WorkerServer extends AbstractServer {
     private LinkedBlockingQueue<Task> vertexTasks;  // vertex-related tasks queue
     private ConcurrentHashMap<Integer, CopyOnWriteArrayList<Mail>> outMailTable;
     private ScheduledExecutorService inMailService;
+    private HashMap<Integer, Integer> vertexIdServerId;
 
     public WorkerServer(int serverId, Address address) {
         super(serverId, address);
@@ -42,7 +44,7 @@ public class WorkerServer extends AbstractServer {
     }
 
     @Override
-    public void start() {
+    public void start() throws TrilobitaException {
         // Superstep 1.1 Handling vertex tasks
         while (!vertexTasks.isEmpty()) {
             executorService.execute(vertexTasks.poll());
@@ -82,7 +84,7 @@ public class WorkerServer extends AbstractServer {
         this.inMailService.shutdown();
     }
 
-    public void onStartSignal() {
+    public void onStartSignal() throws TrilobitaException {
         this.start();
     }
 
@@ -93,11 +95,17 @@ public class WorkerServer extends AbstractServer {
     public void distributeMailToVertex(Mail mail) {
         Vertex vertex = findVertexById(mail.getToVertexId());
         // TODO: send mail to the corresponding vertex
+        assert vertex != null;
+        vertex.onReceive(mail);
     }
 
-    private int findServerByVertexId(int vertexId) {
+    private int findServerByVertexId(int vertexId) throws TrilobitaException {
         // TODO: do findServerByVertexId
-        return 0;
+        int serverId = vertexIdServerId.getOrDefault(vertexId, -1);
+        if (serverId != -1){
+            return serverId;
+        }
+        throw new TrilobitaException("Vertex not registered");
     }
 
     private Vertex findVertexById(int vertexId) {

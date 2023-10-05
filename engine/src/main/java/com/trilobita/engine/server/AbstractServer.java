@@ -4,6 +4,7 @@ import com.trilobita.commons.Address;
 import com.trilobita.commons.Mail;
 import com.trilobita.core.graph.VertexGroup;
 import com.trilobita.engine.server.common.ServerStatus;
+import com.trilobita.exception.TrilobitaException;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -31,7 +32,7 @@ public abstract class AbstractServer {
         this.inMailQueue = new LinkedBlockingQueue<>();
     }
 
-    public abstract void start();
+    public abstract void start() throws TrilobitaException;
     public abstract void pause();
     public abstract void shutdown();
 
