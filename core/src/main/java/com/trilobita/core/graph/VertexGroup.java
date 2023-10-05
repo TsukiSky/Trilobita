@@ -1,7 +1,7 @@
 package com.trilobita.core.graph;
 
 
-import com.trilobita.core.graph.vertex.AbstractVertex;
+import com.trilobita.core.graph.vertex.Vertex;
 import com.trilobita.exception.TrilobitaException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,15 +14,17 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public abstract class VertexGroup {
-    private List<AbstractVertex> vertexSet;
+    protected List<Vertex> vertexSet;
 
-    public AbstractVertex getVertexById(int id) throws TrilobitaException {
-        for (AbstractVertex vertex: vertexSet) {
-            if (vertex.getId() == id) {
+    public Vertex getVertexById(int id) throws TrilobitaException {
+
+        for (Vertex vertex: vertexSet){
+            if (vertex.getId() == id){
                 return vertex;
             }
         }
-        throw new TrilobitaException("Vertex with id " + id + " not found");
+
+        throw new TrilobitaException("Vertex Not Found");
     }
 }
 

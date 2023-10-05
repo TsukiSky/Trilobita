@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Edge {
-    private AbstractVertex from;
-    private AbstractVertex to;
+    private Vertex from;
+    private Vertex to;
     private Value state;
 }

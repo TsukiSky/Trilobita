@@ -1,12 +1,14 @@
 package com.trilobita.engine.server;
 
-import com.trilobita.commons.Address;
 import com.trilobita.commons.Mail;
 import com.trilobita.core.graph.VertexGroup;
+import com.trilobita.core.messaging.MessageConsumer;
+import com.trilobita.core.messaging.MessageProducer;
 import com.trilobita.engine.server.common.ServerStatus;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -16,19 +18,25 @@ import java.util.concurrent.LinkedBlockingQueue;
 @Getter
 public abstract class AbstractServer {
     private final Integer serverId;   // unique id of a server
-    private final Address address;
     @Setter
     private ServerStatus serverStatus;
     @Setter
     private VertexGroup vertexGroup;
-    private final BlockingQueue<Mail> outMailQueue;
-    private final BlockingQueue<Mail> inMailQueue;
+    private final LinkedBlockingQueue<Mail> outMailQueue;
+    private final LinkedBlockingQueue<Mail> inMailQueue;
 
-    public AbstractServer(int serverId, Address address) {
+    private final MessageConsumer messageConsumer;
+
+    protected AbstractServer(int serverId) {
         this.serverId = serverId;
-        this.address = address;
         this.outMailQueue = new LinkedBlockingQueue<>();
         this.inMailQueue = new LinkedBlockingQueue<>();
+        this.messageConsumer = new MessageConsumer(serverId+"", new MessageConsumer.MessageHandler() {
+            @Override
+            public void handleMessage(UUID key, Mail value, int partition, long offset) {
+                AbstractServer.this.inMailQueue.add(value);
+            }
+        });
     }
 
     public abstract void start();
@@ -43,8 +51,14 @@ public abstract class AbstractServer {
         // TODO: implement post method for server
     }
 
-    public void postMail() {
+    protected int findServerByVertexId(int vertexId) {
+        // TODO: do findServerByVertexId
+        return 0;
+    }
+
+    public void postMail(Mail mail) {
         // post one mail to its destination
-        // TODO: implement single mail post method for server
+
+        MessageProducer.produce(null, mail, "//TODOTOPIC");
     }
 }

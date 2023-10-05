@@ -1,22 +1,16 @@
 package com.trilobita.core.messaging;
 
 import com.trilobita.commons.Mail;
-import com.trilobita.commons.MailType;
-import com.trilobita.commons.Message;
-import com.trilobita.core.common.Util;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.*;
-import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.support.GenericMessage;
 
-import javax.naming.Context;
 import java.time.Duration;
-import java.util.*;
+import java.util.Collections;
+import java.util.Properties;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.logging.Handler;
 
 /**
  * <h1>MessageConsumer</h1>
