@@ -16,7 +16,6 @@ import java.util.concurrent.ExecutionException;
  */
 @Slf4j
 public class MessageProducer {
-
     /**
      * <p>Produce a message to a topic.
      * </p>
@@ -34,18 +33,17 @@ public class MessageProducer {
         try {
             MessageAdmin.getInstance().createIfNotExist(topic);
         } catch (ExecutionException | InterruptedException exception) {
-log.error("produce create topic: {}", exception.getMessage());
+            log.error("produce create topic: {}", exception.getMessage());
         }
 
         try (final org.apache.kafka.clients.producer.Producer<Object, Object> producer = new KafkaProducer<>(MessageAdmin.getInstance().props)) {
             producer.send(new ProducerRecord<>(topic, finalKey, value), (event, ex) -> {
                 if (ex != null) {
-log.error("error producing message: {}", ex.getMessage());
+                    log.error("error producing message: {}", ex.getMessage());
                 } else {
-log.info("Produced event to topic {}: key = {} value = {}", topic, finalKey, value);
+                    log.info("Produced event to topic {}: key = {} value = {}", topic, finalKey, value);
                 }
             });
         }
     }
-
 }

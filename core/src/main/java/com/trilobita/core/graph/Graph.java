@@ -5,13 +5,19 @@ import com.trilobita.core.graph.vertex.Edge;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
 @AllArgsConstructor
 public class Graph extends VertexGroup {
+    public Graph(List<Vertex> vertices) {
+        this.vertexSet = vertices;
+    }
+
     public void addVertex(Vertex v){
-        this.VertexSet.add(v);
+        this.vertexSet.add(v);
     }
 
     public void addEdge(Vertex v1, Vertex v2){

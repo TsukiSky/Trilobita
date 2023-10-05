@@ -95,7 +95,6 @@ public class WorkerServer extends AbstractServer {
         // TODO: send mail to the corresponding vertex
     }
 
-
     private Vertex findVertexById(int vertexId) {
         try {
             return this.getVertexGroup().getVertexById(vertexId);
