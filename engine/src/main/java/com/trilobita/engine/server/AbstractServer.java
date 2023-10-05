@@ -24,7 +24,6 @@ public abstract class AbstractServer {
     private VertexGroup vertexGroup;
     private final LinkedBlockingQueue<Mail> outMailQueue;
     private final LinkedBlockingQueue<Mail> inMailQueue;
-
     private final MessageConsumer messageConsumer;
 
     protected AbstractServer(int serverId) {
@@ -58,7 +57,6 @@ public abstract class AbstractServer {
 
     public void postMail(Mail mail) {
         // post one mail to its destination
-
         MessageProducer.produce(null, mail, "//TODOTOPIC");
     }
 }

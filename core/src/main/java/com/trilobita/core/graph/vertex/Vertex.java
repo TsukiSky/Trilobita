@@ -21,9 +21,8 @@ public abstract class Vertex {
     private int id;
     private Value state;
     private List<Edge> edges;
-    private boolean flag;
+    private boolean flag;       // active/idle
     private BlockingQueue<Mail> incomingQueue;
-    private boolean stepFinish;
     private Sender sender;
 
 
