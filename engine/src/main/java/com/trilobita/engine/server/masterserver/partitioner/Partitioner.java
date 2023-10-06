@@ -27,7 +27,6 @@ public class Partitioner extends AbstractPartitioner {
 
     private ArrayList<VertexGroup> PartitionByHash(Graph graph, Integer nWorkers){
         List<Vertex> vertexList = graph.getVertexSet();
-//         ArrayList<VertexGroup> arrayList = new ArrayList<>(nWorkers);
         ArrayList<VertexGroup> arrayList = new ArrayList<>(Collections.nCopies(nWorkers, new VertexGroup()));
         for (int i=0;i<vertexList.size();i++){
             Vertex v = vertexList.get(i);
