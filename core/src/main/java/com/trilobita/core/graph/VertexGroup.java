@@ -5,12 +5,14 @@ import com.trilobita.core.graph.vertex.Vertex;
 import com.trilobita.exception.TrilobitaException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+@Data
 public class VertexGroup {
     protected List<Vertex> vertexSet;
 
