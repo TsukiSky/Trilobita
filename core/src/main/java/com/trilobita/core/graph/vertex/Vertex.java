@@ -84,7 +84,7 @@ public abstract class Vertex {
     };
 
 
-    public void compute(){
+    public void process(){
         List<Message<?>> processMessages = new ArrayList<>();
         while (!this.getIncomingQueue().isEmpty()){
 //            process the message until it reaches the barrier message
@@ -94,19 +94,18 @@ public abstract class Vertex {
                 if (message.getMessageType() == MessageType.BARRIER){
                     break;
                 }
-                processMessages.add(message);
+                compute(message);
             }
         }
-        process(processMessages);
     }
 
     /**
      * <p>
      *     Compute the updated state
      * </p>
-     * @param messages a list of mails used for computing the new state
+     * @param message a message used for computing the new state
      */
-    public void process(List<Message<?>> messages){
+    public void compute(Message<?> message){
 //        update the state according to the incoming messages
 
     }

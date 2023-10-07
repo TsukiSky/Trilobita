@@ -7,6 +7,6 @@ public class VertexTask extends Task {
 
     @Override
     public void run() {
-        vertex.compute();
+        vertex.process();
     }
 }
