@@ -33,17 +33,17 @@ public class ChannelVertex extends Vertex{
 
     public void function() {
 //        forward message
-        if (this.isStepFinish()){
+//        if (this.isStepFinish()){
             while (!updateQueue.isEmpty()){
                 Mail mail = updateQueue.poll();
                 allConnections.get(mail.getFromVertexId()).add(mail.getToVertexId());
             }
             this.sendFinish();
         }
-        else {
+//        else {
 
-        }
-    }
+//        }
+//    }
 
     @Override
     public void onReceive(Mail mail){

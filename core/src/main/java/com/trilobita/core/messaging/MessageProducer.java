@@ -16,9 +16,6 @@ import java.util.concurrent.ExecutionException;
  */
 @Slf4j
 public class MessageProducer {
-
-    MessageAdmin messageAdmin = MessageAdmin.getInstance();
-
     /**
      * <p>Produce a message to a topic.
      * </p>
@@ -28,13 +25,18 @@ public class MessageProducer {
      * @param topic Target topic, usually used by the destination server. It will be created if it does not exist.
      * @author Guo Ziniu : ziniu@catroll.io
      */
-    public void produce(UUID key, Mail value, String topic) throws ExecutionException, InterruptedException {
+    public static void produce(UUID key, Mail value, String topic) {
         if (key == null) {
             key = UUID.randomUUID();
         }
         UUID finalKey = key;
-        messageAdmin.createIfNotExist(topic);
-        try (final org.apache.kafka.clients.producer.Producer<Object, Object> producer = new KafkaProducer<>(messageAdmin.props)) {
+        try {
+            MessageAdmin.getInstance().createIfNotExist(topic);
+        } catch (ExecutionException | InterruptedException exception) {
+            log.error("produce create topic: {}", exception.getMessage());
+        }
+
+        try (final org.apache.kafka.clients.producer.Producer<Object, Object> producer = new KafkaProducer<>(MessageAdmin.getInstance().props)) {
             producer.send(new ProducerRecord<>(topic, finalKey, value), (event, ex) -> {
                 if (ex != null) {
                     log.error("error producing message: {}", ex.getMessage());
@@ -44,5 +46,4 @@ public class MessageProducer {
             });
         }
     }
-
 }
