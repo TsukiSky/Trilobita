@@ -4,9 +4,8 @@ import com.trilobita.core.graph.Graph;
 import com.trilobita.core.graph.VertexGroup;
 import com.trilobita.engine.server.AbstractServer;
 import com.trilobita.engine.server.masterserver.partitioner.AbstractPartitioner;
-import com.trilobita.engine.server.masterserver.partitioner.Partitioner;
+import com.trilobita.engine.server.masterserver.partitioner.HashPartitioner;
 import com.trilobita.engine.server.workerserver.WorkerServer;
-import lombok.Getter;
 
 import java.util.ArrayList;
 
@@ -20,6 +19,8 @@ public class MasterServer extends AbstractServer {
     Integer nRunningWorkers;
     Integer nPauseWorkers;
     Integer nDownWorkers;
+    ArrayList<VertexGroup> vertexGroupArrayList;
+
 
     private static MasterServer instance;
 
@@ -52,8 +53,7 @@ public class MasterServer extends AbstractServer {
     public void sendStartSignal() {}
 
     public void partitionGraph(Graph graph, Integer nWorkers) {
-        ArrayList<VertexGroup> vertexGroupArrayList;
-        Partitioner partitioner = new Partitioner();
-        vertexGroupArrayList = partitioner.Partition(graph, nWorkers);
+        AbstractPartitioner partitioner = new HashPartitioner(nWorkers);
+        this.vertexGroupArrayList = partitioner.Partition(graph, nWorkers);
     }
 }
