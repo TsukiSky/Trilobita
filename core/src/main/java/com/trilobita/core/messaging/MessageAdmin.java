@@ -35,7 +35,7 @@ public class MessageAdmin {
      * @return All the existing topics.
      * @author Guo Ziniu: ziniu@catroll.io
      */
-    public Set<String> getTopic() throws ExecutionException, InterruptedException {
+    public Set<String> getTopics() throws ExecutionException, InterruptedException {
         ListTopicsResult listTopics = adminClient.listTopics();
         return listTopics.names().get();
     }
@@ -50,7 +50,7 @@ public class MessageAdmin {
      * @author Guo Ziniu: ziniu@catroll.io
      */
     public void createIfNotExist(String topic, int partitions, short replication) throws ExecutionException, InterruptedException {
-        Set<String> existing = getTopic();
+        Set<String> existing = getTopics();
         if (existing.contains(topic)) {
             return;
         }

@@ -1,7 +1,6 @@
 package com.trilobita.engine.server.workerserver;
 
 import com.trilobita.commons.Mail;
-
 import com.trilobita.core.graph.vertex.Vertex;
 import com.trilobita.engine.computing.task.MailingTask;
 import com.trilobita.engine.computing.task.Task;
@@ -93,6 +92,8 @@ public class WorkerServer extends AbstractServer {
     public void distributeMailToVertex(Mail mail) {
         Vertex vertex = findVertexById(mail.getToVertexId());
         // TODO: send mail to the corresponding vertex
+        assert vertex != null;
+        vertex.onReceive(mail);
     }
 
     private Vertex findVertexById(int vertexId) {
