@@ -21,9 +21,10 @@ public abstract class Vertex {
     private int id;
     private Computable<?> state;
     private List<Edge> edges;
-    private boolean flag;       // active/idle
+    private boolean flag;
     private BlockingQueue<Mail> incomingQueue;
-    private Sender sender;
+    private boolean stepFinish;
+    private BlockingQueue<Mail> serverQueue;
 
 
     /**
@@ -34,7 +35,7 @@ public abstract class Vertex {
     public void sendFinish(){
 //        tell the server that the vertex has finished its job
         Mail mail = new Mail(-1,-1,null, MailType.FINISH_INDICATOR);
-        this.getSender().addToQueue(mail);
+        this.serverQueue.add(mail);
     }
 
     /**
@@ -45,7 +46,7 @@ public abstract class Vertex {
      * @param mail contains from, to index and message
      */
     public void sendMail(Mail mail){
-        this.getSender().addToQueue(mail);
+        this.serverQueue.add(mail);
     }
 
     /**
@@ -83,7 +84,7 @@ public abstract class Vertex {
     };
 
 
-    public void compute(){
+    public void process(){
         List<Message<?>> processMessages = new ArrayList<>();
         while (!this.getIncomingQueue().isEmpty()){
 //            process the message until it reaches the barrier message
@@ -93,19 +94,18 @@ public abstract class Vertex {
                 if (message.getMessageType() == MessageType.BARRIER){
                     break;
                 }
-                processMessages.add(message);
+                compute(message);
             }
         }
-        process(processMessages);
     }
 
     /**
      * <p>
      *     Compute the updated state
      * </p>
-     * @param messages a list of mails used for computing the new state
+     * @param message a message used for computing the new state
      */
-    public void process(List<Message<?>> messages){
+    public void compute(Message<?> message){
 //        update the state according to the incoming messages
 
     }
