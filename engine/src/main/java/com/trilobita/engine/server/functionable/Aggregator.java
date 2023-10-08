@@ -1,7 +1,8 @@
-package com.trilobita.server.functionable;
+package com.trilobita.engine.server.functionable;
+
 
 import com.trilobita.core.graph.VertexGroup;
-import com.trilobita.server.Context;
+import com.trilobita.engine.server.Context;
 
 /*
  * Monitor and communicate vertices metadata on a workerserver.

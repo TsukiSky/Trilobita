@@ -1,10 +1,10 @@
 package com.trilobita.core.graph.vertex;
 
+import com.trilobita.commons.Computable;
 import com.trilobita.commons.Mail;
 import com.trilobita.commons.MailType;
 import com.trilobita.commons.MessageType;
 import com.trilobita.core.graph.vertex.utils.Sender;
-import com.trilobita.core.graph.vertex.utils.Value;
 import com.trilobita.commons.Message;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,7 +19,7 @@ import java.util.concurrent.BlockingQueue;
 @NoArgsConstructor
 public abstract class Vertex {
     private int id;
-    private Value state;
+    private Computable<?> state;
     private List<Edge> edges;
     private boolean flag;       // active/idle
     private BlockingQueue<Mail> incomingQueue;

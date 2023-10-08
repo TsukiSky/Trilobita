@@ -6,8 +6,6 @@ import com.trilobita.engine.server.AbstractServer;
 import com.trilobita.engine.server.masterserver.partitioner.AbstractPartitioner;
 import com.trilobita.engine.server.masterserver.partitioner.Partitioner;
 import com.trilobita.engine.server.workerserver.WorkerServer;
-import lombok.Getter;
-
 import java.util.ArrayList;
 
 /**

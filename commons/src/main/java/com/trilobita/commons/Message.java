@@ -10,6 +10,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
     @EqualsAndHashCode
 public class Message<T>{
-    private T content;
+    private Computable<T> content;
     private MessageType messageType;
 }

@@ -1,6 +1,6 @@
-package com.trilobita.server.functionable;
+package com.trilobita.engine.server.functionable;
 
-import com.trilobita.server.Context;
+import com.trilobita.engine.server.Context;
 
 /*
  * An interface for easy adding or removing functional blocks, 
@@ -9,6 +9,6 @@ import com.trilobita.server.Context;
  */
 public interface Functinable {
 
-    void execute(Context context);
+    void execute(Context contxt);
 
 }
