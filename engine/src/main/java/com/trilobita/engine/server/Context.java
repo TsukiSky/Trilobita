@@ -21,5 +21,4 @@ public class Context {
     private ConcurrentHashMap<Integer, CopyOnWriteArrayList<Mail>> outMailTable;
     private final LinkedBlockingQueue<Mail> outMailQueue;
     private final LinkedBlockingQueue<Mail> inMailQueue;
-
 }

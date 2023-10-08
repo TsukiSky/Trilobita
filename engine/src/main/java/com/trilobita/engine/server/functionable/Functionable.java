@@ -7,8 +7,6 @@ import com.trilobita.engine.server.Context;
  * We provide the implementation of Combiner and Aggregator, as discussed in Pregel.
  * All defined execute functions will be called at the start of a superstep.  
  */
-public interface Functinable {
-
-    void execute(Context contxt);
-
+public interface Functionable {
+    void execute(Context context);
 }

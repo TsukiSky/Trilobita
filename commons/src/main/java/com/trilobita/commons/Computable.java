@@ -1,5 +1,7 @@
 package com.trilobita.commons;
 
 public interface Computable<T> {
-    Computable<T> combine(Computable<T> content);
+    public T add(Computable<?> computable);
+    public T minus(Computable<T> computable);
+    public T multiple(T computable);
 }

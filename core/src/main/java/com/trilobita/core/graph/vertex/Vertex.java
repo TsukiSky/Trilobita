@@ -4,7 +4,6 @@ import com.trilobita.commons.Computable;
 import com.trilobita.commons.Mail;
 import com.trilobita.commons.MailType;
 import com.trilobita.commons.MessageType;
-import com.trilobita.core.graph.vertex.utils.Sender;
 import com.trilobita.commons.Message;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -57,8 +56,7 @@ public abstract class Vertex {
      * @param message the message to be sent
      */
     public void sendToNeighbor(Edge edge, Message<?> message){
-        Mail mail = new Mail(this.id, edge.getTo().id, new ArrayList<>(), MailType.NORMAL);
-        mail.add(message);
+        Mail mail = new Mail(this.id, edge.getTo().id, message, MailType.NORMAL);
         sendMail(mail);
     }
 
@@ -70,8 +68,7 @@ public abstract class Vertex {
      * @param message the message to be sent
      */
     public void sendTo(int to, Message<?> message){
-        Mail mail = new Mail(this.id, to, new ArrayList<>(), MailType.NORMAL);
-        mail.add(message);
+        Mail mail = new Mail(this.id, to, message, MailType.NORMAL);
         sendMail(mail);
     }
 
@@ -89,13 +86,11 @@ public abstract class Vertex {
         while (!this.getIncomingQueue().isEmpty()){
 //            process the message until it reaches the barrier message
             Mail mail = this.getIncomingQueue().poll();
-            List<Message<?>> messages = mail.getMessages();
-            for (Message<?> message: messages){
-                if (message.getMessageType() == MessageType.BARRIER){
-                    break;
-                }
-                compute(message);
+            Message<?> message = mail.getMessage();
+            if (message.getMessageType() == MessageType.BARRIER){
+                break;
             }
+            compute(message);
         }
     }
 
