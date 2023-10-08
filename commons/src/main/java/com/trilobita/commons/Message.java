@@ -7,9 +7,8 @@ import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
-@NoArgsConstructor
-    @EqualsAndHashCode
+@EqualsAndHashCode
 public class Message<T>{
-    private T content;
+    private Computable<T> content;
     private MessageType messageType;
 }
