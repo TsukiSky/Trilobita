@@ -3,9 +3,7 @@ package com.trilobita.core.graph.vertex.utils;
 
 import com.trilobita.commons.Mail;
 
-import java.util.List;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class Sender {
     private BlockingQueue<Mail> messageQueue;

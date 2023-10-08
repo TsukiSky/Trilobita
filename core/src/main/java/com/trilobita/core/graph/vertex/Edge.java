@@ -1,6 +1,7 @@
 package com.trilobita.core.graph.vertex;
 
-import com.trilobita.core.graph.vertex.utils.Value;
+import com.trilobita.commons.Computable;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,5 +12,5 @@ import lombok.NoArgsConstructor;
 public class Edge {
     private Vertex from;
     private Vertex to;
-    private Value state;
+    private Computable<?> state;
 }

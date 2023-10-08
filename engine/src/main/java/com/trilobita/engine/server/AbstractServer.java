@@ -10,7 +10,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.UUID;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
@@ -26,6 +25,7 @@ public abstract class AbstractServer {
     private final LinkedBlockingQueue<Mail> outMailQueue;
     private final LinkedBlockingQueue<Mail> inMailQueue;
     private final MessageConsumer messageConsumer;
+    public Context context;
 
     protected AbstractServer(int serverId) {
         this.serverId = serverId;

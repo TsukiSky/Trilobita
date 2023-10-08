@@ -9,19 +9,17 @@ import java.util.List;
 
 @Data
 @AllArgsConstructor
-@NoArgsConstructor
 @EqualsAndHashCode
 public class Mail {
     private int fromVertexId;
     private int toVertexId;
-
-    private List<Message<?>> messages;
+    private Message<?> message;
     private MailType mailType;
 
-    public void add(Message<?> message){
-        messages.add(message);
+    public Mail(int toVertexId, Message<?> message, MailType mailType) {
+        this.toVertexId = toVertexId;
+        this.message = message;
+        this.mailType = mailType;
+        this.fromVertexId = 0;
     }
 }
-
-
-
