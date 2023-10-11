@@ -16,9 +16,9 @@ import java.util.concurrent.BlockingQueue;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public abstract class Vertex {
+public abstract class Vertex<T> {
     private int id;
-    private Computable<?> state;
+    private Computable<T> state;
     private List<Edge> edges;
     private boolean flag;
     private BlockingQueue<Mail> incomingQueue;
@@ -92,6 +92,11 @@ public abstract class Vertex {
             }
             compute(message);
         }
+    }
+
+    public void addEdge(Vertex<?> from, Vertex<?> to){
+        Edge edge = new Edge(from,to,null);
+        from.getEdges().add(edge);
     }
 
     /**
