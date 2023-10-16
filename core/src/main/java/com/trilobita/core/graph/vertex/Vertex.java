@@ -67,10 +67,12 @@ public abstract class Vertex<T> {
      * @param to the id of the destination vertex
      * @param message the message to be sent
      */
-    public void sendTo(int to, Message<?> message){
+    public void sendTo(int to, Message<T> message){
         Mail mail = new Mail(this.id, to, message, MailType.NORMAL);
         sendMail(mail);
     }
+
+    public abstract void startSuperstep();
 
     /**
      * Add the mail to the incoming queue of the vertex
@@ -82,11 +84,11 @@ public abstract class Vertex<T> {
 
 
     public void process(){
-        List<Message<?>> processMessages = new ArrayList<>();
+        List<Message<T>> processMessages = new ArrayList<>();
         while (!this.getIncomingQueue().isEmpty()){
 //            process the message until it reaches the barrier message
             Mail mail = this.getIncomingQueue().poll();
-            Message<?> message = mail.getMessage();
+            Message message = mail.getMessage();
             if (message.getMessageType() == MessageType.BARRIER){
                 break;
             }
@@ -105,8 +107,5 @@ public abstract class Vertex<T> {
      * </p>
      * @param message a message used for computing the new state
      */
-    public void compute(Message<?> message){
-//        update the state according to the incoming messages
-
-    }
+    public abstract void compute(Message<T> message);
 }

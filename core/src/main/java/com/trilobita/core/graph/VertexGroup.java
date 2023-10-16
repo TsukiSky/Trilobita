@@ -9,7 +9,7 @@ import java.util.List;
 
 @Data
 public class VertexGroup {
-    protected List<Vertex<?>> vertexSet;
+    protected List<Vertex> vertexSet;
 
     public VertexGroup() {
         this.vertexSet = new ArrayList<>();

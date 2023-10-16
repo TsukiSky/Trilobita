@@ -6,7 +6,9 @@ import com.trilobita.core.messaging.MessageConsumer;
 import com.trilobita.core.messaging.MessageProducer;
 import com.trilobita.engine.server.common.ServerStatus;
 import com.trilobita.exception.TrilobitaException;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.UUID;
@@ -16,6 +18,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  * The abstract parent class for all server instances
  */
 @Getter
+
 public abstract class AbstractServer {
     private final Integer serverId;   // unique id of a server
     @Setter

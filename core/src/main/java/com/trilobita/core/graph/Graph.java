@@ -11,12 +11,12 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 public class Graph extends VertexGroup {
-    public Graph(List<Vertex<?>> vertices) {
+    public Graph(List<Vertex> vertices) {
         super();
         this.vertexSet = vertices;
     }
 
-    public void addVertex(Vertex<?> v){
+    public void addVertex(Vertex v){
         this.vertexSet.add(v);
     }
 
