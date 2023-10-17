@@ -96,7 +96,7 @@ public abstract class Vertex<T> {
         }
     }
 
-    public void addEdge(Vertex<?> from, Vertex<?> to){
+    public void addEdge(Vertex<T> from, Vertex<T> to){
         Edge edge = new Edge(from,to,null);
         from.getEdges().add(edge);
     }

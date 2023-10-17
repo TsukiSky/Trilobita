@@ -1,8 +1,9 @@
-package com.trilobita.runtime.launcher.Worker;
+package com.trilobita.runtime.launcher.worker;
 
 import com.trilobita.engine.server.workerserver.WorkerServer;
 
 public class PageRankWorkerRuntime {
+
     public static void main(String[] args) {
         for (int i=0;i<4;i++){
             WorkerServer workerServer = new WorkerServer(i, 2);

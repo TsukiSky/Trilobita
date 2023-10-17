@@ -4,36 +4,40 @@ import com.trilobita.commons.Computable;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+
 @Data
 @AllArgsConstructor
-public class IntComparable implements Computable<Integer> {
-    private int value;
-    public int getValue(){
+public class DoubleComputable implements Computable<BigDecimal> {
+    private BigDecimal value;
+    public BigDecimal getValue(){
         return this.value;
     }
     @Override
-    public Computable<Integer> add(Computable<Integer> computable) {
-        IntComparable intComparable = (IntComparable) computable;
-        this.value += intComparable.getValue();
+    public Computable<BigDecimal> add(Computable<BigDecimal> computable) {
+        DoubleComputable doubleComputable = (DoubleComputable) computable;
+        this.value = this.value.add(doubleComputable.getValue());
         return this;
     }
 
     @Override
-    public Computable<Integer> minus(Computable<Integer> computable) {
-        IntComparable intComparable = (IntComparable) computable;
-        this.value -= intComparable.getValue();
+    public Computable<BigDecimal> minus(Computable<BigDecimal> computable) {
+        DoubleComputable doubleComputable = (DoubleComputable) computable;
+        this.value=this.value.subtract(doubleComputable.getValue());
         return this;
     }
 
     @Override
-    public Computable<Integer> multiply(Computable<Integer> computable) {
-        IntComparable intComparable = (IntComparable) computable;
-        this.value *= intComparable.getValue();
+    public Computable<BigDecimal> multiply(Computable<BigDecimal> computable) {
+        DoubleComputable doubleComputable = (DoubleComputable) computable;
+        this.value = this.value.multiply(doubleComputable.getValue());
         return this;
     }
 
-    public Computable<Integer> multiply(double num) {
-        this.value *= num;
+
+    public Computable<BigDecimal> multiply(double num) {
+        this.value = this.value.multiply(BigDecimal.valueOf(num));
         return this;
     }
 }
