@@ -15,14 +15,12 @@ public class VertexGroup {
         this.vertexSet = new ArrayList<>();
     }
 
-    public Vertex getVertexById(int id) throws TrilobitaException {
+    public Vertex getVertexById(int id) {
         for (Vertex vertex: vertexSet){
             if (vertex.getId() == id){
                 return vertex;
             }
         }
-        throw new TrilobitaException("Vertex Not Found");
+        return null;
     }
 }
-
-

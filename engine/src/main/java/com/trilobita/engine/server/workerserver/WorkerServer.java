@@ -4,6 +4,7 @@ import com.trilobita.commons.Mail;
 import com.trilobita.core.graph.vertex.Vertex;
 import com.trilobita.engine.computing.task.MailingTask;
 import com.trilobita.engine.computing.task.Task;
+import com.trilobita.engine.computing.task.VertexTask;
 import com.trilobita.engine.server.AbstractServer;
 import com.trilobita.engine.server.common.ServerStatus;
 import com.trilobita.engine.util.Hardware;
@@ -16,7 +17,7 @@ import java.util.concurrent.*;
  */
 public class WorkerServer extends AbstractServer {
     private ExecutorService executorService;
-    private LinkedBlockingQueue<Task> vertexTasks;  // vertex-related tasks queue
+    private LinkedBlockingQueue<VertexTask> vertexTasks;  // vertex-related tasks queue
     private ConcurrentHashMap<Integer, CopyOnWriteArrayList<Mail>> outMailTable;
     private ScheduledExecutorService inMailService;
 
@@ -26,8 +27,7 @@ public class WorkerServer extends AbstractServer {
     }
 
     public WorkerServer(int serverId, int numOfExecutor) {
-        super(serverId);
-        initialize();
+        this(serverId);
         this.executorService = Executors.newFixedThreadPool(numOfExecutor);
     }
 
@@ -55,7 +55,11 @@ public class WorkerServer extends AbstractServer {
         }
 
         try {
-            executorService.awaitTermination(100, TimeUnit.SECONDS);
+            if (executorService.awaitTermination(100, TimeUnit.SECONDS)) {
+                // All tasks are completed
+            } else {
+
+            }
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
@@ -91,17 +95,12 @@ public class WorkerServer extends AbstractServer {
 
     public void distributeMailToVertex(Mail mail) {
         Vertex vertex = findVertexById(mail.getToVertexId());
-        // TODO: send mail to the corresponding vertex
-        assert vertex != null;
-        vertex.onReceive(mail);
+        if (vertex != null) {
+            vertex.onReceive(mail);
+        }
     }
 
     private Vertex findVertexById(int vertexId) {
-        try {
-            return this.getVertexGroup().getVertexById(vertexId);
-        } catch (TrilobitaException e) {
-            e.printStackTrace();
-        }
-        return null;
+        return this.getVertexGroup().getVertexById(vertexId);
     }
 }
