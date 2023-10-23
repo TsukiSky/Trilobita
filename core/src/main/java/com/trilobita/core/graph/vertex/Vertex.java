@@ -10,6 +10,7 @@ import com.trilobita.commons.MessageType;
 import com.trilobita.commons.Message;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
@@ -27,6 +28,7 @@ public class Vertex<T> {
     private List<Edge> edges;
     private boolean flag;
     @JsonDeserialize(as = LinkedBlockingQueue.class)
+    @Getter
     private BlockingQueue<Mail> incomingQueue;
     private boolean stepFinish;
     @JsonDeserialize(as = LinkedBlockingQueue.class)
@@ -63,7 +65,7 @@ public class Vertex<T> {
      * @param message the message to be sent
      */
     public void sendToNeighbor(Edge edge, Message message){
-        Mail mail = new Mail(this.id, edge.getTo().id, message, MailType.NORMAL);
+        Mail mail = new Mail(this.id, edge.getToVertexId(), message, MailType.NORMAL);
         sendMail(mail);
     }
 
@@ -105,9 +107,9 @@ public class Vertex<T> {
         }
     }
 
-    public void addEdge(Vertex<T> from, Vertex<T> to){
-        Edge edge = new Edge(from,to,null);
-        from.getEdges().add(edge);
+    public void addEdge(int to){
+        Edge edge = new Edge(this.id,to,null);
+        this.getEdges().add(edge);
     }
 
     /**

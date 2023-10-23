@@ -43,7 +43,7 @@ public abstract class AbstractServer {
         });
     }
 
-    public abstract void start() throws TrilobitaException;
+    public abstract void start() throws TrilobitaException, InterruptedException;
     public abstract void pause();
     public abstract void shutdown();
 
