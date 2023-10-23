@@ -30,8 +30,8 @@ public class WorkerServer extends AbstractServer {
     private ConcurrentHashMap<Integer, CopyOnWriteArrayList<Mail>> outMailTable;
     private ScheduledExecutorService inMailService;
     private MessageConsumer partitionMessageConsumer;
+    private MessageConsumer startMessageConsumer;
     private CountDownLatch latch;
-    private boolean finishSuperstep;
 
 
     public WorkerServer(int serverId) throws ExecutionException, InterruptedException {
@@ -51,101 +51,108 @@ public class WorkerServer extends AbstractServer {
         this.inMailService = Executors.newScheduledThreadPool(1);
         this.vertexTasks = new LinkedBlockingQueue<>();
         this.outMailTable = new ConcurrentHashMap<>();
-        this.finishSuperstep = true;
         this.setServerStatus(ServerStatus.START);
         this.partitionMessageConsumer= new MessageConsumer(this.getServerId() + "partition", new MessageConsumer.MessageHandler() {
             @Override
-            public void handleMessage(UUID key, Mail value, int partition, long offset) throws JsonProcessingException, InterruptedException {
+            public void handleMessage(UUID key, Mail value, int partition, long offset) throws JsonProcessingException, InterruptedException, ExecutionException {
                 ObjectMapper objectMapper = new ObjectMapper();
                 vertexGroup = objectMapper.convertValue(value.getMessage().getContent(), VertexGroup.class);
                 log.info("Vertex Group: "+vertexGroup);
                 start();
             }
         });
-        listenForPartition();
+        this.startMessageConsumer = new MessageConsumer("start", new MessageConsumer.MessageHandler() {
+            @Override
+            public void handleMessage(UUID key, Mail value, int partition, long offset) throws JsonProcessingException, InterruptedException {
+                log.info("start new super step...");
+                execute();
+            }
+        });
+        startMessageConsumer.start();
+        partitionMessageConsumer.start();
     }
 
     @Override
-    public void start() throws InterruptedException{
-        for (int i=0;i<30;i++) {
-            if (finishSuperstep) {
-                finishSuperstep = false;
-                // Superstep 1.1 Handling inMailQueue
-                // TODO: improve the inMail handling mechanism -> current solution has flaws
-                latch = new CountDownLatch(1);
-                this.inMailService.scheduleAtFixedRate(()->{
-                    while(!this.getInMailQueue().isEmpty()) {
-                        Mail mail = this.getInMailQueue().poll();
-                        this.distributeMailToVertex(mail);
-                    }
-                    latch.countDown();
-                }, 0, 1, TimeUnit.SECONDS);
-                latch.await();
-                log.info("finish distribute task");
+    public void start() throws InterruptedException, ExecutionException {
+        execute();
+    }
 
-                // Tell the vertices to start superstep
-                latch = new CountDownLatch(vertexGroup.getVertexSet().size());
-                for (Vertex v: vertexGroup.getVertexSet()){
-                    Runnable wrappedTask = () -> {
-                        try {
-                            v.startSuperstep();
-                            BlockingQueue<Mail> mails = v.getIncomingQueue();
-                            // Iterate through vertices and add tasks to the task queue
-                            for (Mail mail: mails){
-                                Task task = new VertexTask(v, mail.getMessage());
-                                vertexTasks.add(task);
-                            }
-                        }
-                        finally {
-                            latch.countDown();
-                        }
-                    };
-                    executorService.execute(wrappedTask);
-                }
-                latch.await();
-                log.info("finish adding tasks and starting superstep");
-
-                // Superstep 1.3 Handling vertex tasks
-                latch = new CountDownLatch(vertexTasks.size());
-                while (!vertexTasks.isEmpty()) {
-                    Runnable task = vertexTasks.poll();
-                    Runnable wrappedTask = () -> {
-                        try {
-                            task.run();
-                        }
-                        finally {
-                            latch.countDown();
-                        }
-                    };
-                    executorService.execute(wrappedTask);
-                }
-                latch.await();
-                log.info("finish executing vertex tasks");
-
-                // Superstep 1.4 Handling outMailQueue
-                latch = new CountDownLatch(super.getOutMailQueue().size());
-                while (!super.getOutMailQueue().isEmpty()) {
-                    Mail mail = this.getOutMailQueue().poll();
-                    int receiverId = findServerByVertexId(mail.getToVertexId());
-                    Runnable mailingTask = new MailingTask(this.getOutMailQueue().poll(), receiverId);
-                    Runnable wrappedTask = () -> {
-                        try {
-                            mailingTask.run();
-                        }
-                        finally {
-                            latch.countDown();
-                        }
-                    };
-
-                    executorService.execute(wrappedTask);
-                }
-                latch.await();
-                log.info("finish sending out mails");
-
-                // Tell the master it has finished its job
-                MessageProducer.produce(null, new Mail(-1,null,MailType.FINISH_INDICATOR), "finish");
+    private void execute() throws InterruptedException {
+        log.info("entering new super step...");
+        // Superstep 1.1 Handling inMailQueue
+        // TODO: improve the inMail handling mechanism -> current solution has flaws
+        latch = new CountDownLatch(1);
+        this.inMailService.scheduleAtFixedRate(()->{
+            while(!this.getInMailQueue().isEmpty()) {
+                Mail mail = this.getInMailQueue().poll();
+                this.distributeMailToVertex(mail);
             }
+            latch.countDown();
+        }, 0, 1, TimeUnit.SECONDS);
+        latch.await();
+        log.info("finish distributing task");
+
+        // Tell the vertices to start superstep
+        latch = new CountDownLatch(vertexGroup.getVertexSet().size());
+        for (Vertex v: vertexGroup.getVertexSet()){
+            Runnable wrappedTask = () -> {
+                try {
+                    v.startSuperstep();
+                    BlockingQueue<Mail> mails = v.getIncomingQueue();
+                    // Iterate through vertices and add tasks to the task queue
+                    for (Mail mail: mails){
+                        Task task = new VertexTask(v, mail.getMessage());
+                        vertexTasks.add(task);
+                    }
+                }
+                finally {
+                    latch.countDown();
+                }
+            };
+            executorService.execute(wrappedTask);
         }
+        latch.await();
+        log.info("finish adding tasks and starting superstep");
+
+        // Superstep 1.3 Handling vertex tasks
+        latch = new CountDownLatch(vertexTasks.size());
+        while (!vertexTasks.isEmpty()) {
+            Runnable task = vertexTasks.poll();
+            Runnable wrappedTask = () -> {
+                try {
+                    task.run();
+                }
+                finally {
+                    latch.countDown();
+                }
+            };
+            executorService.execute(wrappedTask);
+        }
+        latch.await();
+        log.info("finish executing vertex tasks");
+
+        // Superstep 1.4 Handling outMailQueue
+        latch = new CountDownLatch(super.getOutMailQueue().size());
+        while (!super.getOutMailQueue().isEmpty()) {
+            Mail mail = this.getOutMailQueue().poll();
+            int receiverId = findServerByVertexId(mail.getToVertexId());
+            Runnable mailingTask = new MailingTask(this.getOutMailQueue().poll(), receiverId);
+            Runnable wrappedTask = () -> {
+                try {
+                    mailingTask.run();
+                }
+                finally {
+                    latch.countDown();
+                }
+            };
+
+            executorService.execute(wrappedTask);
+        }
+        latch.await();
+        log.info("finish sending out mails");
+
+        // Tell the master it has finished its job
+        MessageProducer.produce(null, new Mail(-1,null,MailType.FINISH_INDICATOR), "finish");
     }
 
     @Override
@@ -159,16 +166,12 @@ public class WorkerServer extends AbstractServer {
         this.inMailService.shutdown();
     }
 
-    public void onStartSignal() throws InterruptedException {
+    public void onStartSignal() throws InterruptedException, ExecutionException {
         this.start();
     }
 
     public void sendCompleteSignal() {
 
-    }
-
-    public void listenForPartition() throws ExecutionException, InterruptedException {
-        partitionMessageConsumer.start();
     }
 
     public void distributeMailToVertex(Mail mail) {
