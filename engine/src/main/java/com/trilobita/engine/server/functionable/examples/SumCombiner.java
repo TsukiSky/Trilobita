@@ -28,7 +28,7 @@ public class SumCombiner extends Combiner {
         Mail newMail = new Mail(toVertexId, null, MailType.NORMAL);
         Computable newContent = null;
         for (Mail mail: mails) {
-            Computable content = mail.getMessage().getContent();
+            Computable content = (Computable) mail.getMessage().getContent();
             if (newContent == null) {
                 newContent = content;
             } else {

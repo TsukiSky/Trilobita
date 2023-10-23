@@ -1,5 +1,8 @@
 package com.trilobita.core.graph.vertex;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.trilobita.commons.Computable;
 import com.trilobita.commons.Mail;
 import com.trilobita.commons.MailType;
@@ -12,17 +15,21 @@ import lombok.NoArgsConstructor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public abstract class Vertex<T> {
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")
+public class Vertex<T> {
     private int id;
     private Computable<T> state;
     private List<Edge> edges;
     private boolean flag;
+    @JsonDeserialize(as = LinkedBlockingQueue.class)
     private BlockingQueue<Mail> incomingQueue;
     private boolean stepFinish;
+    @JsonDeserialize(as = LinkedBlockingQueue.class)
     private BlockingQueue<Mail> serverQueue;
 
 
@@ -55,7 +62,7 @@ public abstract class Vertex<T> {
      * @param edge to embed the id of the destination node to a mail
      * @param message the message to be sent
      */
-    public void sendToNeighbor(Edge edge, Message<?> message){
+    public void sendToNeighbor(Edge edge, Message message){
         Mail mail = new Mail(this.id, edge.getTo().id, message, MailType.NORMAL);
         sendMail(mail);
     }
@@ -67,12 +74,14 @@ public abstract class Vertex<T> {
      * @param to the id of the destination vertex
      * @param message the message to be sent
      */
-    public void sendTo(int to, Message<T> message){
+    public void sendTo(int to, Message message){
         Mail mail = new Mail(this.id, to, message, MailType.NORMAL);
         sendMail(mail);
     }
 
-    public abstract void startSuperstep();
+    public void startSuperstep(){
+
+    }
 
     /**
      * Add the mail to the incoming queue of the vertex
@@ -84,7 +93,7 @@ public abstract class Vertex<T> {
 
 
     public void process(){
-        List<Message<T>> processMessages = new ArrayList<>();
+        List<Message> processMessages = new ArrayList<>();
         while (!this.getIncomingQueue().isEmpty()){
 //            process the message until it reaches the barrier message
             Mail mail = this.getIncomingQueue().poll();
@@ -107,5 +116,7 @@ public abstract class Vertex<T> {
      * </p>
      * @param message a message used for computing the new state
      */
-    public abstract void compute(Message<T> message);
+    public void compute(Message message){
+
+    }
 }

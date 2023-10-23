@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
@@ -24,7 +25,7 @@ public abstract class AbstractServer {
     @Setter
     private ServerStatus serverStatus;
     @Setter
-    private VertexGroup vertexGroup;
+    protected volatile VertexGroup vertexGroup;
     private final LinkedBlockingQueue<Mail> outMailQueue;
     private final LinkedBlockingQueue<Mail> inMailQueue;
     private final MessageConsumer messageConsumer;
@@ -47,7 +48,7 @@ public abstract class AbstractServer {
     public abstract void shutdown();
 
     // server initialize
-    public abstract void initialize();
+    public abstract void initialize() throws ExecutionException, InterruptedException;
 
     public void post() {
         // post all mails to its destination
