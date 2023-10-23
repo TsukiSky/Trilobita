@@ -41,7 +41,7 @@ public class MessageConsumer {
          * @param offset    message offset
          * @author Guo Ziniu: ziniu@catroll.io
          */
-        void handleMessage(UUID key, Mail value, int partition, long offset) throws JsonProcessingException, InterruptedException;
+        void handleMessage(UUID key, Mail value, int partition, long offset) throws JsonProcessingException, InterruptedException, ExecutionException;
     }
 
     public MessageConsumer(String topic, MessageHandler messageHandler) {
@@ -86,9 +86,7 @@ public class MessageConsumer {
                         messageHandler.handleMessage(UUID.fromString(consumerRecord.key()), value, partition, offset);
                     }
                 }
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
-            } catch (InterruptedException e) {
+            } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         });

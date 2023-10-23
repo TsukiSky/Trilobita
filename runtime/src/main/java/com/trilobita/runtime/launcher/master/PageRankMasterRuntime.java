@@ -7,6 +7,7 @@ import com.trilobita.runtime.launcher.impl.PageRankVertex;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 public class PageRankMasterRuntime {
     public static Graph createVertices(){
@@ -66,7 +67,7 @@ public class PageRankMasterRuntime {
         Graph graph = new Graph(vertices);
         return graph;
     }
-    public static void main(String[] args) {
+    public static void main(String[] args) throws ExecutionException, InterruptedException {
         MasterServer masterServer = MasterServer.getInstance();
 //        parse the graph
         Graph graph = PageRankMasterRuntime.createVertices();
