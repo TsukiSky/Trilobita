@@ -88,6 +88,8 @@ public class MessageConsumer {
                 }
             } catch (JsonProcessingException e) {
                 throw new RuntimeException(e);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
             }
         });
         consumerThread.start();

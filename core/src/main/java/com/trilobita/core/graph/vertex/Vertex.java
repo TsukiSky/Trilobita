@@ -24,7 +24,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")
 public class Vertex<T> {
     private int id;
-    private Computable<T> state;
     private List<Edge> edges;
     private boolean flag;
     @JsonDeserialize(as = LinkedBlockingQueue.class)
@@ -109,6 +108,11 @@ public class Vertex<T> {
 
     public void addEdge(int to){
         Edge edge = new Edge(this.id,to,null);
+        this.getEdges().add(edge);
+    }
+
+    public void addEdge(Vertex to){
+        Edge edge = new Edge(this.id,to.getId(),null);
         this.getEdges().add(edge);
     }
 
