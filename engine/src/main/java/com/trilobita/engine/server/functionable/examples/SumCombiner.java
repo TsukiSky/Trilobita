@@ -26,16 +26,16 @@ public class SumCombiner extends Combiner {
     // combine mails
     private Mail combineMails(int toVertexId, CopyOnWriteArrayList<Mail> mails) {
         Mail newMail = new Mail(toVertexId, null, MailType.NORMAL);
-        Computable<?> newContent = null;
+        Computable newContent = null;
         for (Mail mail: mails) {
-            Computable<?> content = mail.getMessage().getContent();
+            Computable content = (Computable) mail.getMessage().getContent();
             if (newContent == null) {
                 newContent = content;
             } else {
-                newContent = (Computable<?>) newContent.add(content);
+                newContent = newContent.add(content);
             }
         }
-        newMail.setMessage(new Message<>(newContent, MessageType.NORMAL));
+        newMail.setMessage(new Message(newContent, MessageType.NORMAL));
         return newMail;
     }
 }

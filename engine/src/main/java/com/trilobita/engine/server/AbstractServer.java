@@ -6,22 +6,26 @@ import com.trilobita.core.messaging.MessageConsumer;
 import com.trilobita.core.messaging.MessageProducer;
 import com.trilobita.engine.server.common.ServerStatus;
 import com.trilobita.exception.TrilobitaException;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * The abstract parent class for all server instances
  */
 @Getter
+
 public abstract class AbstractServer {
     private final Integer serverId;   // unique id of a server
     @Setter
     private ServerStatus serverStatus;
     @Setter
-    private VertexGroup vertexGroup;
+    protected volatile VertexGroup vertexGroup;
     private final LinkedBlockingQueue<Mail> outMailQueue;
     private final LinkedBlockingQueue<Mail> inMailQueue;
     private final MessageConsumer messageConsumer;
@@ -44,7 +48,7 @@ public abstract class AbstractServer {
     public abstract void shutdown();
 
     // server initialize
-    public abstract void initialize();
+    public abstract void initialize() throws ExecutionException, InterruptedException;
 
     public void post() {
         // post all mails to its destination

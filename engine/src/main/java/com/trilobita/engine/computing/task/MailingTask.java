@@ -1,6 +1,7 @@
 package com.trilobita.engine.computing.task;
 
 import com.trilobita.commons.Mail;
+import com.trilobita.core.messaging.MessageProducer;
 import lombok.Getter;
 
 @Getter
@@ -15,6 +16,6 @@ public class MailingTask extends Task {
 
     @Override
     public void run() {
-
+        MessageProducer.produce(null, mail, receiverId+"");
     }
 }

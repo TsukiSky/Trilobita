@@ -37,7 +37,7 @@ public class MessageProducer {
         }
 
         try (final org.apache.kafka.clients.producer.Producer<Object, Object> producer = new KafkaProducer<>(MessageAdmin.getInstance().props)) {
-            producer.send(new ProducerRecord<>(topic, finalKey, value), (event, ex) -> {
+            producer.send(new ProducerRecord<>(topic, finalKey.toString(), value), (event, ex) -> {
                 if (ex != null) {
                     log.error("error producing message: {}", ex.getMessage());
                 } else {

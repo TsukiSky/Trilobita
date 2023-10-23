@@ -1,5 +1,6 @@
 package com.trilobita.core.messaging;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.trilobita.commons.Mail;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.*;
@@ -40,7 +41,7 @@ public class MessageConsumer {
          * @param offset    message offset
          * @author Guo Ziniu: ziniu@catroll.io
          */
-        void handleMessage(UUID key, Mail value, int partition, long offset);
+        void handleMessage(UUID key, Mail value, int partition, long offset) throws JsonProcessingException;
     }
 
     public MessageConsumer(String topic, MessageHandler messageHandler) {
@@ -70,21 +71,23 @@ public class MessageConsumer {
         runFlag = true;
         consumerProperties.put(ConsumerConfig.GROUP_INSTANCE_ID_CONFIG, ("consumer-kafka-trilobita-" + UUID.randomUUID()));
         consumerThread = new Thread(() -> {
-            try (Consumer<UUID, Mail> consumer = new KafkaConsumer<>(consumerProperties)) {
+            try (Consumer<String, Mail> consumer = new KafkaConsumer<>(consumerProperties)) {
                 consumer.subscribe(Collections.singletonList(topic));
                 while (runFlag) {
-                    ConsumerRecords<UUID, Mail> records = consumer.poll(Duration.ofMillis(100));
-                    for (ConsumerRecord<UUID, Mail> consumerRecord : records) {
-                        UUID key = consumerRecord.key();
+                    ConsumerRecords<String, Mail> records = consumer.poll(Duration.ofMillis(100));
+                    for (ConsumerRecord<String, Mail> consumerRecord : records) {
+//                        UUID key = consumerRecord.key();
                         Mail value = consumerRecord.value();
                         int partition = consumerRecord.partition();
                         long offset = consumerRecord.offset();
                         log.info("Consumer Record: Topic: {}, key: {}, value: {}, partition: {}, offset: {}",
-                                topic, key, value, partition, offset
+                                topic, consumerRecord.key(), value, partition, offset
                         );
-                        messageHandler.handleMessage(key, value, partition, offset);
+                        messageHandler.handleMessage(UUID.fromString(consumerRecord.key()), value, partition, offset);
                     }
                 }
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
             }
         });
         consumerThread.start();
