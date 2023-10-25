@@ -20,7 +20,7 @@ public class IndexPartitioner extends AbstractPartitioner {
         return new PartitionStrategy() {
             @Override
             public int getServerIdByVertexId(int vertexId) {
-                List<Vertex> vertexList = graph.getVertexSet();
+                List<Vertex> vertexList = graph.getVertices();
                 int verticesPerWorker = (int) Math.ceil((double) vertexList.size() / nWorkers);
                 for(int i =0; i<nWorkers;i++){
                     if (vertexId<=verticesPerWorker*(i+1)){

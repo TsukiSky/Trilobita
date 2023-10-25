@@ -9,10 +9,9 @@ import lombok.Data;
 @Data
 public class VertexTask extends Task {
     private Vertex vertex;
-    private Message message;
 
     @Override
     public void run() {
-        vertex.compute(message);
+        vertex.compute();
     }
 }

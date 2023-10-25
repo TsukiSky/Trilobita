@@ -1,25 +1,23 @@
 package com.trilobita.core.graph;
 
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.trilobita.core.graph.vertex.Vertex;
-import com.trilobita.exception.TrilobitaException;
 import lombok.Data;
 import java.util.ArrayList;
 import java.util.List;
 
 @Data
 public class VertexGroup {
-    protected List<Vertex> vertexSet;
+    protected List<Vertex> vertices;
 
     public VertexGroup() {
-        this.vertexSet = new ArrayList<>();
+        this.vertices = new ArrayList<>();
     }
 
     public Vertex getVertexById(int id) {
-        for (Vertex vertex: vertexSet){
+        for (Vertex vertex: vertices){
             if (vertex.getId() == id){
                 return vertex;
             }

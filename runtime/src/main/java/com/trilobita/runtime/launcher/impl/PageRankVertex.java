@@ -5,43 +5,46 @@ import com.trilobita.commons.*;
 import com.trilobita.core.graph.vertex.Edge;
 import com.trilobita.core.graph.vertex.Vertex;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 
-@NoArgsConstructor
 @Data
+@EqualsAndHashCode(callSuper = true)
+@NoArgsConstructor
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")
 public class PageRankVertex extends Vertex<BigDecimal> {
     private final double weight = 0.85;
-    private DoubleComputable state;
-    public PageRankVertex(int id){
-        super(id, new ArrayList<>(), false, new LinkedBlockingQueue<>(),
-                false, new LinkedBlockingQueue<>());
-        this.state = new DoubleComputable(BigDecimal.valueOf(1));
+
+    public PageRankVertex(int id) {
+        super(id, new ArrayList<>(), VertexStatus.INACTIVE, new PageRankValue(BigDecimal.valueOf(0)), false,
+                new LinkedBlockingQueue<>(), new LinkedBlockingQueue<>());
     }
 
     @Override
-    public void startSuperstep(){
+    public void startSuperstep() {
         // initialize the score to be (1-weight) * score in previous superstep
-        this.getState().setValue(BigDecimal.valueOf(1-weight));
+        this.getValue().set(BigDecimal.valueOf(1 - weight));
     }
+
     @Override
-    public void compute(Message message){
-        DoubleComputable score = (DoubleComputable) message.getContent();
-        // update the state of the vertex according to the incoming score
-        this.setState((DoubleComputable) this.getState().add(score.multiply(weight)));
-        // if finish all the job, generate out mail
-        if (this.getIncomingQueue().isEmpty()){
-        // calculate the updated edge weight
-            Message msg = new Message(this.getState().getValue().divide(BigDecimal.valueOf(this.getEdges().size())), MessageType.NORMAL);
-            for (Edge edge: this.getEdges()){
-                int vertexId = edge.getToVertexId();
-                Mail mail = new Mail(vertexId, msg, MailType.NORMAL);
-                this.sendMail(mail);
-            }
+    public void compute() {
+        while (!this.getIncomingQueue().isEmpty()) {
+            Message message = this.getIncomingQueue().poll().getMessage();
+            PageRankValue score = (PageRankValue) message.getContent();
+            // update the state of the vertex according to the incoming score
+            this.getValue().add(score.multiply(weight));
+        }
+
+        // finished all the job, generate out mail
+        Message msg = new Message(this.getValue().divide(new PageRankValue(BigDecimal.valueOf(this.getEdges().size()))), MessageType.NORMAL);
+        for (Edge edge : this.getEdges()) {
+            int vertexId = edge.getToVertexId();
+            Mail mail = new Mail(vertexId, msg, MailType.NORMAL);
+            this.sendMail(mail);
         }
     }
 }

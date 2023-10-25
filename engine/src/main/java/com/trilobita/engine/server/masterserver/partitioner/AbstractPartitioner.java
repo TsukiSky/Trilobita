@@ -17,11 +17,11 @@ public abstract class AbstractPartitioner {
         for (int i = 0; i < nWorkers; i++) {
             arrayList.add(new VertexGroup());
         }
-        List<Vertex> graphVertexSet = graph.getVertexSet();
+        List<Vertex> graphVertexSet = graph.getVertices();
         for (Vertex vertex : graphVertexSet) {
             int vertexId = vertex.getId();
             int serverId = getPartitionStrategy().getServerIdByVertexId(vertexId);
-            arrayList.get(serverId - 1).getVertexSet().add(vertex);
+            arrayList.get(serverId - 1).getVertices().add(vertex);
         }
         return arrayList;
     }
