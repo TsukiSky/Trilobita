@@ -20,15 +20,15 @@ import java.util.concurrent.*;
  * Worker Server controls vertex computations and communicate with other servers
  */
 @Slf4j
-public class WorkerServer<T> extends AbstractServer<T> {
-    private final ExecutionManager<T> executionManager;
+public class WorkerServer extends AbstractServer {
+    private final ExecutionManager executionManager;
     private final ConcurrentHashMap<Integer, CopyOnWriteArrayList<Mail>> outMailTable;
     private final MessageConsumer partitionMessageConsumer;
     private final MessageConsumer startMessageConsumer;
 
     public WorkerServer(int serverId, int numOfExecutor) throws ExecutionException, InterruptedException {
         super(serverId);
-        this.executionManager = new ExecutionManager<>(4, this);
+        this.executionManager = new ExecutionManager(4, this);
         this.outMailTable = new ConcurrentHashMap<>();
         this.setServerStatus(ServerStatus.START);
         this.partitionMessageConsumer= new MessageConsumer(this.getServerId() + "partition", new MessageConsumer.MessageHandler() {
@@ -60,6 +60,7 @@ public class WorkerServer<T> extends AbstractServer<T> {
         log.info("entering new super step...");
         this.executionManager.execute();
         // Tell the master it has finished its job
+        Thread.sleep(1000);
         MessageProducer.produce(null, new Mail(-1,null,MailType.FINISH_INDICATOR), "finish");
     }
 
@@ -80,13 +81,13 @@ public class WorkerServer<T> extends AbstractServer<T> {
     }
 
     public void distributeMailToVertex(Mail mail) {
-        Vertex<T> vertex = findVertexById(mail.getToVertexId());
+        Vertex vertex = findVertexById(mail.getToVertexId());
         if (vertex != null) {
             vertex.onReceive(mail);
         }
     }
 
-    private Vertex<T> findVertexById(int vertexId) {
+    private Vertex findVertexById(int vertexId) {
         return this.getVertexGroup().getVertexById(vertexId);
     }
 }

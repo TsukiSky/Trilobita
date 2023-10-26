@@ -22,7 +22,7 @@ public abstract class AbstractServer<T> {
     @Setter
     private ServerStatus serverStatus;
     @Setter
-    protected volatile VertexGroup<T> vertexGroup;
+    protected volatile VertexGroup vertexGroup;
     private final LinkedBlockingQueue<Mail> outMailQueue;
     private final LinkedBlockingQueue<Mail> inMailQueue;
     private final MessageConsumer messageConsumer;

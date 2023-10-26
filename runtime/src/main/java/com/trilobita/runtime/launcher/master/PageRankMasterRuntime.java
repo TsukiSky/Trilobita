@@ -71,7 +71,6 @@ public class PageRankMasterRuntime {
         MasterServer masterServer = MasterServer.getInstance();
 //        parse the graph
         Graph graph = PageRankMasterRuntime.createVertices();
-        masterServer.initialize();
         masterServer.partitionGraph(graph, 1);
         masterServer.start();
     }

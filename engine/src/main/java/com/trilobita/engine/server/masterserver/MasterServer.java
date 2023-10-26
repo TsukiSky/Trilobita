@@ -12,7 +12,7 @@ import com.trilobita.core.messaging.MessageConsumer;
 import com.trilobita.core.messaging.MessageProducer;
 import com.trilobita.engine.server.AbstractServer;
 import com.trilobita.engine.server.masterserver.partitioner.AbstractPartitioner;
-import com.trilobita.engine.server.masterserver.partitioner.Partitioner;
+import com.trilobita.engine.server.masterserver.partitioner.HashPartitioner;
 import com.trilobita.engine.server.workerserver.WorkerServer;
 import lombok.extern.slf4j.Slf4j;
 
@@ -78,7 +78,7 @@ public class MasterServer extends AbstractServer {
     public void partitionGraph(Graph graph, Integer nWorkers) {
         nDownWorkers = nWorkers;
         ArrayList<VertexGroup> vertexGroupArrayList;
-        Partitioner partitioner = new Partitioner();
+        AbstractPartitioner partitioner = new HashPartitioner(nWorkers);
         vertexGroupArrayList = partitioner.Partition(graph, nWorkers);
 //        todo: Send partitions to workers
         for (int i=0;i<vertexGroupArrayList.size();i++){
