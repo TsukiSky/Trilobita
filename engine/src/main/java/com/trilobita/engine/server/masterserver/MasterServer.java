@@ -59,14 +59,9 @@ public class MasterServer extends AbstractServer {
     public static synchronized MasterServer getInstance() throws ExecutionException, InterruptedException {
         if (instance == null) {
             instance = new MasterServer(0);
-            instance.initialize();
         }
         return instance;
     }
-
-    @Override
-    public void initialize() {}
-
     @Override
     public void start() {}
 

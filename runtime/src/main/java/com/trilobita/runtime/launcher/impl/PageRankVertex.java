@@ -38,7 +38,6 @@ public class PageRankVertex extends Vertex<BigDecimal> {
             // update the state of the vertex according to the incoming score
             this.getValue().add(score.multiply(weight));
         }
-
         // finished all the job, generate out mail
         Message msg = new Message(this.getValue().divide(new PageRankValue(BigDecimal.valueOf(this.getEdges().size()))), MessageType.NORMAL);
         for (Edge edge : this.getEdges()) {

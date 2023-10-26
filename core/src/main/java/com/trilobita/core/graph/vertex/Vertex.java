@@ -14,7 +14,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, property = "@class")
 public abstract class Vertex<T> {
     private int id;
     private List<Edge> edges;
@@ -25,15 +25,6 @@ public abstract class Vertex<T> {
     private BlockingQueue<Mail> incomingQueue;
     @JsonDeserialize(as = LinkedBlockingQueue.class)
     private BlockingQueue<Mail> serverQueue;
-
-    /**
-     * Send the finish signal to the server
-     */
-    public void sendFinish(){
-    // tell the server that the vertex has finished its job
-        Mail mail = new Mail(-1,-1,null, MailType.FINISH_INDICATOR);
-        this.serverQueue.add(mail);
-    }
 
     /**
      * Push the mail to the server's queue to be sent to the destination vertex
