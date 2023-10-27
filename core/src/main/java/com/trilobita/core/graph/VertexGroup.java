@@ -1,38 +1,36 @@
 package com.trilobita.core.graph;
 
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.trilobita.core.graph.vertex.Vertex;
-import com.trilobita.exception.TrilobitaException;
 import lombok.Data;
+import lombok.Getter;
+
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 @Data
-public class VertexGroup {
-    protected List<Vertex> vertexSet;
+public class VertexGroup<T> {
+    protected List<Vertex<T>> vertices;
 
     public VertexGroup() {
-        this.vertexSet = new ArrayList<>();
+        this.vertices = new LinkedList<>();
     }
 
-    public Vertex getVertexById(int id) throws TrilobitaException {
-        for (Vertex vertex: vertexSet){
+    public Vertex<T> getVertexById(int id) {
+        for (Vertex<T> vertex: vertices){
             if (vertex.getId() == id){
                 return vertex;
             }
         }
-        throw new TrilobitaException("Vertex Not Found");
+        return null;
     }
 
-    public static void main(String[] args) throws JsonProcessingException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        String jsonVertexGroup = "{ \"vertexSet\": [ { \"id\": 1}] }";  // Example JSON representation of VertexGroup
-        VertexGroup result = objectMapper.readValue(jsonVertexGroup, VertexGroup.class);
-    }
-
+    //    public static void main(String[] args) throws JsonProcessingException {
+//        ObjectMapper objectMapper = new ObjectMapper();
+//        String jsonVertexGroup = "{ \"vertexSet\": [ { \"id\": 1}] }";  // Example JSON representation of VertexGroup
+//        VertexGroup<T> result = objectMapper.readValue(jsonVertexGroup, VertexGroup.class);
+//    }
 }
-
-

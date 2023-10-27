@@ -1,19 +1,12 @@
 package com.trilobita.core.graph.vertex;
 
-import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.trilobita.commons.Computable;
-import com.trilobita.commons.Mail;
-import com.trilobita.commons.MailType;
-import com.trilobita.commons.MessageType;
-import com.trilobita.commons.Message;
+import com.trilobita.commons.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -21,35 +14,20 @@ import java.util.concurrent.LinkedBlockingQueue;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")
-public class Vertex<T> {
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, property = "@class")
+public abstract class Vertex<T> {
     private int id;
     private List<Edge> edges;
-    private boolean flag;
+    private VertexStatus status;
+    private Computable<T> value;
+    private boolean stepFinished;
     @JsonDeserialize(as = LinkedBlockingQueue.class)
-    @Getter
     private BlockingQueue<Mail> incomingQueue;
-    private boolean stepFinish;
     @JsonDeserialize(as = LinkedBlockingQueue.class)
     private BlockingQueue<Mail> serverQueue;
 
-
     /**
-     * <p>
-     *     Send the finish signal to the server
-     * </p>
-     */
-    public void sendFinish(){
-//        tell the server that the vertex has finished its job
-        Mail mail = new Mail(-1,-1,null, MailType.FINISH_INDICATOR);
-        this.serverQueue.add(mail);
-    }
-
-    /**
-     * <p>
-     *     Push the mail to the server's queue to be sent
-     *     to the destination vertex
-     * </p>
+     * Push the mail to the server's queue to be sent to the destination vertex
      * @param mail contains from, to index and message
      */
     public void sendMail(Mail mail){
@@ -57,9 +35,7 @@ public class Vertex<T> {
     }
 
     /**
-     * <p>
-     *     send message to neighbors with the sendMail function
-     * </p>
+     * send message to neighbors with the sendMail function
      * @param edge to embed the id of the destination node to a mail
      * @param message the message to be sent
      */
@@ -69,9 +45,7 @@ public class Vertex<T> {
     }
 
     /**
-     * <p>
-     *     send message to neighbors with the sendMail function
-     * </p>
+     * send message to neighbors with the sendMail function
      * @param to the id of the destination vertex
      * @param message the message to be sent
      */
@@ -86,43 +60,33 @@ public class Vertex<T> {
 
     /**
      * Add the mail to the incoming queue of the vertex
-     * @param mail
+     * @param mail the mail to be received
      */
     public void onReceive(Mail mail){
+        this.status = VertexStatus.ACTIVE;
         incomingQueue.add(mail);
-    };
+    }
 
-
-    public void process(){
-        List<Message> processMessages = new ArrayList<>();
-        while (!this.getIncomingQueue().isEmpty()){
-//            process the message until it reaches the barrier message
-            Mail mail = this.getIncomingQueue().poll();
-            Message message = mail.getMessage();
-            if (message.getMessageType() == MessageType.BARRIER){
-                break;
-            }
-            compute(message);
-        }
+    public void addEdge(Edge edge){
+        this.getEdges().add(edge);
     }
 
     public void addEdge(int to){
         Edge edge = new Edge(this.id,to,null);
-        this.getEdges().add(edge);
+        this.addEdge(edge);
     }
 
-    public void addEdge(Vertex to){
+    public void addEdge(Vertex<T> to){
         Edge edge = new Edge(this.id,to.getId(),null);
-        this.getEdges().add(edge);
+        this.addEdge(edge);
     }
 
     /**
-     * <p>
-     *     Compute the updated state
-     * </p>
-     * @param message a message used for computing the new state
+     * compute incoming messages
      */
-    public void compute(Message message){
+    public abstract void compute();
 
+    public enum VertexStatus {
+        ACTIVE, INACTIVE
     }
 }

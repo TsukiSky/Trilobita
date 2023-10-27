@@ -1,13 +1,11 @@
-package com.trilobita.runtime.launcher.worker;
+package com.trilobita.examples.worker;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.trilobita.core.graph.VertexGroup;
 import com.trilobita.engine.server.workerserver.WorkerServer;
 
 import java.util.concurrent.ExecutionException;
 
-public class PageRankWorkerRuntime {
+public class PageRankWorker1 {
 
     public static void main(String[] args) throws ExecutionException, InterruptedException, JsonProcessingException {
 //        for (int i=0;i<4;i++){
@@ -16,7 +14,7 @@ public class PageRankWorkerRuntime {
 //            workerServer.start();
 //        }
 
-        WorkerServer workerServer = new WorkerServer(0, 2);
+        WorkerServer workerServer = new WorkerServer(1, 2);
 
     }
 }

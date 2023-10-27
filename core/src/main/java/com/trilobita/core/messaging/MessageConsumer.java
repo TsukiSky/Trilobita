@@ -44,10 +44,10 @@ public class MessageConsumer {
         void handleMessage(UUID key, Mail value, int partition, long offset) throws JsonProcessingException, InterruptedException, ExecutionException;
     }
 
-    public MessageConsumer(String topic, MessageHandler messageHandler) {
+    public MessageConsumer(String topic, Integer serverId, MessageHandler messageHandler) {
         consumerProperties.putAll(messageAdmin.props);
-        consumerProperties.put(ConsumerConfig.GROUP_ID_CONFIG, "kafka-trilobita");
-        consumerProperties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        consumerProperties.put(ConsumerConfig.GROUP_ID_CONFIG, "kafka-trilobita-"+ serverId);
+        consumerProperties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
         this.messageHandler = messageHandler;
         this.topic = topic;
     }

@@ -1,15 +1,15 @@
-package com.trilobita.runtime.launcher.master;
+package com.trilobita.examples.master;
 
 import com.trilobita.core.graph.Graph;
 import com.trilobita.core.graph.vertex.Vertex;
 import com.trilobita.engine.server.masterserver.MasterServer;
-import com.trilobita.runtime.launcher.impl.PageRankVertex;
+import com.trilobita.examples.impl.PageRankVertex;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-public class PageRankMasterRuntime {
+public class PageRankMaster {
     public static Graph createVertices(){
         List<Vertex> vertices = new ArrayList<>();
         PageRankVertex vertex0 = new PageRankVertex(0);
@@ -70,9 +70,8 @@ public class PageRankMasterRuntime {
     public static void main(String[] args) throws ExecutionException, InterruptedException {
         MasterServer masterServer = MasterServer.getInstance();
 //        parse the graph
-        Graph graph = PageRankMasterRuntime.createVertices();
-        masterServer.initialize();
-        masterServer.partitionGraph(graph, 1);
+        Graph graph = PageRankMaster.createVertices();
+        masterServer.partitionGraph(graph, 2);
         masterServer.start();
     }
 }
