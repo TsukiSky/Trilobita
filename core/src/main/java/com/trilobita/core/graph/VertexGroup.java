@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.Getter;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 @Data
@@ -15,7 +16,7 @@ public class VertexGroup<T> {
     protected List<Vertex<T>> vertices;
 
     public VertexGroup() {
-        this.vertices = new ArrayList<>();
+        this.vertices = new LinkedList<>();
     }
 
     public Vertex<T> getVertexById(int id) {

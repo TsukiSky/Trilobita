@@ -41,7 +41,7 @@ public class MasterServer extends AbstractServer {
     private MasterServer(int serverId) throws ExecutionException, InterruptedException {
         super(serverId);
         finishedWorkers = new AtomicInteger(0);
-        completeSignalListener = new MessageConsumer("finish", new MessageConsumer.MessageHandler() {
+        completeSignalListener = new MessageConsumer("finish", serverId, new MessageConsumer.MessageHandler() {
             @Override
             public void handleMessage(UUID key, Mail value, int partition, long offset) throws JsonProcessingException, InterruptedException {
                 int val = finishedWorkers.addAndGet(1);
@@ -49,6 +49,7 @@ public class MasterServer extends AbstractServer {
                 if (val == nDownWorkers){
                     // start next superstep
                     finishedWorkers.set(0);
+                    Thread.sleep(300);
                     MessageProducer.produce(null, new Mail(-1, null, MailType.NORMAL), "start");
                 }
             }
@@ -77,12 +78,13 @@ public class MasterServer extends AbstractServer {
 
     public void partitionGraph(Graph graph, Integer nWorkers) {
         nDownWorkers = nWorkers;
-        ArrayList<VertexGroup> vertexGroupArrayList;
+        List<VertexGroup> vertexGroupArrayList;
         AbstractPartitioner partitioner = new HashPartitioner(nWorkers);
         vertexGroupArrayList = partitioner.Partition(graph, nWorkers);
 //        todo: Send partitions to workers
-        for (int i=0;i<vertexGroupArrayList.size();i++){
-            Message message = new Message(vertexGroupArrayList.get(i),MessageType.NULL);
+        for (int i=1;i<=vertexGroupArrayList.size();i++){
+            System.out.println(i);
+            Message message = new Message(vertexGroupArrayList.get(i-1),MessageType.NULL);
             Mail mail = new Mail(-1, message, MailType.GRAPH_PARTITION);
             MessageProducer.produce(null, mail, i+"partition");
         }

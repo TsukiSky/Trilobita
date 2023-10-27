@@ -1,4 +1,4 @@
-package com.trilobita.runtime.launcher.impl;
+package com.trilobita.examples.impl;
 
 import com.trilobita.commons.Computable;
 import lombok.AllArgsConstructor;

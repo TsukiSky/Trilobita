@@ -31,7 +31,7 @@ public class WorkerServer extends AbstractServer {
         this.executionManager = new ExecutionManager(4, this);
         this.outMailTable = new ConcurrentHashMap<>();
         this.setServerStatus(ServerStatus.START);
-        this.partitionMessageConsumer= new MessageConsumer(this.getServerId() + "partition", new MessageConsumer.MessageHandler() {
+        this.partitionMessageConsumer= new MessageConsumer(this.getServerId() + "partition", serverId, new MessageConsumer.MessageHandler() {
             @Override
             public void handleMessage(UUID key, Mail value, int partition, long offset) throws JsonProcessingException, InterruptedException, ExecutionException {
                 ObjectMapper objectMapper = new ObjectMapper();
@@ -40,7 +40,7 @@ public class WorkerServer extends AbstractServer {
                 start();
             }
         });
-        this.startMessageConsumer = new MessageConsumer("start", new MessageConsumer.MessageHandler() {
+        this.startMessageConsumer = new MessageConsumer("start", serverId, new MessageConsumer.MessageHandler() {
             @Override
             public void handleMessage(UUID key, Mail value, int partition, long offset) throws JsonProcessingException, InterruptedException {
                 log.info("start new super step...");
@@ -59,8 +59,6 @@ public class WorkerServer extends AbstractServer {
     private void execute() throws InterruptedException {
         log.info("entering new super step...");
         this.executionManager.execute();
-        // Tell the master it has finished its job
-        Thread.sleep(1000);
         MessageProducer.produce(null, new Mail(-1,null,MailType.FINISH_INDICATOR), "finish");
     }
 
