@@ -4,7 +4,6 @@ import com.trilobita.commons.Mail;
 import com.trilobita.core.graph.VertexGroup;
 import com.trilobita.core.messaging.MessageConsumer;
 import com.trilobita.core.messaging.MessageProducer;
-import com.trilobita.engine.server.common.ServerStatus;
 import com.trilobita.exception.TrilobitaException;
 import lombok.Getter;
 import lombok.Setter;
@@ -57,5 +56,12 @@ public abstract class AbstractServer<T> {
     public void postMail(Mail mail) {
         // post one mail to its destination
         MessageProducer.produce(null, mail, "//TODOTOPIC");
+    }
+
+    /**
+     * STATUS of Server
+     */
+    public enum ServerStatus {
+        START, RUNNING, PAUSE, SHUTDOWN
     }
 }

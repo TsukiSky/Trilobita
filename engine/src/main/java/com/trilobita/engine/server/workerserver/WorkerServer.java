@@ -9,7 +9,6 @@ import com.trilobita.core.graph.vertex.Vertex;
 import com.trilobita.core.messaging.MessageConsumer;
 import com.trilobita.core.messaging.MessageProducer;
 import com.trilobita.engine.server.AbstractServer;
-import com.trilobita.engine.server.common.ServerStatus;
 import com.trilobita.engine.server.workerserver.execution.ExecutionManager;
 import lombok.extern.slf4j.Slf4j;
 
@@ -57,7 +56,6 @@ public class WorkerServer<T> extends AbstractServer<T> {
     }
 
     private void execute() throws InterruptedException {
-        log.info("entering new super step...");
         this.executionManager.execute();
         // Tell the master it has finished its job
         MessageProducer.produce(null, new Mail(-1,null,MailType.FINISH_INDICATOR), "finish");

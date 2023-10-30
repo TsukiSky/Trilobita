@@ -12,10 +12,15 @@ import java.util.concurrent.CountDownLatch;
 public class WorkerThread<T> extends Thread {
     private final WorkerServer<T> server;
     private final ExecutionManager<T> executionManager;
+    private CountDownLatch countDownLatch;
 
     public WorkerThread(WorkerServer<T> server, ExecutionManager<T> executionManager) {
         this.server = server;
         this.executionManager = executionManager;
+    }
+
+    public void setCountDownLatch(CountDownLatch countDownLatch) {
+        this.countDownLatch = countDownLatch;
     }
 
     @Override
@@ -47,5 +52,7 @@ public class WorkerThread<T> extends Thread {
             int receiverId = this.server.findServerByVertexId(mail.getToVertexId());
             MessageProducer.produce(null, mail, receiverId + "");
         }
+
+        this.countDownLatch.countDown();    // count down
     }
 }
