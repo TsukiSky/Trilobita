@@ -16,4 +16,10 @@ import java.io.Serializable;
 public class Message implements Serializable {
     private Object content;
     private MessageType messageType;
+
+    public enum MessageType {
+        BARRIER,
+        NORMAL,
+        NULL
+    }
 }

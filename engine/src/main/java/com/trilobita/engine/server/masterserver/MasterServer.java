@@ -1,18 +1,14 @@
 package com.trilobita.engine.server.masterserver;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.trilobita.commons.*;
 import com.trilobita.core.graph.Graph;
 import com.trilobita.core.graph.VertexGroup;
-import com.trilobita.core.messaging.MessageAdmin;
 import com.trilobita.core.messaging.MessageConsumer;
 import com.trilobita.core.messaging.MessageProducer;
 import com.trilobita.engine.server.AbstractServer;
 import com.trilobita.engine.server.masterserver.partitioner.AbstractPartitioner;
 import com.trilobita.engine.server.masterserver.partitioner.HashPartitioner;
-import com.trilobita.engine.server.workerserver.WorkerServer;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
@@ -64,7 +60,7 @@ public class MasterServer<T> extends AbstractServer<T> {
                     curVertexValue = newVertexValue;
                     Thread.sleep(300);
                     log.info(String.valueOf(curVertexValue));
-                    MessageProducer.produce(null, new Mail(-1, null, MailType.NORMAL), "start");
+                    MessageProducer.produce(null, new Mail(-1, null, Mail.MailType.NORMAL), "start");
                 }
             }
         });
@@ -131,8 +127,8 @@ public class MasterServer<T> extends AbstractServer<T> {
 //        todo: Send partitions to workers
         for (int i=1;i<=vertexGroupArrayList.size();i++){
             System.out.println(i);
-            Message message = new Message(vertexGroupArrayList.get(i-1),MessageType.NULL);
-            Mail mail = new Mail(-1, message, MailType.GRAPH_PARTITION);
+            Message message = new Message(vertexGroupArrayList.get(i-1), Message.MessageType.NULL);
+            Mail mail = new Mail(-1, message, Mail.MailType.GRAPH_PARTITION);
             MessageProducer.produce(null, mail, i+"partition");
         }
     }

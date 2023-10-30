@@ -2,22 +2,18 @@ package com.trilobita.commons;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
-import java.util.List;
 
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode
-public class Mail implements Serializable{
+public class Mail implements Serializable {
     private int fromVertexId;
     private int toVertexId;
-
     private Message message;
     private MailType mailType;
 
@@ -37,5 +33,11 @@ public class Mail implements Serializable{
         this.toVertexId = toVertexId;
         this.message = message;
         this.mailType = mailType;
+    }
+
+    public enum MailType {
+        NORMAL,
+        GRAPH_PARTITION,
+        FINISH_INDICATOR,
     }
 }

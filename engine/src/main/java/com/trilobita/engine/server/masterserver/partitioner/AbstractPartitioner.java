@@ -12,10 +12,10 @@ import java.util.List;
 @Data
 public abstract class AbstractPartitioner<T> {
 
-    public ArrayList<VertexGroup<T>> Partition(Graph graph, int nWorkers){
+    public ArrayList<VertexGroup<T>> Partition(Graph<T> graph, int nWorkers){
         ArrayList<VertexGroup<T>> arrayList = new ArrayList<>(nWorkers);
         for (int i = 0; i < nWorkers; i++) {
-            arrayList.add(new VertexGroup());
+            arrayList.add(new VertexGroup<>());
         }
         List<Vertex<T>> graphVertexSet = graph.getVertices();
         for (Vertex<T> vertex : graphVertexSet) {

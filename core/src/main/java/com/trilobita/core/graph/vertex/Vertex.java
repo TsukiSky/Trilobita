@@ -45,7 +45,7 @@ public abstract class Vertex<T> implements Serializable {
      * @param message the message to be sent
      */
     public void sendToNeighbor(Edge edge, Message message){
-        Mail mail = new Mail(this.id, edge.getToVertexId(), message, MailType.NORMAL);
+        Mail mail = new Mail(this.id, edge.getToVertexId(), message, Mail.MailType.NORMAL);
         sendMail(mail);
     }
 
@@ -55,7 +55,7 @@ public abstract class Vertex<T> implements Serializable {
      * @param message the message to be sent
      */
     public void sendTo(int to, Message message){
-        Mail mail = new Mail(this.id, to, message, MailType.NORMAL);
+        Mail mail = new Mail(this.id, to, message, Mail.MailType.NORMAL);
         sendMail(mail);
     }
 

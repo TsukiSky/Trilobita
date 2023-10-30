@@ -1,15 +1,12 @@
 package com.trilobita.engine.server.workerserver;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.trilobita.commons.*;
-import com.trilobita.core.graph.Graph;
 import com.trilobita.core.graph.VertexGroup;
 import com.trilobita.core.graph.vertex.Vertex;
 import com.trilobita.core.messaging.MessageConsumer;
 import com.trilobita.core.messaging.MessageProducer;
 import com.trilobita.engine.server.AbstractServer;
-import com.trilobita.engine.server.common.ServerStatus;
 import com.trilobita.engine.server.workerserver.execution.ExecutionManager;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -84,8 +81,8 @@ public class WorkerServer<T> extends AbstractServer<T> {
         this.executionManager.execute();
         // send the value of the current superstep to the master
         log.info("temp values: "+tempValues);
-        Message message = new Message(tempValues, MessageType.NORMAL);
-        Mail mail = new Mail(-1, message, MailType.NORMAL);
+        Message message = new Message(tempValues, Message.MessageType.NORMAL);
+        Mail mail = new Mail(-1, message, Mail.MailType.NORMAL);
         log.info("mail value: {}", mail);
         MessageProducer.produce(null, mail, "finish");
     }

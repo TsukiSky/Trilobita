@@ -9,15 +9,13 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @AllArgsConstructor
-public class Graph extends VertexGroup {
-    public Graph(List<? extends Vertex> vertices) {
+public class Graph<T> extends VertexGroup<T> {
+    public Graph(List<Vertex<T>> vertices) {
         super();
         this.vertices = vertices;
     }
 
-    public void addVertex(Vertex v){
+    public void addVertex(Vertex<T> v){
         this.vertices.add(v);
     }
-
-
 }

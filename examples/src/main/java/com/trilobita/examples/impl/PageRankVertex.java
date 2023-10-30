@@ -11,10 +11,7 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 
 @Slf4j
@@ -46,10 +43,10 @@ public class PageRankVertex extends Vertex<Double> implements Serializable {
             this.getValue().add(score.multiply(weight));
         }
         // finished all the job, generate out mail
-        Message msg = new Message(new PageRankValue(this.getValue().getValue()/this.getEdges().size()), MessageType.NORMAL);
+        Message msg = new Message(new PageRankValue(this.getValue().getValue()/this.getEdges().size()), Message.MessageType.NORMAL);
         for (Edge edge : this.getEdges()) {
             int vertexId = edge.getToVertexId();
-            Mail mail = new Mail(vertexId, msg, MailType.NORMAL);
+            Mail mail = new Mail(vertexId, msg, Mail.MailType.NORMAL);
             this.sendMail(mail);
         }
         updateServerTempValue();

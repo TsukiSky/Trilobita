@@ -12,12 +12,12 @@ import java.util.concurrent.*;
 /**
  * The execution manager on a single worker machine
  */
-public class ExecutionManager {
-    public final WorkerServer server;
+public class ExecutionManager<T> {
+    public final WorkerServer<T> server;
     public ExecutorService executorService;
-    public List<Vertex> vertices;
+    public List<Vertex<T>> vertices;
 
-    public ExecutionManager(int parallelism, WorkerServer server) {
+    public ExecutionManager(int parallelism, WorkerServer<T> server) {
         this.server = server;
         this.executorService = Executors.newFixedThreadPool(parallelism);
     }
@@ -35,13 +35,13 @@ public class ExecutionManager {
                 });
             }
         }
-        for (Vertex vertex: vertices) {
+        for (Vertex<T> vertex: vertices) {
             if (vertex.getStatus() == Vertex.VertexStatus.ACTIVE) {
                 executorService.submit(vertex::compute);
             }
         }
         while (!this.server.getOutMailQueue().isEmpty()) {
-            Mail mail = (Mail) this.server.getOutMailQueue().poll();
+            Mail mail = this.server.getOutMailQueue().poll();
             executorService.submit(() -> {
                 int receiverId = this.server.findServerByVertexId(mail.getToVertexId());
                 MessageProducer.produce(null, mail, receiverId + "");
