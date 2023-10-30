@@ -14,4 +14,10 @@ import lombok.NoArgsConstructor;
 public class Message{
     private Object content;
     private MessageType messageType;
+
+    public enum MessageType {
+        BARRIER,
+        NORMAL,
+        NULL
+    }
 }

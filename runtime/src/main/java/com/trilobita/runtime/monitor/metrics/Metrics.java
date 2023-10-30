@@ -14,45 +14,45 @@ public class Metrics {
      * Statistics recorded in one superstep
      */
     @Data
-    public static class SuperstepStats {
+    public static class SuperstepStatistics {
         private static AtomicLong time;
         private static AtomicInteger messageNum;
         private static AtomicInteger vertexNum;
         private static AtomicInteger edgeNum;
 
         public void incrementTime(Long time) {
-            SuperstepStats.time.addAndGet(time);
+            SuperstepStatistics.time.addAndGet(time);
         }
 
         public void incrementMessageNum(Integer increment) {
-            SuperstepStats.messageNum.addAndGet(increment);
+            SuperstepStatistics.messageNum.addAndGet(increment);
         }
 
-        public void incrementvertexNum(Integer increment) {
-            SuperstepStats.vertexNum.addAndGet(increment);
+        public void incrementVertexNum(Integer increment) {
+            SuperstepStatistics.vertexNum.addAndGet(increment);
         }
 
-        public void incrementedgeNum(Integer increment) {
-            SuperstepStats.edgeNum.addAndGet(increment);
+        public void incrementEdgeNum(Integer increment) {
+            SuperstepStatistics.edgeNum.addAndGet(increment);
         }
 
         public void resetTimeAndMessageNum() {
-            SuperstepStats.time.set(0);
-            SuperstepStats.messageNum.set(0);
+            SuperstepStatistics.time.set(0);
+            SuperstepStatistics.messageNum.set(0);
         }
 
         public void initialize() {
-            SuperstepStats.time.set(0);
-            SuperstepStats.messageNum.set(0);
-            SuperstepStats.vertexNum.set(0);
-            SuperstepStats.edgeNum.set(0);
+            SuperstepStatistics.time.set(0);
+            SuperstepStatistics.messageNum.set(0);
+            SuperstepStatistics.vertexNum.set(0);
+            SuperstepStatistics.edgeNum.set(0);
         }
 
         public void initialize(int vertexNum, int edgeNum) {
-            SuperstepStats.time.set(0);
-            SuperstepStats.messageNum.set(0);
-            SuperstepStats.vertexNum.set(vertexNum);
-            SuperstepStats.edgeNum.set(edgeNum);
+            SuperstepStatistics.time.set(0);
+            SuperstepStatistics.messageNum.set(0);
+            SuperstepStatistics.vertexNum.set(vertexNum);
+            SuperstepStatistics.edgeNum.set(edgeNum);
         }
     }
 
@@ -60,18 +60,17 @@ public class Metrics {
      * Overall performance of the system
      */
     @Data
-    public static class OverallStats {
+    public static class OverallStatistics {
         private static DescriptiveStatistics superstepExecutionTimes = new DescriptiveStatistics();
         private static DescriptiveStatistics messageNums = new DescriptiveStatistics();
         private static DescriptiveStatistics vertexNums = new DescriptiveStatistics();
         private static DescriptiveStatistics edgeNums = new DescriptiveStatistics();
 
         public static void update() {
-            superstepExecutionTimes.addValue(SuperstepStats.time.doubleValue());
-            messageNums.addValue(SuperstepStats.messageNum.intValue());
-            vertexNums.addValue(SuperstepStats.vertexNum.intValue());
-            edgeNums.addValue(SuperstepStats.edgeNum.intValue());
+            superstepExecutionTimes.addValue(SuperstepStatistics.time.doubleValue());
+            messageNums.addValue(SuperstepStatistics.messageNum.intValue());
+            vertexNums.addValue(SuperstepStatistics.vertexNum.intValue());
+            edgeNums.addValue(SuperstepStatistics.edgeNum.intValue());
         }
     }
-
 }

@@ -1,56 +1,43 @@
 package com.trilobita.engine.server.workerserver.execution;
 
-import com.trilobita.commons.Mail;
-import com.trilobita.core.graph.vertex.Vertex;
-import com.trilobita.core.messaging.MessageProducer;
 import com.trilobita.engine.server.workerserver.WorkerServer;
+import com.trilobita.engine.server.workerserver.execution.thread.WorkerThread;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
 
 /**
  * The execution manager on a single worker machine
  */
-public class ExecutionManager {
-    public final WorkerServer server;
-    public final ExecutorService executorService;
-    public List<Vertex> vertices;
+public class ExecutionManager<T> {
+    private final List<WorkerThread<T>> workerThreads;
+    public final LinkedBlockingQueue<Integer> activeVertices;
+    private CountDownLatch countDownLatch;
+    private final int parallelism;
 
-    public ExecutionManager(int parallelism, WorkerServer server) {
-        this.server = server;
-        this.executorService = Executors.newFixedThreadPool(parallelism);
+    public ExecutionManager(int parallelism, WorkerServer<T> server) {
+        this.activeVertices = new LinkedBlockingQueue<>();
+        this.workerThreads = new ArrayList<>();
+        this.parallelism = parallelism;
+        for (int i = 0; i < parallelism; i++) {
+            WorkerThread<T> workerThread = new WorkerThread<>(server, this);
+            workerThreads.add(workerThread);    // add worker thread to the list
+        }
     }
 
-
-    public void execute() throws InterruptedException {
-        this.vertices = this.server.getVertexGroup().getVertices();
-        while (!server.getInMailQueue().isEmpty()) {
-            Mail mail = (Mail) this.server.getInMailQueue().poll();
-            if (mail != null) {
-                this.executorService.submit(() -> {
-                    server.distributeMailToVertex(mail);
-                });
-            }
+    /**
+     * Execute all worker threads
+     */
+    public void execute() {
+        for (WorkerThread<T> workerThread : workerThreads) {
+            this.countDownLatch = new CountDownLatch(parallelism);
+            workerThread.setCountDownLatch(this.countDownLatch);
+            workerThread.start();
         }
-        for (Vertex vertex: vertices) {
-            if (vertex.getStatus() == Vertex.VertexStatus.ACTIVE) {
-                executorService.submit(vertex::compute);
-            }
-        }
-        while (!this.server.getOutMailQueue().isEmpty()) {
-            Mail mail = (Mail) this.server.getOutMailQueue().poll();
-            executorService.submit(() -> {
-                int receiverId = this.server.findServerByVertexId(mail.getToVertexId());
-                MessageProducer.produce(null, mail, receiverId + "");
-            });
-        }
-        executorService.shutdown();
         try {
-            executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
+            this.countDownLatch.await();
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }

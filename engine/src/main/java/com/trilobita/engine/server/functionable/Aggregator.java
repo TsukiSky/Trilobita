@@ -13,5 +13,4 @@ public abstract class Aggregator implements Functionable {
         this.aggregate(context.getVertexGroup());
     }
     public abstract void aggregate(VertexGroup vertexGroup);
-    
 }

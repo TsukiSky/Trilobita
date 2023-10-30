@@ -1,9 +1,9 @@
 package com.trilobita.engine.util;
 
 /**
- * Hardware class contains all necessary methods to get the current hardware's information
+ * Utility class
  */
-public class Hardware {
+public class Util {
     /**
      * Get the number of cores on the current machine
      * @return int

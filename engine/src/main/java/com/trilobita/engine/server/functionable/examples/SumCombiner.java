@@ -25,7 +25,7 @@ public class SumCombiner extends Combiner {
 
     // combine mails
     private Mail combineMails(int toVertexId, CopyOnWriteArrayList<Mail> mails) {
-        Mail newMail = new Mail(toVertexId, null, MailType.NORMAL);
+        Mail newMail = new Mail(toVertexId, null, Mail.MailType.NORMAL);
         Computable newContent = null;
         for (Mail mail: mails) {
             Computable content = (Computable) mail.getMessage().getContent();
@@ -35,7 +35,7 @@ public class SumCombiner extends Combiner {
                 newContent = newContent.add(content);
             }
         }
-        newMail.setMessage(new Message(newContent, MessageType.NORMAL));
+        newMail.setMessage(new Message(newContent, Message.MessageType.NORMAL));
         return newMail;
     }
 }
