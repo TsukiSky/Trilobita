@@ -24,13 +24,13 @@ import java.util.concurrent.*;
 
 @Slf4j
 @Getter
-public class WorkerServer extends AbstractServer {
+public class WorkerServer<T> extends AbstractServer<T> {
     private final ExecutionManager executionManager;
     private final ConcurrentHashMap<Integer, CopyOnWriteArrayList<Mail>> outMailTable;
     private final MessageConsumer partitionMessageConsumer;
     private final MessageConsumer startMessageConsumer;
     private final MessageConsumer faultHandleMessageConsumer;
-    private final ConcurrentHashMap<Integer, Computable> tempValues;
+    private final ConcurrentHashMap<Integer, Computable<T>> tempValues;
 
     public WorkerServer(int serverId, int numOfExecutor) throws ExecutionException, InterruptedException {
         super(serverId);
@@ -41,10 +41,10 @@ public class WorkerServer extends AbstractServer {
         this.partitionMessageConsumer= new MessageConsumer(this.getServerId() + "partition", serverId, new MessageConsumer.MessageHandler() {
             @Override
             public void handleMessage(UUID key, Mail value, int partition, long offset) throws JsonProcessingException, InterruptedException, ExecutionException {
-                vertexGroup = (VertexGroup) value.getMessage().getContent();
+                vertexGroup = (VertexGroup<T>) value.getMessage().getContent();
                 //    assign the server's hashmap to each vertex
-                List<Vertex> vertices = vertexGroup.getVertices();
-                for (Vertex vertex: vertices){
+                List<Vertex<T>> vertices = vertexGroup.getVertices();
+                for (Vertex<T> vertex: vertices){
                     vertex.setServerQueue(getOutMailQueue());
                     vertex.setServerTempValue(tempValues);
                 }
@@ -108,13 +108,13 @@ public class WorkerServer extends AbstractServer {
     }
 
     public void distributeMailToVertex(Mail mail) {
-        Vertex vertex = findVertexById(mail.getToVertexId());
+        Vertex<T> vertex = findVertexById(mail.getToVertexId());
         if (vertex != null) {
             vertex.onReceive(mail);
         }
     }
 
-    private Vertex findVertexById(int vertexId) {
+    private Vertex<T> findVertexById(int vertexId) {
         return this.getVertexGroup().getVertexById(vertexId);
     }
 }

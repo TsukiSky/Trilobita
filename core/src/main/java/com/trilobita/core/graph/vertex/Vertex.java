@@ -29,7 +29,7 @@ public abstract class Vertex<T> implements Serializable {
     private BlockingQueue<Mail> serverQueue;
 
     @JsonDeserialize(as = ConcurrentHashMap.class)
-    private ConcurrentHashMap<Integer, Computable> serverTempValue;
+    private ConcurrentHashMap<Integer, Computable<T>> serverTempValue;
 
     /**
      * Push the mail to the server's queue to be sent to the destination vertex

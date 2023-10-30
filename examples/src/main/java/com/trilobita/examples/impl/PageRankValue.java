@@ -1,14 +1,11 @@
 package com.trilobita.examples.impl;
 
 import com.trilobita.commons.Computable;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 
-public class PageRankValue extends Computable<Double> implements Serializable {
+public class PageRankValue implements Computable<Double>, Serializable {
+    private Double value;
     public PageRankValue(Double value) {
         this.value = value;
     }
@@ -42,7 +39,6 @@ public class PageRankValue extends Computable<Double> implements Serializable {
         this.value /= computable.getValue();
         return this;
     }
-
 
     @Override
     public Double getValue() {

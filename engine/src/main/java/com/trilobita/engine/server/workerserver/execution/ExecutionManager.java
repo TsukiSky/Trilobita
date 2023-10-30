@@ -22,7 +22,6 @@ public class ExecutionManager {
         this.executorService = Executors.newFixedThreadPool(parallelism);
     }
 
-
     public void execute() throws InterruptedException {
         this.vertices = this.server.getVertexGroup().getVertices();
         if (executorService == null || executorService.isTerminated()) {

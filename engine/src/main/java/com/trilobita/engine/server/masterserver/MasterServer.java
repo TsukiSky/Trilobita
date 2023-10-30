@@ -23,9 +23,9 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Master Server is the master of a server cluster, coordinate the start and the end of a Superstep
  */
 @Slf4j
-public class MasterServer extends AbstractServer {
+public class MasterServer<T> extends AbstractServer<T> {
     Graph graph;
-    AbstractPartitioner graphPartitioner;
+    AbstractPartitioner<T> graphPartitioner;
     Integer nRunningWorkers;
     Integer nPauseWorkers;
     Integer nDownWorkers;
@@ -33,13 +33,13 @@ public class MasterServer extends AbstractServer {
     volatile Boolean handlingFault;
     List<Integer> workerIds;
     MessageConsumer completeSignalListener;
-    ConcurrentHashMap<Integer, Computable> curVertexValue;
-    ConcurrentHashMap<Integer, Computable> newVertexValue;
+    ConcurrentHashMap<Integer, Computable<T>> curVertexValue;
+    ConcurrentHashMap<Integer, Computable<T>> newVertexValue;
     ConcurrentHashMap<Integer, Boolean> workerStatus;
     ScheduledExecutorService executorService;
 
 
-    private static MasterServer instance;
+    private static MasterServer<?> instance;
 
     private MasterServer(int serverId) throws ExecutionException, InterruptedException {
         super(serverId);
@@ -55,7 +55,7 @@ public class MasterServer extends AbstractServer {
                     return;
                 }
                 int val = finishedWorkers.addAndGet(1);
-                ConcurrentHashMap<Integer, Computable> tempValue = (ConcurrentHashMap<Integer, Computable>) value.getMessage().getContent();
+                ConcurrentHashMap<Integer, Computable<T>> tempValue = (ConcurrentHashMap<Integer, Computable<T>>) value.getMessage().getContent();
                 updateVertexValue(tempValue);
                 log.info("finished number of workers: "+val);
                 if (val == nDownWorkers){
@@ -72,9 +72,9 @@ public class MasterServer extends AbstractServer {
         checkHeartBeat();
     }
 
-    public void updateVertexValue(ConcurrentHashMap<Integer, Computable> tempValue){
-        Set<Map.Entry<Integer, Computable>> set = tempValue.entrySet();
-        for (Map.Entry<Integer, Computable> entry: set){
+    public void updateVertexValue(ConcurrentHashMap<Integer, Computable<T>> tempValue){
+        Set<Map.Entry<Integer, Computable<T>>> set = tempValue.entrySet();
+        for (Map.Entry<Integer, Computable<T>> entry: set){
             System.out.println(entry.getKey() + " " + entry.getValue());
             newVertexValue.put(entry.getKey(), entry.getValue());
         }
@@ -104,9 +104,9 @@ public class MasterServer extends AbstractServer {
         return -1;
     }
 
-    public static synchronized MasterServer getInstance() throws ExecutionException, InterruptedException {
+    public static synchronized MasterServer<?> getInstance() throws ExecutionException, InterruptedException {
         if (instance == null) {
-            instance = new MasterServer(0);
+            instance = new MasterServer<>(0);
         }
         return instance;
     }
@@ -125,8 +125,8 @@ public class MasterServer extends AbstractServer {
 
     public void partitionGraph(Graph graph, Integer nWorkers) {
         nDownWorkers = nWorkers;
-        List<VertexGroup> vertexGroupArrayList;
-        AbstractPartitioner partitioner = new HashPartitioner(nWorkers);
+        List<VertexGroup<T>> vertexGroupArrayList;
+        AbstractPartitioner<T> partitioner = new HashPartitioner(nWorkers);
         vertexGroupArrayList = partitioner.Partition(graph, nWorkers);
 //        todo: Send partitions to workers
         for (int i=1;i<=vertexGroupArrayList.size();i++){
