@@ -3,7 +3,6 @@ package com.trilobita.engine.server.workerserver.execution.thread;
 import com.trilobita.commons.Mail;
 import com.trilobita.core.graph.vertex.Vertex;
 import com.trilobita.core.messaging.MessageProducer;
-import com.trilobita.engine.computing.task.MailingTask;
 import com.trilobita.engine.server.workerserver.WorkerServer;
 import com.trilobita.engine.server.workerserver.execution.ExecutionManager;
 

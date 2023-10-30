@@ -3,7 +3,6 @@ package com.trilobita.engine.server.workerserver;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.trilobita.commons.Mail;
-import com.trilobita.commons.MailType;
 import com.trilobita.core.graph.VertexGroup;
 import com.trilobita.core.graph.vertex.Vertex;
 import com.trilobita.core.messaging.MessageConsumer;
@@ -58,7 +57,7 @@ public class WorkerServer<T> extends AbstractServer<T> {
     private void execute() throws InterruptedException {
         this.executionManager.execute();
         // Tell the master it has finished its job
-        MessageProducer.produce(null, new Mail(-1,null,MailType.FINISH_INDICATOR), "finish");
+        MessageProducer.produce(null, new Mail(-1,null, Mail.MailType.FINISH_INDICATOR), "finish");
     }
 
     @Override

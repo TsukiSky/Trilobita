@@ -39,10 +39,10 @@ public class PageRankVertex extends Vertex<BigDecimal> {
             this.getValue().add(score.multiply(weight));
         }
         // finished all the job, generate out mail
-        Message msg = new Message(this.getValue().divide(new PageRankValue(BigDecimal.valueOf(this.getEdges().size()))), MessageType.NORMAL);
+        Message msg = new Message(this.getValue().divide(new PageRankValue(BigDecimal.valueOf(this.getEdges().size()))), Message.MessageType.NORMAL);
         for (Edge edge : this.getEdges()) {
             int vertexId = edge.getToVertexId();
-            Mail mail = new Mail(vertexId, msg, MailType.NORMAL);
+            Mail mail = new Mail(vertexId, msg, Mail.MailType.NORMAL);
             this.sendMail(mail);
         }
     }
