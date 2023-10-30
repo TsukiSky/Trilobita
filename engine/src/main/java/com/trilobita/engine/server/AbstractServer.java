@@ -31,7 +31,7 @@ public abstract class AbstractServer<T> {
         this.serverId = serverId;
         this.outMailQueue = new LinkedBlockingQueue<>();
         this.inMailQueue = new LinkedBlockingQueue<>();
-        this.messageConsumer = new MessageConsumer(serverId+"", new MessageConsumer.MessageHandler() {
+        this.messageConsumer = new MessageConsumer(serverId+"", serverId, new MessageConsumer.MessageHandler() {
             @Override
             public void handleMessage(UUID key, Mail value, int partition, long offset) {
                 AbstractServer.this.inMailQueue.add(value);

@@ -1,4 +1,4 @@
-package com.trilobita.runtime.launcher.impl;
+package com.trilobita.examples.impl;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.trilobita.commons.*;
@@ -32,6 +32,7 @@ public class PageRankVertex extends Vertex<BigDecimal> {
 
     @Override
     public void compute() {
+        startSuperstep();
         while (!this.getIncomingQueue().isEmpty()) {
             Message message = this.getIncomingQueue().poll().getMessage();
             PageRankValue score = (PageRankValue) message.getContent();

@@ -1,4 +1,4 @@
-package com.trilobita.runtime.launcher.impl;
+package com.trilobita.examples.impl;
 
 import com.trilobita.commons.Computable;
 import lombok.AllArgsConstructor;
@@ -7,10 +7,10 @@ import lombok.Data;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-@Data
-@AllArgsConstructor
-public class PageRankValue implements Computable<BigDecimal> {
-    private BigDecimal value;
+public class PageRankValue extends Computable<BigDecimal> {
+    public PageRankValue(BigDecimal value) {
+        super(value);
+    }
 
     @Override
     public Computable<BigDecimal> add(Computable<BigDecimal> computable) {
