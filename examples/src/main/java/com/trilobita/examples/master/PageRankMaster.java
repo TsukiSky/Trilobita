@@ -11,41 +11,45 @@ import java.util.concurrent.ExecutionException;
 
 public class PageRankMaster {
     public static Graph createVertices(){
-        List<Vertex> vertices = new ArrayList<>();
+        List<PageRankVertex> vertices = new ArrayList<>();
         PageRankVertex vertex0 = new PageRankVertex(0);
+        vertex0.setStatus(Vertex.VertexStatus.ACTIVE);
         vertices.add(vertex0);
 
         PageRankVertex vertex1 = new PageRankVertex(1);
+        vertex1.setStatus(Vertex.VertexStatus.ACTIVE);
         vertices.add(vertex1);
 
         PageRankVertex vertex2 = new PageRankVertex(2);
+        vertex2.setStatus(Vertex.VertexStatus.ACTIVE);
         vertices.add(vertex2);
 
         PageRankVertex vertex3 = new PageRankVertex(3);
+        vertex3.setStatus(Vertex.VertexStatus.ACTIVE);
         vertices.add(vertex3);
 
         PageRankVertex vertex4 = new PageRankVertex(4);
-        vertex4.setId(4);
+        vertex4.setStatus(Vertex.VertexStatus.ACTIVE);
         vertices.add(vertex4);
 
         PageRankVertex vertex5 = new PageRankVertex(5);
-        vertex5.setId(5);
+        vertex5.setStatus(Vertex.VertexStatus.ACTIVE);
         vertices.add(vertex5);
 
         PageRankVertex vertex6 = new PageRankVertex(6);
-        vertex6.setId(6);
+        vertex6.setStatus(Vertex.VertexStatus.ACTIVE);
         vertices.add(vertex6);
 
         PageRankVertex vertex7 = new PageRankVertex(7);
-        vertex7.setId(7);
+        vertex7.setStatus(Vertex.VertexStatus.ACTIVE);
         vertices.add(vertex7);
 
         PageRankVertex vertex8 = new PageRankVertex(8);
-        vertex8.setId(8);
+        vertex8.setStatus(Vertex.VertexStatus.ACTIVE);
         vertices.add(vertex8);
 
         PageRankVertex vertex9 = new PageRankVertex(9);
-        vertex9.setId(9);
+        vertex9.setStatus(Vertex.VertexStatus.ACTIVE);
         vertices.add(vertex9);
 
         vertex1.addEdge(vertex2);

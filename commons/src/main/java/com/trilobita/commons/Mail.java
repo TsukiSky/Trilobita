@@ -14,7 +14,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode
-public class Mail{
+public class Mail implements Serializable{
     private int fromVertexId;
     private int toVertexId;
 

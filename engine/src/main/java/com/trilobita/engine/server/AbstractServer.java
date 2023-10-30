@@ -7,6 +7,7 @@ import com.trilobita.core.messaging.MessageProducer;
 import com.trilobita.engine.server.common.ServerStatus;
 import com.trilobita.exception.TrilobitaException;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.UUID;

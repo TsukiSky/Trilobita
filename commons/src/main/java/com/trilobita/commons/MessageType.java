@@ -1,6 +1,8 @@
 package com.trilobita.commons;
 
-public enum MessageType {
+import java.io.Serializable;
+
+public enum MessageType implements Serializable {
     BARRIER,
     NORMAL,
     NULL

@@ -4,50 +4,53 @@ import com.trilobita.commons.Computable;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-public class PageRankValue extends Computable<BigDecimal> {
-    public PageRankValue(BigDecimal value) {
-        super(value);
+public class PageRankValue extends Computable<Double> implements Serializable {
+    public PageRankValue(Double value) {
+        this.value = value;
     }
 
     @Override
-    public Computable<BigDecimal> add(Computable<BigDecimal> computable) {
-        this.value = this.value.add(computable.get());
+    public Computable<Double> add(Computable<Double> computable) {
+        this.value += computable.getValue();
         return this;
     }
 
     @Override
-    public Computable<BigDecimal> minus(Computable<BigDecimal> computable) {
-        this.value=this.value.subtract(computable.get());
+    public Computable<Double> minus(Computable<Double> computable) {
+        this.value -= computable.getValue();
         return this;
     }
 
     @Override
-    public Computable<BigDecimal> multiply(Computable<BigDecimal> computable) {
-        this.value = this.value.multiply(computable.get());
+    public Computable<Double> multiply(Computable<Double> computable) {
+        this.value *= computable.getValue();
         return this;
     }
 
-    public Computable<BigDecimal> multiply(double num) {
-        this.value = this.value.multiply(BigDecimal.valueOf(num));
+    public Computable<Double> multiply(Double num) {
+        this.value *= num;
         return this;
     }
 
-    @Override
-    public Computable<BigDecimal> divide(Computable<BigDecimal> computable) {
-        this.value = this.value.divide(computable.get(), RoundingMode.DOWN);
-        return this;
-    }
 
     @Override
-    public BigDecimal get() {
+    public Computable<Double> divide(Computable<Double> computable) {
+        this.value /= computable.getValue();
+        return this;
+    }
+
+
+    @Override
+    public Double getValue() {
         return this.value;
     }
 
     @Override
-    public void set(BigDecimal value) {
+    public void setValue(Double value) {
         this.value = value;
     }
 }

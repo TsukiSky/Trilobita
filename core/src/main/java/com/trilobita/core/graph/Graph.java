@@ -10,7 +10,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 public class Graph extends VertexGroup {
-    public Graph(List<Vertex> vertices) {
+    public Graph(List<? extends Vertex> vertices) {
         super();
         this.vertices = vertices;
     }

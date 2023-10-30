@@ -7,15 +7,17 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, property = "@class")
-public abstract class Vertex<T> {
+public abstract class Vertex<T> implements Serializable {
     private int id;
     private List<Edge> edges;
     private VertexStatus status;
@@ -25,6 +27,9 @@ public abstract class Vertex<T> {
     private BlockingQueue<Mail> incomingQueue;
     @JsonDeserialize(as = LinkedBlockingQueue.class)
     private BlockingQueue<Mail> serverQueue;
+
+    @JsonDeserialize(as = ConcurrentHashMap.class)
+    private ConcurrentHashMap<Integer, Computable> serverTempValue;
 
     /**
      * Push the mail to the server's queue to be sent to the destination vertex
@@ -56,6 +61,10 @@ public abstract class Vertex<T> {
 
     public void startSuperstep(){
 
+    }
+
+    public void updateServerTempValue(){
+        this.serverTempValue.put(this.id, this.value);
     }
 
     /**

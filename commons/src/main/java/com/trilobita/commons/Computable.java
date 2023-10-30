@@ -4,10 +4,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Computable<T> {
+public class Computable<T> implements Serializable {
     protected T value;
     public Computable<T> add(Computable<T> computable) {
         return null;
@@ -21,10 +23,10 @@ public class Computable<T> {
     };
     public Computable<T> divide(Computable<T> computable){
         return null;
-    };
-    public T get(){
+    }
+    public T getValue(){
         return null;
-    };
-    public void set(T t){
-    };
+    }
+    public void setValue(T t){
+    }
 }

@@ -1,23 +1,20 @@
 package com.trilobita.engine.server.workerserver.execution;
 
-import com.trilobita.commons.Mail;
+import com.trilobita.commons.*;
 import com.trilobita.core.graph.vertex.Vertex;
 import com.trilobita.core.messaging.MessageProducer;
 import com.trilobita.engine.server.workerserver.WorkerServer;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 /**
  * The execution manager on a single worker machine
  */
 public class ExecutionManager {
     public final WorkerServer server;
-    public final ExecutorService executorService;
+    public ExecutorService executorService;
     public List<Vertex> vertices;
 
     public ExecutionManager(int parallelism, WorkerServer server) {
@@ -28,6 +25,9 @@ public class ExecutionManager {
 
     public void execute() throws InterruptedException {
         this.vertices = this.server.getVertexGroup().getVertices();
+        if (executorService == null || executorService.isTerminated()) {
+            executorService = Executors.newFixedThreadPool(5); // Adjust the number of threads as needed
+        }
         while (!server.getInMailQueue().isEmpty()) {
             Mail mail = (Mail) this.server.getInMailQueue().poll();
             if (mail != null) {

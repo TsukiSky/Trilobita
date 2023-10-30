@@ -6,10 +6,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Edge {
+public class Edge implements Serializable {
     private int fromVertexId;
     private int toVertexId;
     private Computable<?> state;
