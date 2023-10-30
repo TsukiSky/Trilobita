@@ -16,19 +16,24 @@ public class ExecutionManager<T> {
     public final WorkerServer<T> server;
     public ExecutorService executorService;
     public List<Vertex<T>> vertices;
+    public BlockingQueue<Integer> activeVertices;
+    public CountDownLatch countDownLatch;
+    public int parallelism;
 
     public ExecutionManager(int parallelism, WorkerServer<T> server) {
         this.server = server;
+        this.parallelism = parallelism;
         this.executorService = Executors.newFixedThreadPool(parallelism);
     }
 
-    public void execute() throws InterruptedException {
+    public void execute() {
+        this.countDownLatch = new CountDownLatch(this.parallelism);
         this.vertices = this.server.getVertexGroup().getVertices();
         if (executorService == null || executorService.isTerminated()) {
             executorService = Executors.newFixedThreadPool(5); // Adjust the number of threads as needed
         }
         while (!server.getInMailQueue().isEmpty()) {
-            Mail mail = (Mail) this.server.getInMailQueue().poll();
+            Mail mail = this.server.getInMailQueue().poll();
             if (mail != null) {
                 this.executorService.submit(() -> {
                     server.distributeMailToVertex(mail);
@@ -47,6 +52,8 @@ public class ExecutionManager<T> {
                 MessageProducer.produce(null, mail, receiverId + "");
             });
         }
+
+        // block until all threads finish
         executorService.shutdown();
         try {
             executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);

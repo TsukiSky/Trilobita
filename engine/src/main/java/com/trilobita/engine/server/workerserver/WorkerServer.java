@@ -22,18 +22,18 @@ import java.util.concurrent.*;
 @Slf4j
 @Getter
 public class WorkerServer<T> extends AbstractServer<T> {
-    private final ExecutionManager executionManager;
+    private final ExecutionManager<T> executionManager;
     private final ConcurrentHashMap<Integer, CopyOnWriteArrayList<Mail>> outMailTable;
+    private final ConcurrentHashMap<Integer, Computable<T>> vertexValues;
     private final MessageConsumer partitionMessageConsumer;
     private final MessageConsumer startMessageConsumer;
     private final MessageConsumer faultHandleMessageConsumer;
-    private final ConcurrentHashMap<Integer, Computable<T>> tempValues;
 
     public WorkerServer(int serverId, int numOfExecutor) throws ExecutionException, InterruptedException {
         super(serverId);
-        this.executionManager = new ExecutionManager(4, this);
+        this.executionManager = new ExecutionManager<>(4, this);
         this.outMailTable = new ConcurrentHashMap<>();
-        this.tempValues = new ConcurrentHashMap<>();
+        this.vertexValues = new ConcurrentHashMap<>();
         this.setServerStatus(ServerStatus.START);
         this.partitionMessageConsumer= new MessageConsumer(this.getServerId() + "partition", serverId, new MessageConsumer.MessageHandler() {
             @Override
@@ -43,12 +43,13 @@ public class WorkerServer<T> extends AbstractServer<T> {
                 List<Vertex<T>> vertices = vertexGroup.getVertices();
                 for (Vertex<T> vertex: vertices){
                     vertex.setServerQueue(getOutMailQueue());
-                    vertex.setServerTempValue(tempValues);
+                    vertex.setVertexValues(vertexValues);
                 }
                 log.info("Vertex Group: "+vertexGroup);
                 start();
             }
         });
+
         this.startMessageConsumer = new MessageConsumer("start", serverId, new MessageConsumer.MessageHandler() {
             @Override
             public void handleMessage(UUID key, Mail value, int partition, long offset) throws JsonProcessingException, InterruptedException {
@@ -58,6 +59,7 @@ public class WorkerServer<T> extends AbstractServer<T> {
                 }
             }
         });
+
         this.faultHandleMessageConsumer= new MessageConsumer("fault-handle", serverId, new MessageConsumer.MessageHandler() {
             @Override
             public void handleMessage(UUID key, Mail value, int partition, long offset) throws JsonProcessingException, InterruptedException {
@@ -80,8 +82,7 @@ public class WorkerServer<T> extends AbstractServer<T> {
         log.info("entering new super step...");
         this.executionManager.execute();
         // send the value of the current superstep to the master
-        log.info("temp values: "+tempValues);
-        Message message = new Message(tempValues, Message.MessageType.NORMAL);
+        Message message = new Message(vertexValues, Message.MessageType.NORMAL);
         Mail mail = new Mail(-1, message, Mail.MailType.NORMAL);
         log.info("mail value: {}", mail);
         MessageProducer.produce(null, mail, "finish");

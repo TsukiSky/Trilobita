@@ -6,12 +6,14 @@ import com.trilobita.core.messaging.MessageProducer;
 import com.trilobita.engine.server.workerserver.WorkerServer;
 import com.trilobita.engine.server.workerserver.execution.ExecutionManager;
 
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 public class WorkerThread<T> extends Thread {
     private final WorkerServer<T> server;
     private final ExecutionManager<T> executionManager;
     private CountDownLatch countDownLatch;
+
 
     public WorkerThread(WorkerServer<T> server, ExecutionManager<T> executionManager) {
         this.server = server;
@@ -29,21 +31,21 @@ public class WorkerThread<T> extends Thread {
             Mail mail = this.server.getInMailQueue().poll();
             if (mail != null) {
                 server.distributeMailToVertex(mail);
-//                try {
-//                    this.executionManager.activeVertices.put(mail.getToVertexId());
-//                } catch (InterruptedException e) {
-//                    throw new RuntimeException(e);
-//                }
+                try {
+                    this.executionManager.activeVertices.put(mail.getToVertexId());
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
             }
         }
         // 2. compute vertex
-//        while (!this.executionManager.activeVertices.isEmpty()) {
-//            Integer vertexId = this.executionManager.activeVertices.poll();
-//            Vertex<T> vertex = this.server.getVertexGroup().getVertexById(vertexId);
-//            if (vertex != null) {
-//                vertex.compute();
-//            }
-//        }
+        while (!this.executionManager.activeVertices.isEmpty()) {
+            Integer vertexId = this.executionManager.activeVertices.poll();
+            Vertex<T> vertex = this.server.getVertexGroup().getVertexById(vertexId);
+            if (vertex != null) {
+                vertex.compute();
+            }
+        }
 
         // 3. post mails
         while (!this.server.getOutMailQueue().isEmpty()) {

@@ -27,9 +27,8 @@ public abstract class Vertex<T> implements Serializable {
     private BlockingQueue<Mail> incomingQueue;
     @JsonDeserialize(as = LinkedBlockingQueue.class)
     private BlockingQueue<Mail> serverQueue;
-
     @JsonDeserialize(as = ConcurrentHashMap.class)
-    private ConcurrentHashMap<Integer, Computable<T>> serverTempValue;
+    private ConcurrentHashMap<Integer, Computable<T>> vertexValues;
 
     /**
      * Push the mail to the server's queue to be sent to the destination vertex
@@ -64,7 +63,7 @@ public abstract class Vertex<T> implements Serializable {
     }
 
     public void updateServerTempValue(){
-        this.serverTempValue.put(this.id, this.value);
+        this.vertexValues.put(this.id, this.value);
     }
 
     /**
