@@ -29,10 +29,13 @@ public class TrilobitaEnvironment {
         return trilobitaEnvironment;
     }
 
+    public void execute() {}
+
     /**
      * Initialize the configuration of Trilobita
      */
     public void initConfig() {
         jCommandHandler.initConfig(configuration);
     }
+
 }
