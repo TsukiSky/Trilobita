@@ -46,7 +46,8 @@ public class WorkerServer<T> extends AbstractServer<T> {
                     vertex.setServerQueue(getOutMailQueue());
                     vertex.setVertexValues(vertexValues);
                 }
-                log.info("Vertex Group: "+vertexGroup);
+                log.info("Vertex Group: {}",vertexGroup);
+                log.info("Vertex to Server: {}", getVertexToServer());
                 start();
             }
         });
@@ -83,11 +84,7 @@ public class WorkerServer<T> extends AbstractServer<T> {
     private synchronized void execute() throws InterruptedException {
         log.info("entering new super step...");
         this.executionManager.execute();
-        // send the value of the current superstep to the master
-        Message message = new Message(vertexValues, Message.MessageType.NORMAL);
-        Mail mail = new Mail(-1, message, Mail.MailType.NORMAL);
-        log.info("mail value: {}", mail);
-        MessageProducer.createAndProduce(null, mail, "finish");
+        sendCompleteSignal();
     }
 
     @Override
@@ -104,7 +101,10 @@ public class WorkerServer<T> extends AbstractServer<T> {
     }
 
     public void sendCompleteSignal() {
-
+        Message message = new Message(new HashMap<>(vertexValues), Message.MessageType.NORMAL);
+        Mail mail = new Mail(-1, message, Mail.MailType.NORMAL);
+        log.info("mail value: {}", mail);
+        MessageProducer.createAndProduce(null, mail, "finish");
     }
 
     public void distributeMailToVertex(Mail mail) {

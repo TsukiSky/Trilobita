@@ -18,7 +18,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
-@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")
 public class PageRankVertex extends Vertex<Double> implements Serializable {
     private final double weight = 0.85;
 
@@ -40,7 +39,6 @@ public class PageRankVertex extends Vertex<Double> implements Serializable {
             Message message = this.getIncomingQueue().poll().getMessage();
             PageRankValue score = (PageRankValue) message.getContent();
             // update the state of the vertex according to the incoming score
-            log.info("added pagerank value: {}", score);
             this.getValue().add(score.multiply(weight));
         }
         // finished all the job, generate out mail

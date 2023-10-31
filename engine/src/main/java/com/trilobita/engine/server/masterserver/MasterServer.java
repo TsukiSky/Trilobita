@@ -52,7 +52,7 @@ public class MasterServer<T> extends AbstractServer<T> {
                     return;
                 }
                 int val = finishedWorkers.addAndGet(1);
-                ConcurrentHashMap<Integer, Computable<T>> tempValue = (ConcurrentHashMap<Integer, Computable<T>>) value.getMessage().getContent();
+                Map<Integer, Computable<T>> tempValue = (HashMap<Integer, Computable<T>>) value.getMessage().getContent();
                 updateVertexValue(tempValue);
                 log.info("finished number of workers: "+val);
                 if (val == nDownWorkers){
@@ -60,7 +60,7 @@ public class MasterServer<T> extends AbstractServer<T> {
                     finishedWorkers.set(0);
                     curVertexValue = newVertexValue;
                     Thread.sleep(300);
-                    log.info(String.valueOf(curVertexValue));
+                    log.info("current vertex values {}",curVertexValue);
                     MessageProducer.createAndProduce(null, new Mail(-1, null, Mail.MailType.NORMAL), "start");
                 }
             }
@@ -69,10 +69,9 @@ public class MasterServer<T> extends AbstractServer<T> {
         checkHeartBeat();
     }
 
-    public void updateVertexValue(ConcurrentHashMap<Integer, Computable<T>> tempValue){
+    public void updateVertexValue(Map<Integer, Computable<T>> tempValue){
         Set<Map.Entry<Integer, Computable<T>>> set = tempValue.entrySet();
         for (Map.Entry<Integer, Computable<T>> entry: set){
-            System.out.println(entry.getKey() + " " + entry.getValue());
             newVertexValue.put(entry.getKey(), entry.getValue());
         }
     }
@@ -127,7 +126,7 @@ public class MasterServer<T> extends AbstractServer<T> {
         vertexGroupArrayList = partitioner.Partition(graph, nWorkers);
 //        create a hashmap that store (key: vertexId, value: serverId)
         Map<Integer, Integer> vertexToServer = new HashMap<>();
-        for (int i=1;i<vertexGroupArrayList.size();i++){
+        for (int i=1;i<=vertexGroupArrayList.size();i++){
             for (Vertex v: vertexGroupArrayList.get(i-1).getVertices()){
                 vertexToServer.put(v.getId(), i);
             }

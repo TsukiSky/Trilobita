@@ -24,11 +24,7 @@ public class Mail implements Serializable {
         this.fromVertexId = 0;
     }
 
-    @JsonCreator
-    public Mail(@JsonProperty("fromVertexId") int fromVertexId,
-                @JsonProperty("toVertexId") int toVertexId,
-                @JsonProperty("message") Message message,
-                @JsonProperty("mailType") MailType mailType) {
+    public Mail(int fromVertexId, int toVertexId, Message message, MailType mailType) {
         this.fromVertexId = fromVertexId;
         this.toVertexId = toVertexId;
         this.message = message;

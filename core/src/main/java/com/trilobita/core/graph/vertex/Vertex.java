@@ -16,18 +16,14 @@ import java.util.concurrent.LinkedBlockingQueue;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, property = "@class")
 public abstract class Vertex<T> implements Serializable {
     private int id;
     private List<Edge> edges;
     private VertexStatus status;
     private Computable<T> value;
     private boolean stepFinished;
-    @JsonDeserialize(as = LinkedBlockingQueue.class)
     private BlockingQueue<Mail> incomingQueue;
-    @JsonDeserialize(as = LinkedBlockingQueue.class)
     private BlockingQueue<Mail> serverQueue;
-    @JsonDeserialize(as = ConcurrentHashMap.class)
     private ConcurrentHashMap<Integer, Computable<T>> vertexValues;
 
     /**

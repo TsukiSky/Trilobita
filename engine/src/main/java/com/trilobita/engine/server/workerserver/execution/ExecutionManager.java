@@ -50,9 +50,7 @@ public class ExecutionManager<T> {
             Mail mail = this.server.getOutMailQueue().poll();
             executorService.submit(() -> {
                 int receiverId = this.server.findServerByVertexId(mail.getToVertexId());
-                log.info("the receiver server id is: {}, the vertex id is: {}",receiverId, mail.getToVertexId());
                 MessageProducer.createAndProduce(null, mail, receiverId + "");
-
             });
         }
 

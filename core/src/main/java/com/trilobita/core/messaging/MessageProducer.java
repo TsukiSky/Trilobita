@@ -25,6 +25,7 @@ public class MessageProducer {
      * @param topic Target topic, usually used by the destination server. It will be created if it does not exist.
      * @author Guo Ziniu : ziniu@catroll.io
      */
+    private static final boolean willLog = false;
     public static void createAndProduce(UUID key, Mail value, String topic) {
 
         try {
@@ -47,7 +48,9 @@ public class MessageProducer {
                 if (ex != null) {
                     log.error("error producing message: {}", ex.getMessage());
                 } else {
-//                    log.info("Produced event to topic {}: key = {} value = {}", topic, finalKey, value);
+                    if (willLog){
+                        log.info("Produced event to topic {}: key = {} value = {}", topic, finalKey, value);
+                    }
                 }
             });
         }

@@ -21,6 +21,7 @@ import java.util.concurrent.ExecutionException;
  */
 @Slf4j
 public class MessageConsumer {
+    private static final boolean willLog = false;
     private volatile boolean runFlag = false;
     private String topic;
     private final MessageAdmin messageAdmin = MessageAdmin.getInstance();
@@ -81,9 +82,11 @@ public class MessageConsumer {
                         Mail value = consumerRecord.value();
                         int partition = consumerRecord.partition();
                         long offset = consumerRecord.offset();
-                        log.info("Consumer Record: Topic: {}, key: {}, value: {}, partition: {}, offset: {}",
-                                topic, consumerRecord.key(), value, partition, offset
-                        );
+                        if (willLog){
+                            log.info("Consumer Record: Topic: {}, key: {}, value: {}, partition: {}, offset: {}",
+                                    topic, consumerRecord.key(), value, partition, offset
+                            );
+                        }
                         messageHandler.handleMessage(UUID.fromString(consumerRecord.key()), value, partition, offset);
                     }
                 }
