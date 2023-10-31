@@ -11,8 +11,7 @@ import com.trilobita.engine.server.workerserver.execution.ExecutionManager;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.*;
 
 /**
@@ -38,7 +37,9 @@ public class WorkerServer<T> extends AbstractServer<T> {
         this.partitionMessageConsumer= new MessageConsumer(this.getServerId() + "partition", serverId, new MessageConsumer.MessageHandler() {
             @Override
             public void handleMessage(UUID key, Mail value, int partition, long offset) throws JsonProcessingException, InterruptedException, ExecutionException {
-                vertexGroup = (VertexGroup<T>) value.getMessage().getContent();
+                Map<String, Object> res = (Map<String, Object>) value.getMessage().getContent();
+                vertexGroup = (VertexGroup<T>) res.get("PARTITION");
+                setVertexToServer((HashMap<Integer, Integer>) res.get("VERTEX-TO-SERVER"));
                 //    assign the server's hashmap to each vertex
                 List<Vertex<T>> vertices = vertexGroup.getVertices();
                 for (Vertex<T> vertex: vertices){
@@ -70,6 +71,7 @@ public class WorkerServer<T> extends AbstractServer<T> {
 
         startMessageConsumer.start();
         partitionMessageConsumer.start();
+        this.getMessageConsumer().start();
     }
 
     @Override

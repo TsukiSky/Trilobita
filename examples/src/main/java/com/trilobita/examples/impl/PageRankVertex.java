@@ -40,6 +40,7 @@ public class PageRankVertex extends Vertex<Double> implements Serializable {
             Message message = this.getIncomingQueue().poll().getMessage();
             PageRankValue score = (PageRankValue) message.getContent();
             // update the state of the vertex according to the incoming score
+            log.info("added pagerank value: {}", score);
             this.getValue().add(score.multiply(weight));
         }
         // finished all the job, generate out mail

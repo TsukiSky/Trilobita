@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.trilobita.commons.*;
 import com.trilobita.core.graph.Graph;
 import com.trilobita.core.graph.VertexGroup;
+import com.trilobita.core.graph.vertex.Vertex;
 import com.trilobita.core.messaging.MessageConsumer;
 import com.trilobita.core.messaging.MessageProducer;
 import com.trilobita.engine.server.AbstractServer;
@@ -124,10 +125,18 @@ public class MasterServer<T> extends AbstractServer<T> {
         List<VertexGroup<T>> vertexGroupArrayList;
         AbstractPartitioner<T> partitioner = new HashPartitioner(nWorkers);
         vertexGroupArrayList = partitioner.Partition(graph, nWorkers);
-//        todo: Send partitions to workers
+//        create a hashmap that store (key: vertexId, value: serverId)
+        Map<Integer, Integer> vertexToServer = new HashMap<>();
+        for (int i=1;i<vertexGroupArrayList.size();i++){
+            for (Vertex v: vertexGroupArrayList.get(i-1).getVertices()){
+                vertexToServer.put(v.getId(), i);
+            }
+        }
         for (int i=1;i<=vertexGroupArrayList.size();i++){
-            System.out.println(i);
-            Message message = new Message(vertexGroupArrayList.get(i-1), Message.MessageType.NULL);
+            Map<String, Object> objectMap = new HashMap<>();
+            objectMap.put("VERTEX-TO-SERVER", vertexToServer);
+            objectMap.put("PARTITION", vertexGroupArrayList.get(i-1));
+            Message message = new Message(objectMap, Message.MessageType.NULL);
             Mail mail = new Mail(-1, message, Mail.MailType.GRAPH_PARTITION);
             MessageProducer.produce(null, mail, i+"partition");
         }

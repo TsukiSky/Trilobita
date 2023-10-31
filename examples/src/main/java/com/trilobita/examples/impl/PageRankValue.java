@@ -1,9 +1,11 @@
 package com.trilobita.examples.impl;
 
 import com.trilobita.commons.Computable;
+import lombok.Data;
 
 import java.io.Serializable;
 
+@Data
 public class PageRankValue implements Computable<Double>, Serializable {
     private Double value;
     public PageRankValue(Double value) {

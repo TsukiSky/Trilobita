@@ -41,7 +41,7 @@ public class MessageProducer {
                 if (ex != null) {
                     log.error("error producing message: {}", ex.getMessage());
                 } else {
-                    log.info("Produced event to topic {}: key = {} value = {}", topic, finalKey, value);
+//                    log.info("Produced event to topic {}: key = {} value = {}", topic, finalKey, value);
                 }
             });
         }

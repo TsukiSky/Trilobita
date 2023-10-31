@@ -4,6 +4,7 @@ import com.trilobita.commons.*;
 import com.trilobita.core.graph.vertex.Vertex;
 import com.trilobita.core.messaging.MessageProducer;
 import com.trilobita.engine.server.workerserver.WorkerServer;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +13,7 @@ import java.util.concurrent.*;
 /**
  * The execution manager on a single worker machine
  */
+@Slf4j
 public class ExecutionManager<T> {
     public final WorkerServer<T> server;
     public ExecutorService executorService;
@@ -49,6 +51,7 @@ public class ExecutionManager<T> {
             Mail mail = this.server.getOutMailQueue().poll();
             executorService.submit(() -> {
                 int receiverId = this.server.findServerByVertexId(mail.getToVertexId());
+                log.info("the receiver server id is: {}, the vertex id is: {}",receiverId, mail.getToVertexId());
                 MessageProducer.produce(null, mail, receiverId + "");
             });
         }

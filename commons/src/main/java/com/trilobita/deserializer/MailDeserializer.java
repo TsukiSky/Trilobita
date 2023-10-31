@@ -33,7 +33,11 @@ public class MailDeserializer implements Deserializer<Mail> {
 
     @Override
     public Mail deserialize(String topic, Headers headers, byte[] data) {
-        return (Mail) SerializationUtils.deserialize(data);
+        try {
+            return (Mail) SerializationUtils.deserialize(data);
+        } catch (Exception e){
+            return null;
+        }
 //        return Deserializer.super.deserialize(topic, headers, data);
     }
 

@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -26,6 +27,8 @@ public abstract class AbstractServer<T> {
     private final LinkedBlockingQueue<Mail> outMailQueue;
     private final LinkedBlockingQueue<Mail> inMailQueue;
     private final MessageConsumer messageConsumer;
+    @Setter
+    private Map<Integer, Integer> vertexToServer;
     public Context context;
 
     protected AbstractServer(int serverId) {
@@ -50,8 +53,7 @@ public abstract class AbstractServer<T> {
     }
 
     public int findServerByVertexId(int vertexId) {
-        // TODO: do findServerByVertexId
-        return 0;
+        return vertexToServer.getOrDefault(vertexId, 0);
     }
 
     public void postMail(Mail mail) {
