@@ -6,7 +6,6 @@ import com.trilobita.core.messaging.MessageProducer;
 import com.trilobita.engine.server.workerserver.WorkerServer;
 import com.trilobita.engine.server.workerserver.execution.ExecutionManager;
 
-import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 public class WorkerThread<T> extends Thread {
@@ -51,7 +50,7 @@ public class WorkerThread<T> extends Thread {
         while (!this.server.getOutMailQueue().isEmpty()) {
             Mail mail = this.server.getOutMailQueue().poll();
             int receiverId = this.server.findServerByVertexId(mail.getToVertexId());
-            MessageProducer.produce(null, mail, receiverId + "");
+            MessageProducer.createAndProduce(null, mail, receiverId + "");
         }
 
         this.countDownLatch.countDown();    // count down

@@ -16,6 +16,6 @@ public class MailingTask extends Task {
 
     @Override
     public void run() {
-        MessageProducer.produce(null, mail, receiverId+"");
+        MessageProducer.createAndProduce(null, mail, receiverId+"");
     }
 }
