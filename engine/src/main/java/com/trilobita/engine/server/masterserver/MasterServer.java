@@ -35,7 +35,6 @@ public class MasterServer<T> extends AbstractServer<T> {
     ConcurrentHashMap<Integer, Boolean> workerStatus;
     ScheduledExecutorService executorService;
 
-
     private static MasterServer<?> instance;
 
     private MasterServer(int serverId) throws ExecutionException, InterruptedException {
@@ -60,7 +59,8 @@ public class MasterServer<T> extends AbstractServer<T> {
                     finishedWorkers.set(0);
                     curVertexValue = newVertexValue;
                     Thread.sleep(300);
-                    log.info("current vertex values {}",curVertexValue);
+                    log.info("super step {}: current vertex values {}",superstep,curVertexValue);
+                    superstep++;
                     MessageProducer.createAndProduce(null, new Mail(-1, null, Mail.MailType.NORMAL), "start");
                 }
             }

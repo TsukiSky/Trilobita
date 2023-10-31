@@ -46,6 +46,7 @@ public class WorkerServer<T> extends AbstractServer<T> {
                     vertex.setServerQueue(getOutMailQueue());
                     vertex.setVertexValues(vertexValues);
                 }
+                superstep = 1;
                 log.info("Vertex Group: {}",vertexGroup);
                 log.info("Vertex to Server: {}", getVertexToServer());
                 start();
@@ -103,8 +104,9 @@ public class WorkerServer<T> extends AbstractServer<T> {
     public void sendCompleteSignal() {
         Message message = new Message(new HashMap<>(vertexValues), Message.MessageType.NORMAL);
         Mail mail = new Mail(-1, message, Mail.MailType.NORMAL);
-        log.info("mail value: {}", mail);
+        log.info("super step {}: mail value: {}", superstep, mail);
         MessageProducer.createAndProduce(null, mail, "finish");
+        superstep++;
     }
 
     public void distributeMailToVertex(Mail mail) {

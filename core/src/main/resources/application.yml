@@ -1,6 +1,6 @@
-logging:
-    level:
-        root: OFF
-        org.springframework: OFF
-        org.apache: OFF
-        kafka: OFF
+#logging:
+#    level:
+#        root: OFF
+#        org.springframework: OFF
+#        org.apache: OFF
+#        kafka: OFF

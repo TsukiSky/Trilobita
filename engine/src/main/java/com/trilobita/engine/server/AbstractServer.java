@@ -29,6 +29,8 @@ public abstract class AbstractServer<T> {
     @Setter
     private Map<Integer, Integer> vertexToServer;
     public Context context;
+    protected Integer superstep = 1;
+
 
     protected AbstractServer(int serverId) {
         this.serverId = serverId;

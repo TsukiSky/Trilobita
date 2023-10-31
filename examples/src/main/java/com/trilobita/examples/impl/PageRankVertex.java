@@ -18,6 +18,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")
 public class PageRankVertex extends Vertex<Double> implements Serializable {
     private final double weight = 0.85;
 
