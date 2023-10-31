@@ -25,16 +25,22 @@ public class MessageProducer {
      * @param topic Target topic, usually used by the destination server. It will be created if it does not exist.
      * @author Guo Ziniu : ziniu@catroll.io
      */
-    public static void produce(UUID key, Mail value, String topic) {
-        if (key == null) {
-            key = UUID.randomUUID();
-        }
-        UUID finalKey = key;
+    public static void createAndProduce(UUID key, Mail value, String topic) {
+
         try {
             MessageAdmin.getInstance().createIfNotExist(topic);
         } catch (ExecutionException | InterruptedException exception) {
             log.error("produce create topic: {}", exception.getMessage());
         }
+
+        produce(key, value, topic);
+    }
+
+    public static void produce(UUID key, Mail value, String topic) {
+        if (key == null) {
+            key = UUID.randomUUID();
+        }
+        UUID finalKey = key;
 
         try (final org.apache.kafka.clients.producer.Producer<Object, Object> producer = new KafkaProducer<>(MessageAdmin.getInstance().props)) {
             producer.send(new ProducerRecord<>(topic, finalKey.toString(), value), (event, ex) -> {

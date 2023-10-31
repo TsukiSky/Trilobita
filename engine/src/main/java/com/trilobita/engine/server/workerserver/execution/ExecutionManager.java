@@ -5,7 +5,6 @@ import com.trilobita.core.graph.vertex.Vertex;
 import com.trilobita.core.messaging.MessageProducer;
 import com.trilobita.engine.server.workerserver.WorkerServer;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
 
@@ -49,7 +48,7 @@ public class ExecutionManager<T> {
             Mail mail = this.server.getOutMailQueue().poll();
             executorService.submit(() -> {
                 int receiverId = this.server.findServerByVertexId(mail.getToVertexId());
-                MessageProducer.produce(null, mail, receiverId + "");
+                MessageProducer.createAndProduce(null, mail, receiverId + "");
             });
         }
 

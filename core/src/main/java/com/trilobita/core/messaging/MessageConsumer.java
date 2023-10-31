@@ -62,7 +62,8 @@ public class MessageConsumer {
     public void start() throws ExecutionException, InterruptedException {
         Set<String> existing = messageAdmin.getTopics();
         if (!existing.contains(topic)) {
-            log.info("existing topic: {} do not contain {}! Stopping...", existing, topic);
+            messageAdmin.createIfNotExist(topic);
+            log.info("existing topic: {} do not contain {}! Creating, and then subscribe...", existing, topic);
             return;
         }
         if (runFlag) {
