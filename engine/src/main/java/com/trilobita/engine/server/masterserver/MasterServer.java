@@ -61,7 +61,7 @@ public class MasterServer<T> extends AbstractServer<T> {
                     curVertexValue = newVertexValue;
                     Thread.sleep(300);
                     log.info(String.valueOf(curVertexValue));
-                    MessageProducer.produce(null, new Mail(-1, null, Mail.MailType.NORMAL), "start");
+                    MessageProducer.createAndProduce(null, new Mail(-1, null, Mail.MailType.NORMAL), "start");
                 }
             }
         });
@@ -138,7 +138,7 @@ public class MasterServer<T> extends AbstractServer<T> {
             objectMap.put("PARTITION", vertexGroupArrayList.get(i-1));
             Message message = new Message(objectMap, Message.MessageType.NULL);
             Mail mail = new Mail(-1, message, Mail.MailType.GRAPH_PARTITION);
-            MessageProducer.produce(null, mail, i+"partition");
+            MessageProducer.createAndProduce(null, mail, i+"partition");
         }
     }
 }

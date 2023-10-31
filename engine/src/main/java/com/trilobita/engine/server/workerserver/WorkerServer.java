@@ -87,7 +87,7 @@ public class WorkerServer<T> extends AbstractServer<T> {
         Message message = new Message(vertexValues, Message.MessageType.NORMAL);
         Mail mail = new Mail(-1, message, Mail.MailType.NORMAL);
         log.info("mail value: {}", mail);
-        MessageProducer.produce(null, mail, "finish");
+        MessageProducer.createAndProduce(null, mail, "finish");
     }
 
     @Override

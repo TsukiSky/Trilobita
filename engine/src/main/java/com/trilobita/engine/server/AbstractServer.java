@@ -6,7 +6,6 @@ import com.trilobita.core.messaging.MessageConsumer;
 import com.trilobita.core.messaging.MessageProducer;
 import com.trilobita.exception.TrilobitaException;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.Map;
@@ -58,7 +57,7 @@ public abstract class AbstractServer<T> {
 
     public void postMail(Mail mail) {
         // post one mail to its destination
-        MessageProducer.produce(null, mail, "//TODOTOPIC");
+        MessageProducer.createAndProduce(null, mail, "//TODOTOPIC");
     }
 
     /**
