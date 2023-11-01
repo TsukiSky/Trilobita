@@ -5,7 +5,7 @@ import com.trilobita.engine.server.workerserver.WorkerServer;
 
 import java.util.concurrent.ExecutionException;
 
-public class PageRankWorker2 {
+public class PageRankWorkerRunner2 {
 
     public static void main(String[] args) throws ExecutionException, InterruptedException, JsonProcessingException {
 //        for (int i=0;i<4;i++){

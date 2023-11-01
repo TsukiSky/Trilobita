@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-public class PageRankMaster {
+public class PageRankMasterRunner {
     public static Graph createVertices(){
         List<PageRankVertex> vertices = new ArrayList<>();
         PageRankVertex vertex0 = new PageRankVertex(0);
@@ -74,7 +74,7 @@ public class PageRankMaster {
     public static void main(String[] args) throws ExecutionException, InterruptedException {
         MasterServer masterServer = MasterServer.getInstance();
 //        parse the graph
-        Graph graph = PageRankMaster.createVertices();
+        Graph graph = PageRankMasterRunner.createVertices();
         masterServer.partitionGraph(graph, 2);
         masterServer.start();
     }

@@ -56,7 +56,7 @@ public class WorkerServer<T> extends AbstractServer<T> {
         this.startMessageConsumer = new MessageConsumer("start", serverId, new MessageConsumer.MessageHandler() {
             @Override
             public void handleMessage(UUID key, Mail value, int partition, long offset) throws JsonProcessingException, InterruptedException {
-                log.info("start new super step...");
+//                log.info("start new super step...");
                 if (getVertexGroup() != null){
                     execute();
                 }
