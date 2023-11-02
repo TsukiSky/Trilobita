@@ -1,13 +1,14 @@
 package com.trilobita.commons;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
+/**
+ * Mail serves as the message payload
+ */
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode
@@ -31,9 +32,13 @@ public class Mail implements Serializable {
         this.mailType = mailType;
     }
 
+    /**
+     * MailType is used to distinguish different types of mails
+     */
     public enum MailType {
         NORMAL,
-        GRAPH_PARTITION,
-        FINISH_INDICATOR,
+        PARTITION,
+        FINISH_SIGNAL,
+        START_SIGNAL,
     }
 }

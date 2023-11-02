@@ -15,9 +15,11 @@ import java.util.*;
 import java.util.concurrent.*;
 
 /**
- * Worker Server controls vertex computations and communicate with other servers
+ * Worker Server is the worker of a server cluster.
+ * It executes the superstep, controls vertex computations and communicate with other servers
+ *
+ * @param <T> the type of the vertex value
  */
-
 @Slf4j
 @Getter
 public class WorkerServer<T> extends AbstractServer<T> {
@@ -26,48 +28,39 @@ public class WorkerServer<T> extends AbstractServer<T> {
     private final ConcurrentHashMap<Integer, Computable<T>> vertexValues;
     private final MessageConsumer partitionMessageConsumer;
     private final MessageConsumer startMessageConsumer;
-    private final MessageConsumer faultHandleMessageConsumer;
 
-    public WorkerServer(int serverId, int numOfExecutor) throws ExecutionException, InterruptedException {
+    public WorkerServer(int serverId, int parallelism) throws ExecutionException, InterruptedException {
         super(serverId);
-        this.executionManager = new ExecutionManager<>(4, this);
+        this.executionManager = new ExecutionManager<>(parallelism, this);
         this.outMailTable = new ConcurrentHashMap<>();
         this.vertexValues = new ConcurrentHashMap<>();
-        this.setServerStatus(ServerStatus.START);
-        this.partitionMessageConsumer= new MessageConsumer(this.getServerId() + "partition", serverId, new MessageConsumer.MessageHandler() {
-            @Override
-            public void handleMessage(UUID key, Mail value, int partition, long offset) throws JsonProcessingException, InterruptedException, ExecutionException {
-                Map<String, Object> res = (Map<String, Object>) value.getMessage().getContent();
-                vertexGroup = (VertexGroup<T>) res.get("PARTITION");
-                setVertexToServer((HashMap<Integer, Integer>) res.get("VERTEX-TO-SERVER"));
-                //    assign the server's hashmap to each vertex
-                List<Vertex<T>> vertices = vertexGroup.getVertices();
-                for (Vertex<T> vertex: vertices){
-                    vertex.setServerQueue(getOutMailQueue());
-                    vertex.setVertexValues(vertexValues);
-                }
-                superstep = 1;
-                log.info("Vertex Group: {}",vertexGroup);
-                log.info("Vertex to Server: {}", getVertexToServer());
-                start();
-            }
-        });
 
-        this.startMessageConsumer = new MessageConsumer("start", serverId, new MessageConsumer.MessageHandler() {
+        this.partitionMessageConsumer = new MessageConsumer("SERVER_" + this.getServerId() + "_PARTITION", serverId,
+                new MessageConsumer.MessageHandler() {
+                    @Override
+                    public void handleMessage(UUID key, Mail mail, int partition, long offset) throws JsonProcessingException, InterruptedException, ExecutionException {
+                        Map<String, Object> res = (Map<String, Object>) mail.getMessage().getContent();
+                        setVertexGroup((VertexGroup<T>) res.get("PARTITION"));
+                        setVertexToServer((HashMap<Integer, Integer>) res.get("VERTEX-TO-SERVER"));
+                        //    assign the server's hashmap to each vertex
+                        List<Vertex<T>> vertices = vertexGroup.getVertices();
+                        for (Vertex<T> vertex : vertices) {
+                            vertex.setServerQueue(getOutMailQueue());
+                        }
+                        superstep = 1;
+                        log.info("Vertex Group: {}", vertexGroup);
+                        log.info("Vertex to Server: {}", getVertexToServer());
+                        start();
+                    }
+                });
+
+        this.startMessageConsumer = new MessageConsumer(Mail.MailType.START_SIGNAL.ordinal(), serverId, new MessageConsumer.MessageHandler() {
             @Override
-            public void handleMessage(UUID key, Mail value, int partition, long offset) throws JsonProcessingException, InterruptedException {
+            public void handleMessage(UUID key, Mail mail, int partition, long offset) throws InterruptedException {
                 log.info("start new super step...");
-                if (getVertexGroup() != null){
+                if (getVertexGroup() != null) {
                     execute();
                 }
-            }
-        });
-
-        this.faultHandleMessageConsumer= new MessageConsumer("fault-handle", serverId, new MessageConsumer.MessageHandler() {
-            @Override
-            public void handleMessage(UUID key, Mail value, int partition, long offset) throws JsonProcessingException, InterruptedException {
-                log.info("detected server down...");
-                pause();
             }
         });
 
@@ -83,7 +76,7 @@ public class WorkerServer<T> extends AbstractServer<T> {
     }
 
     private synchronized void execute() throws InterruptedException {
-        log.info("entering new super step...");
+        log.info("entering a new super step...");
         this.executionManager.execute();
         sendCompleteSignal();
     }
@@ -97,18 +90,19 @@ public class WorkerServer<T> extends AbstractServer<T> {
     public void shutdown() {
     }
 
-    public void onStartSignal() throws InterruptedException {
-        this.start();
-    }
-
+    /**
+     * Send a complete signal to the master server
+     */
     public void sendCompleteSignal() {
-        Message message = new Message(new HashMap<>(vertexValues), Message.MessageType.NORMAL);
-        Mail mail = new Mail(-1, message, Mail.MailType.NORMAL);
-        log.info("super step {}: mail value: {}", superstep, mail);
-        MessageProducer.createAndProduce(null, mail, "finish");
+        MessageProducer.produceFinishSignal(this.superstep, new HashMap<>(vertexValues));
         superstep++;
     }
 
+    /**
+     * Distribute mail to vertex
+     *
+     * @param mail mail to be distributed
+     */
     public void distributeMailToVertex(Mail mail) {
         Vertex<T> vertex = findVertexById(mail.getToVertexId());
         if (vertex != null) {
@@ -116,6 +110,12 @@ public class WorkerServer<T> extends AbstractServer<T> {
         }
     }
 
+    /**
+     * Find the vertex with the given id
+     *
+     * @param vertexId vertex id
+     * @return vertex with the given id
+     */
     private Vertex<T> findVertexById(int vertexId) {
         return this.getVertexGroup().getVertexById(vertexId);
     }

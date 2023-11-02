@@ -1,6 +1,5 @@
 package com.trilobita.engine.server.masterserver;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.trilobita.commons.*;
 import com.trilobita.core.graph.Graph;
 import com.trilobita.core.graph.VertexGroup;
@@ -9,7 +8,6 @@ import com.trilobita.core.messaging.MessageConsumer;
 import com.trilobita.core.messaging.MessageProducer;
 import com.trilobita.engine.server.AbstractServer;
 import com.trilobita.engine.server.masterserver.partitioner.AbstractPartitioner;
-import com.trilobita.engine.server.masterserver.partitioner.HashPartitioner;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
@@ -21,123 +19,76 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 @Slf4j
 public class MasterServer<T> extends AbstractServer<T> {
-    Graph graph;
+    Graph<T> graph;
     AbstractPartitioner<T> graphPartitioner;
-    Integer nRunningWorkers;
-    Integer nPauseWorkers;
-    Integer nDownWorkers;
-    AtomicInteger finishedWorkers;
-    volatile Boolean handlingFault;
-    List<Integer> workerIds;
-    MessageConsumer completeSignalListener;
-    ConcurrentHashMap<Integer, Computable<T>> curVertexValue;
-    ConcurrentHashMap<Integer, Computable<T>> newVertexValue;
+    int nWorker;
+    AtomicInteger nFinishedWorker;
+    MessageConsumer completeSignalConsumer;
     ConcurrentHashMap<Integer, Boolean> workerStatus;
-    ScheduledExecutorService executorService;
 
-    private static MasterServer<?> instance;
-
-    private MasterServer(int serverId) throws ExecutionException, InterruptedException {
-        super(serverId);
-        finishedWorkers = new AtomicInteger(0);
-        executorService = Executors.newScheduledThreadPool(1);
-        handlingFault = false;
-        curVertexValue = new ConcurrentHashMap<>();
-        newVertexValue = new ConcurrentHashMap<>();
-        completeSignalListener = new MessageConsumer("finish", serverId, new MessageConsumer.MessageHandler() {
+    public MasterServer(AbstractPartitioner<T> graphPartitioner, int nWorker) throws ExecutionException, InterruptedException {
+        super(0);   // the standard server id of master is 0
+        this.nWorker = nWorker;
+        this.graphPartitioner = graphPartitioner;
+        this.nFinishedWorker = new AtomicInteger(0);
+        this.completeSignalConsumer = new MessageConsumer(Mail.MailType.FINISH_SIGNAL.ordinal(), super.getServerId(), new MessageConsumer.MessageHandler() {
             @Override
-            public void handleMessage(UUID key, Mail value, int partition, long offset) throws JsonProcessingException, InterruptedException {
-                if (handlingFault){
-                    return;
-                }
-                int val = finishedWorkers.addAndGet(1);
-                Map<Integer, Computable<T>> tempValue = (HashMap<Integer, Computable<T>>) value.getMessage().getContent();
-                updateVertexValue(tempValue);
-                log.info("finished number of workers: "+val);
-                if (val == nDownWorkers){
-                    // start next superstep
-                    finishedWorkers.set(0);
-                    curVertexValue = newVertexValue;
+            public void handleMessage(UUID key, Mail value, int partition, long offset) throws InterruptedException {
+                int val = nFinishedWorker.addAndGet(1);
+                log.info("number of finished workers: " + val);
+                if (val == nWorker) {
+                    // start the next superstep
                     Thread.sleep(300);
-                    log.info("super step {}: current vertex values {}",superstep,curVertexValue);
-                    superstep++;
-                    MessageProducer.createAndProduce(null, new Mail(-1, null, Mail.MailType.NORMAL), "start");
+                    startNewSuperstep();
                 }
             }
         });
-        completeSignalListener.start();
-        checkHeartBeat();
     }
-
-    public void updateVertexValue(Map<Integer, Computable<T>> tempValue){
-        Set<Map.Entry<Integer, Computable<T>>> set = tempValue.entrySet();
-        for (Map.Entry<Integer, Computable<T>> entry: set){
-            newVertexValue.put(entry.getKey(), entry.getValue());
-        }
-    }
-
-    public void checkHeartBeat(){
-        executorService.schedule(new Runnable() {
-            @Override
-            public void run() {
-                //  get the id of the dead server
-                Integer serverId = checkStatus();
-                if (serverId == -1){
-                    return;
-                }
-                log.info(String.valueOf(serverId));
-            }
-        }, 2, TimeUnit.SECONDS);
-    }
-
-    public Integer checkStatus(){
-        Set<Map.Entry<Integer, Boolean>> set = workerStatus.entrySet();
-        for (Map.Entry<Integer, Boolean> entry: set){
-            if (!entry.getValue()){
-                return entry.getKey();
-            }
-        }
-        return -1;
-    }
-
-    public static synchronized MasterServer<?> getInstance() throws ExecutionException, InterruptedException {
-        if (instance == null) {
-            instance = new MasterServer<>(0);
-        }
-        return instance;
-    }
-    @Override
-    public void start() {}
 
     @Override
-    public void pause() {}
+    public void start() throws ExecutionException, InterruptedException {
+        this.completeSignalConsumer.start();
+    }
 
     @Override
-    public void shutdown() {}
+    public void pause() {
+    }
 
-    public void onCompleteSignal(Integer workerId) {}
+    @Override
+    public void shutdown() {
+    }
 
-    public void sendStartSignal() {}
+    public void startNewSuperstep() {
+        this.superstep += 1;
+        this.nFinishedWorker.set(0);
+        MessageProducer.produceStartSignal();
+    }
 
-    public void partitionGraph(Graph graph, Integer nWorkers) {
-        nDownWorkers = nWorkers;
+    /**
+     * partition the graph and send the partitioned graph to the workers
+     * @param graph the graph to be partitioned
+     * @param nWorker the number of workers
+     */
+    public void partitionGraph(Graph<T> graph, Integer nWorker) {
+        this.nWorker = nWorker;
+        this.graph = graph;
         List<VertexGroup<T>> vertexGroupArrayList;
-        AbstractPartitioner<T> partitioner = new HashPartitioner(nWorkers);
-        vertexGroupArrayList = partitioner.Partition(graph, nWorkers);
-//        create a hashmap that store (key: vertexId, value: serverId)
+        vertexGroupArrayList = this.graphPartitioner.Partition(graph, nWorker);
+
+        // create a hashmap that store (key: vertexId, value: serverId)
         Map<Integer, Integer> vertexToServer = new HashMap<>();
-        for (int i=1;i<=vertexGroupArrayList.size();i++){
-            for (Vertex v: vertexGroupArrayList.get(i-1).getVertices()){
+        for (int i = 1; i <= vertexGroupArrayList.size(); i++) {
+            for (Vertex<T> v :vertexGroupArrayList.get(i - 1).getVertices()) {
                 vertexToServer.put(v.getId(), i);
             }
         }
-        for (int i=1;i<=vertexGroupArrayList.size();i++){
+        for (int i = 1; i <= vertexGroupArrayList.size(); i++) {
             Map<String, Object> objectMap = new HashMap<>();
             objectMap.put("VERTEX-TO-SERVER", vertexToServer);
-            objectMap.put("PARTITION", vertexGroupArrayList.get(i-1));
-            Message message = new Message(objectMap, Message.MessageType.NULL);
-            Mail mail = new Mail(-1, message, Mail.MailType.GRAPH_PARTITION);
-            MessageProducer.createAndProduce(null, mail, i+"partition");
+            objectMap.put("PARTITION", vertexGroupArrayList.get(i - 1));
+            Message message = new Message(objectMap);
+            Mail mail = new Mail(-1, message, Mail.MailType.PARTITION);
+            MessageProducer.createAndProduce(null, mail, "SERVER_" + i + "_PARTITION");
         }
     }
 }

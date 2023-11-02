@@ -10,29 +10,24 @@ import java.util.List;
 import java.util.concurrent.*;
 
 /**
- * The execution manager on a single worker machine
+ * Execution Manager is responsible for the execution of a superstep
+ * @param <T> the type of the vertex value
  */
 @Slf4j
 public class ExecutionManager<T> {
     public final WorkerServer<T> server;
-    public ExecutorService executorService;
-    public List<Vertex<T>> vertices;
-    public BlockingQueue<Integer> activeVertices;
-    public CountDownLatch countDownLatch;
-    public int parallelism;
+    private final ExecutorService executorService;
 
     public ExecutionManager(int parallelism, WorkerServer<T> server) {
         this.server = server;
-        this.parallelism = parallelism;
         this.executorService = Executors.newFixedThreadPool(parallelism);
     }
 
-    public void execute() {
-        this.countDownLatch = new CountDownLatch(this.parallelism);
-        this.vertices = this.server.getVertexGroup().getVertices();
-        if (executorService == null || executorService.isTerminated()) {
-            executorService = Executors.newFixedThreadPool(5); // Adjust the number of threads as needed
-        }
+    /**
+     * execute the superstep
+     */
+    public void execute() throws InterruptedException {
+        // distribute the mail to the vertices
         while (!server.getInMailQueue().isEmpty()) {
             Mail mail = this.server.getInMailQueue().poll();
             if (mail != null) {
@@ -41,25 +36,38 @@ public class ExecutionManager<T> {
                 });
             }
         }
+
+        List<Vertex<T>> vertices = this.server.getVertexGroup().getVertices();
+        int activeVertexCount = 0;
         for (Vertex<T> vertex: vertices) {
             if (vertex.getStatus() == Vertex.VertexStatus.ACTIVE) {
-                executorService.submit(vertex::compute);
+                activeVertexCount++;
             }
         }
+        CountDownLatch computeLatch = new CountDownLatch(activeVertexCount);
+
+        // start the computation of the vertices
+        for (Vertex<T> vertex: vertices) {
+            if (vertex.getStatus() == Vertex.VertexStatus.ACTIVE) {
+                executorService.submit(() -> {
+                    vertex.step();
+                    computeLatch.countDown();
+                });
+            }
+        }
+
+        computeLatch.await();   // block until all computing tasks are finished
+
+        CountDownLatch mailingLatch = new CountDownLatch(server.getOutMailQueue().size());
+        // send the mail to the other servers
         while (!this.server.getOutMailQueue().isEmpty()) {
             Mail mail = this.server.getOutMailQueue().poll();
             executorService.submit(() -> {
                 int receiverId = this.server.findServerByVertexId(mail.getToVertexId());
-                MessageProducer.createAndProduce(null, mail, receiverId + "");
+                MessageProducer.createAndProduce(null, mail, "SERVER_" + receiverId + "_MESSAGE");
+                mailingLatch.countDown();
             });
         }
-
-        // block until all threads finish
-        executorService.shutdown();
-        try {
-            executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        mailingLatch.await();   // block until all mailing tasks are finished
     }
 }

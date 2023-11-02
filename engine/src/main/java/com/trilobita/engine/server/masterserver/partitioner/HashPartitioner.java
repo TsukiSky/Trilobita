@@ -1,7 +1,6 @@
 package com.trilobita.engine.server.masterserver.partitioner;
 
-public class HashPartitioner extends AbstractPartitioner {
-
+public class HashPartitioner<T> extends AbstractPartitioner<T> {
     private final int nWorkers;
 
     public HashPartitioner(int nWorkers){

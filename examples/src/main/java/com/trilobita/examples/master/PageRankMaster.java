@@ -3,6 +3,8 @@ package com.trilobita.examples.master;
 import com.trilobita.core.graph.Graph;
 import com.trilobita.core.graph.vertex.Vertex;
 import com.trilobita.engine.server.masterserver.MasterServer;
+import com.trilobita.engine.server.masterserver.partitioner.HashPartitioner;
+import com.trilobita.examples.impl.PageRankValue;
 import com.trilobita.examples.impl.PageRankVertex;
 
 import java.util.ArrayList;
@@ -72,9 +74,9 @@ public class PageRankMaster {
         return graph;
     }
     public static void main(String[] args) throws ExecutionException, InterruptedException {
-        MasterServer masterServer = MasterServer.getInstance();
+        MasterServer<PageRankValue> masterServer = new MasterServer<>(new HashPartitioner<>(2), 2);
 //        parse the graph
-        Graph graph = PageRankMaster.createVertices();
+        Graph<PageRankValue> graph = PageRankMaster.createVertices();
         masterServer.partitionGraph(graph, 2);
         masterServer.start();
     }

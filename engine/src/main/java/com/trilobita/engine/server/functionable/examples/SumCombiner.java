@@ -35,7 +35,7 @@ public class SumCombiner extends Combiner {
                 newContent = newContent.add(content);
             }
         }
-        newMail.setMessage(new Message(newContent, Message.MessageType.NORMAL));
+        newMail.setMessage(new Message(newContent));
         return newMail;
     }
 }

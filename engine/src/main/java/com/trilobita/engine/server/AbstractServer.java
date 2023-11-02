@@ -18,25 +18,24 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 @Getter
 public abstract class AbstractServer<T> {
-    private final Integer serverId;   // unique id of a server
+    public final Integer serverId;   // unique id of a server
     @Setter
-    private ServerStatus serverStatus;
+    public ServerStatus serverStatus;
     @Setter
-    protected volatile VertexGroup<T> vertexGroup;
-    private final LinkedBlockingQueue<Mail> outMailQueue;
-    private final LinkedBlockingQueue<Mail> inMailQueue;
-    private final MessageConsumer messageConsumer;
+    public VertexGroup<T> vertexGroup;
+    public final LinkedBlockingQueue<Mail> outMailQueue;
+    public final LinkedBlockingQueue<Mail> inMailQueue;
+    public final MessageConsumer messageConsumer;
     @Setter
     private Map<Integer, Integer> vertexToServer;
     public Context context;
-    protected Integer superstep = 1;
+    public Integer superstep = 1;
 
-
-    protected AbstractServer(int serverId) {
+    public AbstractServer(int serverId) {
         this.serverId = serverId;
         this.outMailQueue = new LinkedBlockingQueue<>();
         this.inMailQueue = new LinkedBlockingQueue<>();
-        this.messageConsumer = new MessageConsumer(serverId+"", serverId, new MessageConsumer.MessageHandler() {
+        this.messageConsumer = new MessageConsumer("SERVER_" + serverId + "_MESSAGE", serverId, new MessageConsumer.MessageHandler() {
             @Override
             public void handleMessage(UUID key, Mail value, int partition, long offset) {
                 AbstractServer.this.inMailQueue.add(value);
@@ -48,24 +47,19 @@ public abstract class AbstractServer<T> {
     public abstract void pause();
     public abstract void shutdown();
 
-    public void post() {
-        // post all mails to its destination
-        // TODO: implement post method for server
-    }
-
+    /**
+     * find the server id of a vertex
+     * @param vertexId the id of the vertex
+     * @return the server id of the vertex
+     */
     public int findServerByVertexId(int vertexId) {
         return vertexToServer.getOrDefault(vertexId, 0);
-    }
-
-    public void postMail(Mail mail) {
-        // post one mail to its destination
-        MessageProducer.createAndProduce(null, mail, "//TODOTOPIC");
     }
 
     /**
      * STATUS of Server
      */
     public enum ServerStatus {
-        START, RUNNING, PAUSE, SHUTDOWN
+        RUNNING, PAUSE, SHUTDOWN
     }
 }

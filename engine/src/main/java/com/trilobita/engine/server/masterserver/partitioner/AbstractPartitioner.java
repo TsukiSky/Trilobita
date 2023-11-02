@@ -11,10 +11,12 @@ import java.util.List;
 
 @Data
 public abstract class AbstractPartitioner<T> {
-
-    public ArrayList<VertexGroup<T>> Partition(Graph<T> graph, int nWorkers){
-        ArrayList<VertexGroup<T>> arrayList = new ArrayList<>(nWorkers);
-        for (int i = 0; i < nWorkers; i++) {
+    /**
+     * Partition the graph into nWorker parts
+     */
+    public ArrayList<VertexGroup<T>> Partition(Graph<T> graph, int nWorker) {
+        ArrayList<VertexGroup<T>> arrayList = new ArrayList<>(nWorker);
+        for (int i = 0; i < nWorker; i++) {
             arrayList.add(new VertexGroup<>());
         }
         List<Vertex<T>> graphVertexSet = graph.getVertices();
@@ -26,8 +28,14 @@ public abstract class AbstractPartitioner<T> {
         return arrayList;
     }
 
+    /**
+     * @return the partition strategy of the partitioner
+     */
     public abstract PartitionStrategy getPartitionStrategy();
 
+    /**
+     * The partition strategy of the partitioner
+     */
     public abstract static class PartitionStrategy {
         public abstract int getServerIdByVertexId(int vertexId);
     }
