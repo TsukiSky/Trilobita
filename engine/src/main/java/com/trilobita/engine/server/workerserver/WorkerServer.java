@@ -1,12 +1,12 @@
 package com.trilobita.engine.server.workerserver;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.trilobita.commons.*;
 import com.trilobita.core.graph.VertexGroup;
 import com.trilobita.core.graph.vertex.Vertex;
 import com.trilobita.core.messaging.MessageConsumer;
 import com.trilobita.core.messaging.MessageProducer;
 import com.trilobita.engine.server.AbstractServer;
+import com.trilobita.engine.server.masterserver.partitioner.AbstractPartitioner;
 import com.trilobita.engine.server.workerserver.execution.ExecutionManager;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -29,8 +29,8 @@ public class WorkerServer<T> extends AbstractServer<T> {
     private final MessageConsumer partitionMessageConsumer;
     private final MessageConsumer startMessageConsumer;
 
-    public WorkerServer(int serverId, int parallelism) throws ExecutionException, InterruptedException {
-        super(serverId);
+    public WorkerServer(int serverId, int parallelism, AbstractPartitioner.PartitionStrategy partitionStrategy) throws ExecutionException, InterruptedException {
+        super(serverId, partitionStrategy);
         this.executionManager = new ExecutionManager<>(parallelism, this);
         this.outMailTable = new ConcurrentHashMap<>();
         this.vertexValues = new ConcurrentHashMap<>();
@@ -38,18 +38,16 @@ public class WorkerServer<T> extends AbstractServer<T> {
         this.partitionMessageConsumer = new MessageConsumer("SERVER_" + this.getServerId() + "_PARTITION", serverId,
                 new MessageConsumer.MessageHandler() {
                     @Override
-                    public void handleMessage(UUID key, Mail mail, int partition, long offset) throws JsonProcessingException, InterruptedException, ExecutionException {
+                    public void handleMessage(UUID key, Mail mail, int partition, long offset) throws InterruptedException {
                         Map<String, Object> res = (Map<String, Object>) mail.getMessage().getContent();
                         setVertexGroup((VertexGroup<T>) res.get("PARTITION"));
-                        setVertexToServer((HashMap<Integer, Integer>) res.get("VERTEX-TO-SERVER"));
-                        //    assign the server's hashmap to each vertex
+                        // assign the server's hashmap to each vertex
                         List<Vertex<T>> vertices = vertexGroup.getVertices();
                         for (Vertex<T> vertex : vertices) {
                             vertex.setServerQueue(getOutMailQueue());
                         }
                         superstep = 1;
                         log.info("Vertex Group: {}", vertexGroup);
-                        log.info("Vertex to Server: {}", getVertexToServer());
                         start();
                     }
                 });
@@ -59,7 +57,7 @@ public class WorkerServer<T> extends AbstractServer<T> {
             public void handleMessage(UUID key, Mail mail, int partition, long offset) throws InterruptedException {
                 log.info("start new super step...");
                 if (getVertexGroup() != null) {
-                    execute();
+                    startNewSuperstep();
                 }
             }
         });
@@ -69,13 +67,19 @@ public class WorkerServer<T> extends AbstractServer<T> {
         this.getMessageConsumer().start();
     }
 
+    /**
+     * Start running the server
+     */
     @Override
     public void start() throws InterruptedException {
         setServerStatus(ServerStatus.RUNNING);
-        execute();
+        startNewSuperstep();
     }
 
-    private synchronized void execute() throws InterruptedException {
+    /**
+     * Execute the superstep
+     */
+    private void startNewSuperstep() throws InterruptedException {
         log.info("entering a new super step...");
         this.executionManager.execute();
         sendCompleteSignal();
@@ -100,7 +104,6 @@ public class WorkerServer<T> extends AbstractServer<T> {
 
     /**
      * Distribute mail to vertex
-     *
      * @param mail mail to be distributed
      */
     public void distributeMailToVertex(Mail mail) {
@@ -112,7 +115,6 @@ public class WorkerServer<T> extends AbstractServer<T> {
 
     /**
      * Find the vertex with the given id
-     *
      * @param vertexId vertex id
      * @return vertex with the given id
      */

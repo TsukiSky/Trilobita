@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 public class PageRankMaster {
-    public static Graph createVertices(){
+    public static Graph<PageRankValue> createVertices(){
         List<PageRankVertex> vertices = new ArrayList<>();
         PageRankVertex vertex0 = new PageRankVertex(0);
         vertex0.setStatus(Vertex.VertexStatus.ACTIVE);
@@ -70,14 +70,14 @@ public class PageRankMaster {
         vertex0.addEdge(vertex9);
         vertex9.addEdge(vertex6);
 
-        Graph graph = new Graph(vertices);
+        Graph<PageRankValue> graph = new Graph(vertices);
         return graph;
     }
     public static void main(String[] args) throws ExecutionException, InterruptedException {
         MasterServer<PageRankValue> masterServer = new MasterServer<>(new HashPartitioner<>(2), 2);
 //        parse the graph
         Graph<PageRankValue> graph = PageRankMaster.createVertices();
-        masterServer.partitionGraph(graph, 2);
+        masterServer.loadGraph(graph);
         masterServer.start();
     }
 }

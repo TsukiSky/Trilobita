@@ -35,7 +35,6 @@ public class PageRankValue implements Computable<Double>, Serializable {
         return this;
     }
 
-
     @Override
     public Computable<Double> divide(Computable<Double> computable) {
         this.value /= computable.getValue();

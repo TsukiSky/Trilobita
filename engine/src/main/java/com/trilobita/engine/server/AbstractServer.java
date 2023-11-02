@@ -3,12 +3,11 @@ package com.trilobita.engine.server;
 import com.trilobita.commons.Mail;
 import com.trilobita.core.graph.VertexGroup;
 import com.trilobita.core.messaging.MessageConsumer;
-import com.trilobita.core.messaging.MessageProducer;
+import com.trilobita.engine.server.masterserver.partitioner.AbstractPartitioner;
 import com.trilobita.exception.TrilobitaException;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -27,12 +26,13 @@ public abstract class AbstractServer<T> {
     public final LinkedBlockingQueue<Mail> inMailQueue;
     public final MessageConsumer messageConsumer;
     @Setter
-    private Map<Integer, Integer> vertexToServer;
+    public AbstractPartitioner.PartitionStrategy partitionStrategy;
     public Context context;
     public Integer superstep = 1;
 
-    public AbstractServer(int serverId) {
+    public AbstractServer(int serverId, AbstractPartitioner.PartitionStrategy partitionStrategy) {
         this.serverId = serverId;
+        this.partitionStrategy = partitionStrategy;
         this.outMailQueue = new LinkedBlockingQueue<>();
         this.inMailQueue = new LinkedBlockingQueue<>();
         this.messageConsumer = new MessageConsumer("SERVER_" + serverId + "_MESSAGE", serverId, new MessageConsumer.MessageHandler() {
@@ -53,7 +53,7 @@ public abstract class AbstractServer<T> {
      * @return the server id of the vertex
      */
     public int findServerByVertexId(int vertexId) {
-        return vertexToServer.getOrDefault(vertexId, 0);
+        return partitionStrategy.getServerIdByVertexId(vertexId);
     }
 
     /**

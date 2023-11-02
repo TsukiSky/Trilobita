@@ -71,7 +71,7 @@ public class MessageAdmin {
 
     public void deleteIfExist(String topic) throws ExecutionException, InterruptedException {
         Set<String> existing = getTopics();
-        if (existing.contains(topic)) {
+        if (!existing.contains(topic)) {
             return;
         }
         DeleteTopicsResult deleteTopicsResult = adminClient.deleteTopics(Collections.singleton(topic));
@@ -79,8 +79,22 @@ public class MessageAdmin {
         future.get();
     }
 
+    /**
+     * Clear a topic by deleting and recreating it.
+     * @param topic the topic to be cleared
+     */
     public void purgeTopic(String topic) throws ExecutionException, InterruptedException {
         deleteIfExist(topic);
         createIfNotExist(topic);
+    }
+
+    /**
+     * Clear all the topics by deleting them
+     */
+    public void deleteAllTopics() throws ExecutionException, InterruptedException {
+        Set<String> topics = getTopics();
+        for (String topic: topics) {
+            deleteIfExist(topic);
+        }
     }
 }

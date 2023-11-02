@@ -1,20 +1,16 @@
 package com.trilobita.examples.worker;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.trilobita.engine.server.masterserver.partitioner.AbstractPartitioner;
+import com.trilobita.engine.server.masterserver.partitioner.HashPartitioner;
 import com.trilobita.engine.server.workerserver.WorkerServer;
+import com.trilobita.examples.impl.PageRankValue;
 
 import java.util.concurrent.ExecutionException;
 
 public class PageRankWorker1 {
-
-    public static void main(String[] args) throws ExecutionException, InterruptedException, JsonProcessingException {
-//        for (int i=0;i<4;i++){
-//            WorkerServer workerServer = new WorkerServer(i, 2);
-//            workerServer.initialize();
-//            workerServer.start();
-//        }
-
-        WorkerServer workerServer = new WorkerServer(1, 2);
-
+    public static void main(String[] args) throws ExecutionException, InterruptedException {
+        AbstractPartitioner.PartitionStrategy partitionStrategy = new HashPartitioner<>(2).getPartitionStrategy();
+        WorkerServer<PageRankValue> workerServer = new WorkerServer<>(1, 2, partitionStrategy);
+        workerServer.start();
     }
 }
