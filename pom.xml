@@ -9,7 +9,6 @@
   <url>http://maven.apache.org</url>
   <modules>
     <module>commons</module>
-    <module>config</module>
     <module>examples</module>
     <module>runtime</module>
     <module>engine</module>
