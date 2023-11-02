@@ -1,11 +1,11 @@
-package com.trilobita.examples.master;
+package pagerank;
 
 import com.trilobita.core.graph.Graph;
 import com.trilobita.core.graph.vertex.Vertex;
-import com.trilobita.engine.server.masterserver.MasterServer;
 import com.trilobita.engine.server.masterserver.partitioner.HashPartitioner;
-import com.trilobita.examples.impl.PageRankValue;
-import com.trilobita.examples.impl.PageRankVertex;
+import com.trilobita.runtime.launcher.TrilobitaEnvironment;
+import pagerank.vertex.PageRankValue;
+import pagerank.vertex.PageRankVertex;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -74,10 +74,11 @@ public class PageRankMaster {
         return graph;
     }
     public static void main(String[] args) throws ExecutionException, InterruptedException {
-        MasterServer<PageRankValue> masterServer = new MasterServer<>(new HashPartitioner<>(2), 2);
-//        parse the graph
-        Graph<PageRankValue> graph = PageRankMaster.createVertices();
-        masterServer.loadGraph(graph);
-        masterServer.start();
+        TrilobitaEnvironment<PageRankValue> trilobitaEnvironment = new TrilobitaEnvironment<>();
+        trilobitaEnvironment.initConfig();
+        trilobitaEnvironment.loadGraph(PageRankMaster.createVertices());
+        trilobitaEnvironment.setPartitioner(new HashPartitioner<>((int) trilobitaEnvironment.getConfiguration().get("numOfWorker")));
+        trilobitaEnvironment.createMasterServer();
+        trilobitaEnvironment.startMasterServer();
     }
 }

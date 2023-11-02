@@ -91,7 +91,7 @@ public class MasterServer<T> extends AbstractServer<T> {
      * load the graph to the master server
      * @param graph the graph to be loaded
      */
-    public void loadGraph(Graph<T> graph) {
+    public void setGraph(Graph<T> graph) {
         this.graph = graph;
     }
 }
