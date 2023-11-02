@@ -1,12 +1,14 @@
 package com.trilobita.core.messaging;
 
 import com.trilobita.core.common.Util;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.admin.*;
 import org.apache.kafka.common.KafkaFuture;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
+@Slf4j
 public class MessageAdmin {
     private static MessageAdmin instance = null;
     final Properties props = Util.loadConfig("core/src/main/resources/kafka.properties");
@@ -65,5 +67,20 @@ public class MessageAdmin {
      */
     public void createIfNotExist(String topic) throws ExecutionException, InterruptedException {
         createIfNotExist(topic, 1, (short) 3);
+    }
+
+    public void deleteIfExist(String topic) throws ExecutionException, InterruptedException {
+        Set<String> existing = getTopics();
+        if (existing.contains(topic)) {
+            return;
+        }
+        DeleteTopicsResult deleteTopicsResult = adminClient.deleteTopics(Collections.singleton(topic));
+        KafkaFuture<Void> future = deleteTopicsResult.all();
+        future.get();
+    }
+
+    public void purgeTopic(String topic) throws ExecutionException, InterruptedException {
+        deleteIfExist(topic);
+        createIfNotExist(topic);
     }
 }
