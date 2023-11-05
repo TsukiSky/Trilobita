@@ -1,1 +1,0 @@
-System launcher (system entrance point)
