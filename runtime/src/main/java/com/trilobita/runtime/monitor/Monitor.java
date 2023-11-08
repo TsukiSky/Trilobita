@@ -1,21 +1,38 @@
 package com.trilobita.runtime.monitor;
 
+import com.trilobita.runtime.monitor.metrics.Metrics;
+
 /**
  * Monitor is the singleton class to monitor the performance of the system
  */
 public class Monitor {
-    private static Monitor instance;
-
     private Monitor() {}
 
     /**
-     * Get the singleton instance of Monitor
-     * @return the singleton instance of Monitor
+     * Start monitoring
      */
-    public static Monitor getMonitor() {
-        if (instance == null) {
-            instance = new Monitor();
-        }
-        return instance;
+    public static void startMonitor() {
+        Metrics.OverallStatistics.startTime = System.nanoTime();
+    }
+
+    /**
+     * Stop monitoring
+     */
+    public static void stopMonitor() {
+        Metrics.OverallStatistics.startTime = System.nanoTime();
+    }
+
+    /**
+     * Start to record the statistics of a new superstep
+     */
+    public static void startNewSuperstep() {
+        Metrics.SuperstepStatistics.resetTimeAndMessageNum();
+    }
+
+    /**
+     * Record the statistics of one superstep
+     */
+    public static void endSuperstep() {
+        Metrics.OverallStatistics.update();
     }
 }
