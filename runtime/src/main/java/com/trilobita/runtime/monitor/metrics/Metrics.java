@@ -20,35 +20,51 @@ public class Metrics {
         private static AtomicInteger vertexNum;
         private static AtomicInteger edgeNum;
 
-        public void incrementTime(Long time) {
+        /**
+         * Increment the time
+         * @param time the time to be incremented, unit is nanosecond
+         */
+        public static void incrementTime(Long time) {
             SuperstepStatistics.time.addAndGet(time);
         }
 
-        public void incrementMessageNum(Integer increment) {
+        /**
+         * Increment the number of messages
+         * @param increment the number of messages to be incremented
+         */
+        public static void incrementMessageNum(Integer increment) {
             SuperstepStatistics.messageNum.addAndGet(increment);
         }
 
-        public void incrementVertexNum(Integer increment) {
+        /**
+         * Increment the number of vertices
+         * @param increment the number of vertices to be incremented
+         */
+        public static void incrementVertexNum(Integer increment) {
             SuperstepStatistics.vertexNum.addAndGet(increment);
         }
 
-        public void incrementEdgeNum(Integer increment) {
+        /**
+         * Increment the number of edges
+         * @param increment the number of edges to be incremented
+         */
+        public static void incrementEdgeNum(Integer increment) {
             SuperstepStatistics.edgeNum.addAndGet(increment);
         }
 
-        public void resetTimeAndMessageNum() {
+        public static void resetTimeAndMessageNum() {
             SuperstepStatistics.time.set(0);
             SuperstepStatistics.messageNum.set(0);
         }
 
-        public void initialize() {
+        public static void initialize() {
             SuperstepStatistics.time.set(0);
             SuperstepStatistics.messageNum.set(0);
             SuperstepStatistics.vertexNum.set(0);
             SuperstepStatistics.edgeNum.set(0);
         }
 
-        public void initialize(int vertexNum, int edgeNum) {
+        public static void initialize(int vertexNum, int edgeNum) {
             SuperstepStatistics.time.set(0);
             SuperstepStatistics.messageNum.set(0);
             SuperstepStatistics.vertexNum.set(vertexNum);
@@ -61,16 +77,19 @@ public class Metrics {
      */
     @Data
     public static class OverallStatistics {
-        private static DescriptiveStatistics superstepExecutionTimes = new DescriptiveStatistics();
-        private static DescriptiveStatistics messageNums = new DescriptiveStatistics();
-        private static DescriptiveStatistics vertexNums = new DescriptiveStatistics();
-        private static DescriptiveStatistics edgeNums = new DescriptiveStatistics();
+        public static long startTime;
+        public static long endTime;
+        public static DescriptiveStatistics superstepExecutionTimes = new DescriptiveStatistics();
+        public static DescriptiveStatistics messageNums = new DescriptiveStatistics();
 
+        /**
+         * Update the overallStatistics
+         */
         public static void update() {
             superstepExecutionTimes.addValue(SuperstepStatistics.time.doubleValue());
             messageNums.addValue(SuperstepStatistics.messageNum.intValue());
-            vertexNums.addValue(SuperstepStatistics.vertexNum.intValue());
-            edgeNums.addValue(SuperstepStatistics.edgeNum.intValue());
+//            vertexNums.addValue(SuperstepStatistics.vertexNum.intValue());
+//            edgeNums.addValue(SuperstepStatistics.edgeNum.intValue());
         }
     }
 }
