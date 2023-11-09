@@ -13,6 +13,7 @@ public class Graph<T> extends VertexGroup<T> {
     public Graph(List<Vertex<T>> vertices) {
         super();
         this.vertices = vertices;
+        this.size = vertices.size();
     }
 
     public void addVertex(Vertex<T> v){
