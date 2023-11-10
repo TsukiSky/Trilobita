@@ -6,6 +6,7 @@ import com.trilobita.core.messaging.MessageProducer;
 import com.trilobita.engine.server.workerserver.WorkerServer;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
 
@@ -17,6 +18,7 @@ import java.util.concurrent.*;
 public class ExecutionManager<T> {
     public final WorkerServer<T> server;
     private final ExecutorService executorService;
+    private final List<Future<?>> futures = new ArrayList<>();
 
     public ExecutionManager(int parallelism, WorkerServer<T> server) {
         this.server = server;
@@ -27,13 +29,14 @@ public class ExecutionManager<T> {
      * execute the superstep
      */
     public void execute() throws InterruptedException {
+        futures.clear();
         // distribute the mail to the vertices
         while (!server.getInMailQueue().isEmpty()) {
             Mail mail = this.server.getInMailQueue().poll();
             if (mail != null) {
-                this.executorService.submit(() -> {
+                futures.add(this.executorService.submit(() -> {
                     server.distributeMailToVertex(mail);
-                });
+                }));
             }
         }
 
@@ -49,10 +52,10 @@ public class ExecutionManager<T> {
         // start the computation of the vertices
         for (Vertex<T> vertex: vertices) {
             if (vertex.getStatus() == Vertex.VertexStatus.ACTIVE) {
-                executorService.submit(() -> {
+                futures.add(executorService.submit(() -> {
                     vertex.step();
                     computeLatch.countDown();
-                });
+                }));
             }
         }
 
@@ -62,11 +65,11 @@ public class ExecutionManager<T> {
         // send the mail to the other servers
         while (!this.server.getOutMailQueue().isEmpty()) {
             Mail mail = this.server.getOutMailQueue().poll();
-            executorService.submit(() -> {
+            futures.add(executorService.submit(() -> {
                 int receiverId = this.server.findServerByVertexId(mail.getToVertexId());
                 MessageProducer.createAndProduce(null, mail, "SERVER_" + receiverId + "_MESSAGE");
                 mailingLatch.countDown();
-            });
+            }));
         }
         mailingLatch.await();   // block until all mailing tasks are finished
     }
