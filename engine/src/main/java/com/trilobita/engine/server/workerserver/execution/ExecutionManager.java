@@ -25,6 +25,12 @@ public class ExecutionManager<T> {
         this.executorService = Executors.newFixedThreadPool(parallelism);
     }
 
+    public void waitForFutures() throws ExecutionException, InterruptedException {
+        for (Future<?> future : futures) {
+            future.get(); // Wait for each task to complete
+        }
+    }
+
     /**
      * execute the superstep
      */
