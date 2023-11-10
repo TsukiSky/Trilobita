@@ -1,5 +1,6 @@
 package com.trilobita.engine.server.workerserver;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.trilobita.commons.*;
 import com.trilobita.core.graph.VertexGroup;
 import com.trilobita.core.graph.vertex.Vertex;
@@ -39,7 +40,8 @@ public class WorkerServer<T> extends AbstractServer<T> {
         this.partitionMessageConsumer = new MessageConsumer("SERVER_" + this.getServerId() + "_PARTITION", serverId,
                 new MessageConsumer.MessageHandler() {
                     @Override
-                    public void handleMessage(UUID key, Mail mail, int partition, long offset) throws InterruptedException {
+                    public void handleMessage(UUID key, Mail mail, int partition, long offset) throws InterruptedException, ExecutionException {
+                        WorkerServer.this.executionManager.waitForFutures(); // in case of fault, repartition is needed
                         Map<String, Object> res = (Map<String, Object>) mail.getMessage().getContent();
                         setVertexGroup((VertexGroup<T>) res.get("PARTITION"));
                         PartitionStrategyFactory<T> partitionStrategyFactory = new PartitionStrategyFactory<>();
