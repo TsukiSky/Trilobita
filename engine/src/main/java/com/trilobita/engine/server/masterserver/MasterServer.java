@@ -6,7 +6,8 @@ import com.trilobita.core.graph.VertexGroup;
 import com.trilobita.core.messaging.MessageConsumer;
 import com.trilobita.core.messaging.MessageProducer;
 import com.trilobita.engine.server.AbstractServer;
-import com.trilobita.engine.server.masterserver.partitioner.AbstractPartitioner;
+import com.trilobita.engine.server.masterserver.partitioner.Partioner;
+import com.trilobita.engine.server.masterserver.partitioner.Partioner;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
@@ -19,13 +20,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Slf4j
 public class MasterServer<T> extends AbstractServer<T> {
     Graph<T> graph;                                     // the graph to be computed
-    AbstractPartitioner<T> graphPartitioner;            // the partitioner of the graph
+    Partioner<T> graphPartitioner;            // the partitioner of the graph
     int nWorker;                                        // the number of workers
     AtomicInteger nFinishedWorker;                      // the number of workers that have finished the superstep
     MessageConsumer completeSignalConsumer;             // the consumer that consume the finish signal from workers
     ConcurrentHashMap<Integer, Boolean> workerStatus;   // the status of the workers
 
-    public MasterServer(AbstractPartitioner<T> graphPartitioner, int nWorker) {
+    public MasterServer(Partioner<T> graphPartitioner, int nWorker) {
         super(0, graphPartitioner.getPartitionStrategy());   // the standard server id of master is 0
         this.nWorker = nWorker;
         this.graphPartitioner = graphPartitioner;
@@ -76,11 +77,12 @@ public class MasterServer<T> extends AbstractServer<T> {
             throw new Error("graph is not set!");
         }
         List<VertexGroup<T>> vertexGroupArrayList;
-        vertexGroupArrayList = this.graphPartitioner.Partition(graph, nWorker);
+        vertexGroupArrayList = this.graphPartitioner.partition(graph, nWorker);
 
         for (int i = 1; i <= vertexGroupArrayList.size(); i++) {
             Map<String, Object> objectMap = new HashMap<>();
             objectMap.put("PARTITION", vertexGroupArrayList.get(i - 1));
+            objectMap.put("PARTITIONSTRATEGY",this.graphPartitioner.getPartitionStrategy());
             Message message = new Message(objectMap);
             Mail mail = new Mail(-1, message, Mail.MailType.PARTITION);
             MessageProducer.createAndProduce(null, mail, "SERVER_" + i + "_PARTITION");

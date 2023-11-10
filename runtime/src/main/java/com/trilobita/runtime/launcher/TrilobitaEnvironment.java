@@ -2,7 +2,8 @@ package com.trilobita.runtime.launcher;
 
 import com.trilobita.core.graph.Graph;
 import com.trilobita.engine.server.masterserver.MasterServer;
-import com.trilobita.engine.server.masterserver.partitioner.AbstractPartitioner;
+import com.trilobita.engine.server.masterserver.partitioner.Partioner;
+import com.trilobita.engine.server.masterserver.partitioner.PartitionStrategy;
 import com.trilobita.engine.server.workerserver.WorkerServer;
 import com.trilobita.runtime.configuration.Configuration;
 import com.trilobita.runtime.configuration.JCommandHandler;
@@ -21,8 +22,8 @@ public class TrilobitaEnvironment<T> {
     private final Configuration configuration = new Configuration();
     private final JCommandHandler jCommandHandler = new JCommandHandler();  // Command-line handler for Trilobita
     private Graph<T> graph;
-    public AbstractPartitioner.PartitionStrategy partitionStrategy;
-    public AbstractPartitioner<T> partitioner;
+    public PartitionStrategy partitionStrategy;
+    public Partioner<T> partitioner;
     public MasterServer<T> masterServer;
     public WorkerServer<?> workerServer;
 
@@ -40,7 +41,11 @@ public class TrilobitaEnvironment<T> {
         this.graph = graph;
     }
 
-    public void setPartitioner(AbstractPartitioner<T> partitioner) {
+    public Graph<T> getGraph(){
+        return this.graph;
+    }
+
+    public void setPartitioner(Partioner<T> partitioner) {
         this.partitioner = partitioner;
         this.partitionStrategy = partitioner.getPartitionStrategy();
     }
