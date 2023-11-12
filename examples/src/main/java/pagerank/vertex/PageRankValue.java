@@ -1,4 +1,4 @@
-package com.trilobita.examples.impl;
+package pagerank.vertex;
 
 import com.trilobita.commons.Computable;
 import lombok.Data;
@@ -34,7 +34,6 @@ public class PageRankValue implements Computable<Double>, Serializable {
         this.value *= num;
         return this;
     }
-
 
     @Override
     public Computable<Double> divide(Computable<Double> computable) {

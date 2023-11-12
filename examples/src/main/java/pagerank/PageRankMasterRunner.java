@@ -1,9 +1,13 @@
-package com.trilobita.examples.master;
+package pagerank;
 
 import com.trilobita.core.graph.Graph;
 import com.trilobita.core.graph.vertex.Vertex;
-import com.trilobita.engine.server.masterserver.MasterServer;
-import com.trilobita.examples.impl.PageRankVertex;
+import com.trilobita.engine.server.masterserver.partitioner.Partioner;
+import com.trilobita.engine.server.masterserver.partitioner.PartitionStrategy;
+import com.trilobita.engine.server.masterserver.partitioner.PartitionStrategyFactory;
+import com.trilobita.runtime.launcher.TrilobitaEnvironment;
+import pagerank.vertex.PageRankValue;
+import pagerank.vertex.PageRankVertex;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -68,14 +72,17 @@ public class PageRankMasterRunner {
         vertex0.addEdge(vertex9);
         vertex9.addEdge(vertex6);
 
-        Graph graph = new Graph(vertices);
+        Graph<PageRankValue> graph = new Graph(vertices);
         return graph;
     }
     public static void main(String[] args) throws ExecutionException, InterruptedException {
-        MasterServer masterServer = MasterServer.getInstance();
-//        parse the graph
-        Graph graph = PageRankMasterRunner.createVertices();
-        masterServer.partitionGraph(graph, 2);
-        masterServer.start();
+        TrilobitaEnvironment<PageRankValue> trilobitaEnvironment = new TrilobitaEnvironment<>();
+        trilobitaEnvironment.initConfig();
+        trilobitaEnvironment.loadGraph(PageRankMasterRunner.createVertices());
+        PartitionStrategyFactory partitionStrategyFactory = new PartitionStrategyFactory<>();
+        PartitionStrategy partitionStrategy = partitionStrategyFactory.getPartitionStrategy("hashPartitionStrategy",(int) trilobitaEnvironment.getConfiguration().get("numOfWorker"),trilobitaEnvironment.getGraph().getSize());
+        trilobitaEnvironment.setPartitioner(new Partioner<>(partitionStrategy));
+        trilobitaEnvironment.createMasterServer();
+        trilobitaEnvironment.startMasterServer();
     }
 }

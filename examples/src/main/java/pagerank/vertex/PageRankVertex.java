@@ -1,30 +1,22 @@
-package com.trilobita.examples.impl;
+package pagerank.vertex;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.trilobita.commons.*;
-import com.trilobita.commons.Computable;
 import com.trilobita.core.graph.vertex.Edge;
 import com.trilobita.core.graph.vertex.Vertex;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.concurrent.LinkedBlockingQueue;
 
 @Slf4j
-@Data
 @EqualsAndHashCode(callSuper = true)
-@NoArgsConstructor
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")
 public class PageRankVertex extends Vertex<Double> implements Serializable {
     private final double weight = 0.85;
 
     public PageRankVertex(int id) {
-        super(id, new ArrayList<>(), VertexStatus.INACTIVE, new PageRankValue((double) 0), false,
-                new LinkedBlockingQueue<>(), null, null);
+        super(id, new PageRankValue(0.0));
     }
 
     @Override
@@ -42,13 +34,13 @@ public class PageRankVertex extends Vertex<Double> implements Serializable {
             // update the state of the vertex according to the incoming score
             this.getValue().add(score.multiply(weight));
         }
+        this.setValueOnServer();
         // finished all the job, generate out mail
-        Message msg = new Message(new PageRankValue(this.getValue().getValue()/this.getEdges().size()), Message.MessageType.NORMAL);
+        Message msg = new Message(new PageRankValue(this.getValue().getValue()/this.getEdges().size()));
         for (Edge edge : this.getEdges()) {
             int vertexId = edge.getToVertexId();
             Mail mail = new Mail(vertexId, msg, Mail.MailType.NORMAL);
             this.sendMail(mail);
         }
-        updateServerTempValue();
     }
 }

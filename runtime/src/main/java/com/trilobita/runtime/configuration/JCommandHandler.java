@@ -10,6 +10,11 @@ public class JCommandHandler {
     public boolean help = false;
     @Parameter(names = {"--parallelism"}, description = "The parallelism of the job")
     public int parallelism = 4; // default parallelism
+    @Parameter(names = {"--numOfWorker"}, description = "The number of workers")
+    public int numOfWorker = 2; // default number of workers
+    @Parameter(names = {"--singletonMode"}, description = "Whether to run in singleton mode")
+    public boolean singletonMode = false; // default singleton mode
+
 
     /**
      * Load the properties from the JCommander
@@ -17,5 +22,7 @@ public class JCommandHandler {
      */
     public void initConfig(Configuration configuration) {
         configuration.put("parallelism", parallelism);
+        configuration.put("numOfWorker", numOfWorker);
+        configuration.put("singletonMode", singletonMode);
     }
 }

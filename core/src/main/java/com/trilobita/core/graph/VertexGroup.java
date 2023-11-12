@@ -15,6 +15,7 @@ import java.util.List;
 @Data
 public class VertexGroup<T> implements Serializable {
     protected List<Vertex<T>> vertices;
+    protected int size;
 
     public VertexGroup() {
         this.vertices = new LinkedList<>();

@@ -31,10 +31,9 @@ public class MessageConsumer {
 
     public interface MessageHandler {
         /**
-         * <p>Handle message received from a topic.
-         * <b>Note: </b>This method should not handle complicated tasks as it will block the consumer(listener) thread!
+         * Handle message received from a topic.
+         * Note: This method should not handle complicated tasks as it will block the consumer(listener) thread!
          * It is recommended to add messages to a {@link BlockingQueue}.
-         * </p>
          *
          * @param key       Message {@link UUID}
          * @param value     {@link Mail}, which is the message payload
@@ -43,6 +42,10 @@ public class MessageConsumer {
          * @author Guo Ziniu: ziniu@catroll.io
          */
         void handleMessage(UUID key, Mail value, int partition, long offset) throws JsonProcessingException, InterruptedException, ExecutionException;
+    }
+
+    public MessageConsumer(int topic, Integer serverId, MessageHandler messageHandler) {
+        this(String.valueOf(topic), serverId, messageHandler);
     }
 
     public MessageConsumer(String topic, Integer serverId, MessageHandler messageHandler) {
@@ -55,9 +58,7 @@ public class MessageConsumer {
     }
 
     /**
-     * <p>Start listening to the topic in a new thread.
-     * </p>
-     *
+     * Start listening to the topic in a new thread
      * @author Guo Ziniu: ziniu@catroll.io
      */
     public void start() throws ExecutionException, InterruptedException {
@@ -98,9 +99,7 @@ public class MessageConsumer {
     }
 
     /**
-     * <p>Stop the consumer thread.
-     * </p>
-     *
+     * Stop the consumer thread.
      * @author Guo Ziniu: ziniu@catroll.io
      * @see MessageConsumer#stop(boolean)
      */
@@ -109,9 +108,7 @@ public class MessageConsumer {
     }
 
     /**
-     * <p>Stop the consumer thread.
-     * </p>
-     *
+     * Stop the consumer thread.
      * @param block If set to true, it will wait for the current task to finish.
      * @author Guo Ziniu: ziniu@catroll.io
      */
@@ -124,9 +121,7 @@ public class MessageConsumer {
     }
 
     /**
-     * <p>Change the topic and restart consumer.
-     * </p>
-     *
+     * Change the topic and restart consumer.
      * @param topic The topic to be changed to.
      * @author Guo Ziniu: ziniu@catroll.io
      */
