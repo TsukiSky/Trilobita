@@ -36,36 +36,17 @@ public abstract class Vertex<T> implements Serializable {
         this.incomingQueue = new LinkedBlockingQueue<>();
     }
 
-    /**
-     * Push the mail to the server's queue to be sent to the destination vertex
-     * @param mail contains from, to index and message
-     */
-    public void sendMail(Mail mail){
+    public void addMailToServerQueue(Mail mail){
         this.serverQueue.add(mail);
     }
 
     /**
-     * send message to neighbors with the sendMail function
-     * @param edge to embed the id of the destination node to a mail
-     * @param message the message to be sent
+     * Push the mail to the server's queue to be sent to the destination vertex
      */
-    public void sendToNeighbor(Edge edge, Message message){
-        Mail mail = new Mail(this.id, edge.getToVertexId(), message, Mail.MailType.NORMAL);
-        sendMail(mail);
-    }
+    public abstract void sendMail();
 
-    /**
-     * send message to neighbors with the sendMail function
-     * @param to the id of the destination vertex
-     * @param message the message to be sent
-     */
-    public void sendTo(int to, Message message){
-        Mail mail = new Mail(this.id, to, message, Mail.MailType.NORMAL);
-        sendMail(mail);
-    }
 
-    public void startSuperstep(){
-    }
+    public abstract void startSuperstep();
 
     /**
      * Add the mail to the incoming queue of the vertex
