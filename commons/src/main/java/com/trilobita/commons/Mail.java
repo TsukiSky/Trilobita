@@ -13,6 +13,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @EqualsAndHashCode
 public class Mail implements Serializable {
+    private int fromServerId;
     private int fromVertexId;
     private int toVertexId;
     private Message message;
@@ -30,6 +31,15 @@ public class Mail implements Serializable {
         this.toVertexId = toVertexId;
         this.message = message;
         this.mailType = mailType;
+        this.fromServerId = -1;
+    }
+
+    public Mail(int fromServerId, int fromVertexId, int toVertexId, Message message, MailType mailType) {
+        this.fromServerId = fromServerId;
+        this.fromVertexId = fromVertexId;
+        this.toVertexId = toVertexId;
+        this.message = message;
+        this.mailType = mailType;
     }
 
     /**
@@ -40,5 +50,6 @@ public class Mail implements Serializable {
         PARTITION,
         FINISH_SIGNAL,
         START_SIGNAL,
+        BROADCAST //TODO: implement mechanism for broadcasting messages
     }
 }

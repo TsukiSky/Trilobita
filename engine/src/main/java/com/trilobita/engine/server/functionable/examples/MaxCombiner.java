@@ -8,7 +8,7 @@ import com.trilobita.engine.server.functionable.Combiner;
 /*
  * Sum all messages sent to the same vertex.
  */
-public class SumCombiner extends Combiner {
+public class MaxCombiner extends Combiner {
     @Override
     public Mail combineMails(int toVertexId, CopyOnWriteArrayList<Mail> mails) {
         Mail newMail = new Mail(toVertexId, null, Mail.MailType.NORMAL);
@@ -18,10 +18,12 @@ public class SumCombiner extends Combiner {
             if (newContent == null) {
                 newContent = content;
             } else {
-                newContent = newContent.add(content);
+                if (newContent.compareTo(content) < 0){
+                    newContent = content;
+                } 
             }
         }
-        newMail.setMessage(new Message(newContent));
+        newMail.setMessage(new Message(newContent, Message.MessageType.NORMAL));
         return newMail;
     }
 }

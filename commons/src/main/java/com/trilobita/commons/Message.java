@@ -13,4 +13,12 @@ import java.io.Serializable;
 @EqualsAndHashCode
 public class Message implements Serializable {
     private Object content;
+    private MessageType messageType;
+
+    public enum MessageType {
+        BARRIER,
+        NORMAL,
+        NULL,
+        BROADCAST
+    }
 }

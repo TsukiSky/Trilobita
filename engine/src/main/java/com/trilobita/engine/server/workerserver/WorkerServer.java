@@ -2,6 +2,7 @@ package com.trilobita.engine.server.workerserver;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.trilobita.commons.*;
+import com.trilobita.commons.Mail.MailType;
 import com.trilobita.core.graph.VertexGroup;
 import com.trilobita.core.graph.vertex.Vertex;
 import com.trilobita.core.messaging.MessageConsumer;

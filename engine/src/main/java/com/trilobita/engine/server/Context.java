@@ -1,5 +1,6 @@
 package com.trilobita.engine.server;
 
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -14,10 +15,12 @@ import lombok.Data;
  */
 @Data
 public class Context {
-    public Integer serverId;
-    public AbstractServer.ServerStatus serverStatus;
+    private Integer serverId;
+    private AbstractServer.ServerStatus serverStatus;
+    private Map<Integer, Integer> vertexToServer;
     private VertexGroup vertexGroup;
     private ConcurrentHashMap<Integer, CopyOnWriteArrayList<Mail>> outMailTable;
     private final LinkedBlockingQueue<Mail> outMailQueue;
     private final LinkedBlockingQueue<Mail> inMailQueue;
+    protected Integer superstep;
 }
