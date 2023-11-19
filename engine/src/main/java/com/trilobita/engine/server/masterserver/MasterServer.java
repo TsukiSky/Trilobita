@@ -1,5 +1,6 @@
 package com.trilobita.engine.server.masterserver;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.trilobita.commons.*;
 import com.trilobita.core.graph.Graph;
 import com.trilobita.core.graph.VertexGroup;
@@ -25,30 +26,44 @@ public class MasterServer<T> extends AbstractServer<T> {
     int nWorker;                                        // the number of workers
     AtomicInteger nFinishedWorker;                      // the number of workers that have finished the superstep
     MessageConsumer completeSignalConsumer;             // the consumer that consume the finish signal from workers
+    MessageConsumer heatBeatConsumer;
     ConcurrentHashMap<Integer, Boolean> workerStatus;   // the status of the workers
     HeartbeatChecker workerHeartbeatChecker;
     HeartbeatChecker masterHeartbeatChecker;
     HeartbeatSender heartbeatSender;
     ValueSnapshot<T> valueSnapshot;
-    List<Integer> WorkingWorkerIdList;                  // the alive working server's id
+    List<Integer> workingWorkerIdList;                  // the alive working server's id
 
-    public MasterServer(Partioner<T> graphPartitioner, int nWorker,int id) {
-        super(0, graphPartitioner.getPartitionStrategy());   // the standard server id of master is 0
+    public MasterServer(Partioner<T> graphPartitioner, int nWorker, int id) {
+        super(id, graphPartitioner.getPartitionStrategy());   // the standard server id of master is 0
         this.nWorker = nWorker;
         this.graphPartitioner = graphPartitioner;
         this.nFinishedWorker = new AtomicInteger(0);
         this.valueSnapshot = new ValueSnapshot<>();
         this.heartbeatSender = new HeartbeatSender(getServerId(), false);
-        this.workerHeartbeatChecker = new HeartbeatChecker(new ArrayList<>(), true, new HeartbeatChecker.FaultHandler() {
+        this.workingWorkerIdList = new ArrayList<>();
+        for (int i=0;i<nWorker;i++){
+            this.workingWorkerIdList.add(i+1);
+        }
+        this.workerHeartbeatChecker = new HeartbeatChecker(this.workingWorkerIdList, true, new HeartbeatChecker.FaultHandler() {
             @Override
-            public void handleFault() {
-                // call the repartition function of the worker
+            public void handleFault(int id) {
+                List<Integer> currentWorkingServerIdList = new ArrayList<>();
+                for (int i: workingWorkerIdList){
+                    if (i != id) {
+                        currentWorkingServerIdList.add(i);
+                    }
+                }
+                workingWorkerIdList = currentWorkingServerIdList;
+                nFinishedWorker.set(0);
+                MasterServer.this.partitionGraph();
+                log.info("finished repartitioning...");
             }
         });
 
         this.masterHeartbeatChecker = new HeartbeatChecker(new ArrayList<>(), false, new HeartbeatChecker.FaultHandler() {
             @Override
-            public void handleFault() {
+            public void handleFault(int id) {
                 // if all id with greater id has died, become the master
             }
         });
@@ -61,15 +76,22 @@ public class MasterServer<T> extends AbstractServer<T> {
                 int val = nFinishedWorker.addAndGet(1);
                 log.info("number of finished workers: " + val);
                 HashMap<Integer, Computable<T>> vertexValue = (HashMap<Integer, Computable<T>>) value.getMessage().getContent();
-                log.info(vertexValue.toString());
                 valueSnapshot.record(vertexValue);
-                if (val == nWorker) {
+                if (val == workingWorkerIdList.size()) {
                     // start the next superstep
                     valueSnapshot.finishSuperstep(graph);
+                    log.info("graph is : {}", graph.getVertices());
                     // todo: update the new graph to other replicas
                     Thread.sleep(300);
                     startNewSuperstep();
                 }
+            }
+        });
+        heatBeatConsumer = new MessageConsumer("HEARTBEAT_WORKER", getServerId(), new MessageConsumer.MessageHandler() {
+            @Override
+            public void handleMessage(UUID key, Mail value, int partition, long offset) throws JsonProcessingException, InterruptedException, ExecutionException {
+                int id = (int) value.getMessage().getContent();
+                workerHeartbeatChecker.setHeatBeat(id);
             }
         });
     }
@@ -80,6 +102,7 @@ public class MasterServer<T> extends AbstractServer<T> {
         this.workerHeartbeatChecker.start();
         this.partitionGraph();
         this.heartbeatSender.start();
+        this.heatBeatConsumer.start();
 
     }
 
@@ -111,16 +134,17 @@ public class MasterServer<T> extends AbstractServer<T> {
         if (this.graph == null) {
             throw new Error("graph is not set!");
         }
-        List<VertexGroup<T>> vertexGroupArrayList;
-        vertexGroupArrayList = this.graphPartitioner.partition(graph, nWorker);
+        Map<Integer, VertexGroup<T>> map;
+        map = this.graphPartitioner.partition(graph, workingWorkerIdList);
 
-        for (int i = 1; i <= vertexGroupArrayList.size(); i++) {
+        Set<Map.Entry<Integer, VertexGroup<T>>> set = map.entrySet();
+        for (Map.Entry<Integer, VertexGroup<T>> entry: set) {
             Map<String, Object> objectMap = new HashMap<>();
-            objectMap.put("PARTITION", vertexGroupArrayList.get(i - 1));
+            objectMap.put("PARTITION", entry.getValue());
             objectMap.put("PARTITIONSTRATEGY",this.graphPartitioner.getPartitionStrategy());
             Message message = new Message(objectMap);
             Mail mail = new Mail(-1, message, Mail.MailType.PARTITION);
-            MessageProducer.createAndProduce(null, mail, "SERVER_" + i + "_PARTITION");
+            MessageProducer.createAndProduce(null, mail, "SERVER_" + entry.getKey() + "_PARTITION");
         }
     }
 
@@ -129,21 +153,22 @@ public class MasterServer<T> extends AbstractServer<T> {
      * @param graph the graph to be loaded
      */
     public void setGraph(Graph<T> graph) {
+        System.out.println(graph.getVertices());
         this.graph = graph;
-        valueSnapshot.setGraph(graph);
     }
-
-    public void repartition (){
-        List<VertexGroup<T>> vertexGroupArrayList;
-        vertexGroupArrayList = this.graphPartitioner.partition(graph, WorkingWorkerIdList.size());
-
-        for (int i = 1; i <= vertexGroupArrayList.size(); i++) {
-            Map<String, Object> objectMap = new HashMap<>();
-            objectMap.put("PARTITION", vertexGroupArrayList.get(i - 1));
-            objectMap.put("PARTITIONSTRATEGY",this.graphPartitioner.getPartitionStrategy());
-            Message message = new Message(objectMap);
-            Mail mail = new Mail(-1, message, Mail.MailType.PARTITION);
-            MessageProducer.createAndProduce(null, mail, "SERVER_" + WorkingWorkerIdList.get(i) + "_PARTITION");
-        }
-    }
+//
+//    public void repartition (){
+//        Map<Integer, VertexGroup<T>> map;
+//        map = this.graphPartitioner.partition(graph, workingWorkerIdList);
+//
+//        Set<Map.Entry<Integer, VertexGroup<T>>> set = map.entrySet();
+//        for (Map.Entry<Integer, VertexGroup<T>> entry: set) {
+//            Map<String, Object> objectMap = new HashMap<>();
+//            objectMap.put("PARTITION", entry.getValue());
+//            objectMap.put("PARTITIONSTRATEGY",this.graphPartitioner.getPartitionStrategy());
+//            Message message = new Message(objectMap);
+//            Mail mail = new Mail(-1, message, Mail.MailType.PARTITION);
+//            MessageProducer.createAndProduce(null, mail, "SERVER_" + entry.getKey() + "_PARTITION");
+//        }
+//    }
 }

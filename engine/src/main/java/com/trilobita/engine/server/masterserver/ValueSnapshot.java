@@ -15,7 +15,6 @@ import java.util.concurrent.ConcurrentHashMap;
 @Data
 public class ValueSnapshot<T> {
     private final ConcurrentHashMap<Integer, Computable<T>> snapshot;
-    private Graph<T> graph;
     public ValueSnapshot(){
         this.snapshot = new ConcurrentHashMap<>();
     }

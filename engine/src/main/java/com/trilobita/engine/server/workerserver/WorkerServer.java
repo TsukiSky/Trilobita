@@ -42,11 +42,12 @@ public class WorkerServer<T> extends AbstractServer<T> {
                 new MessageConsumer.MessageHandler() {
                     @Override
                     public void handleMessage(UUID key, Mail mail, int partition, long offset) throws InterruptedException, ExecutionException {
+                        log.info("receiving message from server.........");
                         WorkerServer.this.executionManager.waitForFutures(); // in case of fault, repartition is needed
                         Map<String, Object> res = (Map<String, Object>) mail.getMessage().getContent();
                         setVertexGroup((VertexGroup<T>) res.get("PARTITION"));
-                        PartitionStrategyFactory<T> partitionStrategyFactory = new PartitionStrategyFactory<>();
                         PartitionStrategy partitionStrategy = (PartitionStrategy) res.get("PARTITIONSTRATEGY");
+                        log.info(partitionStrategy.getWorkerIdList().toString());
                         setPartitionStrategy(partitionStrategy);
                         // assign the server's hashmap to each vertex
                         List<Vertex<T>> vertices = vertexGroup.getVertices();
@@ -63,7 +64,6 @@ public class WorkerServer<T> extends AbstractServer<T> {
         this.startMessageConsumer = new MessageConsumer(Mail.MailType.START_SIGNAL.ordinal(), serverId, new MessageConsumer.MessageHandler() {
             @Override
             public void handleMessage(UUID key, Mail mail, int partition, long offset) throws InterruptedException {
-                log.info("start new super step...");
                 if (getVertexGroup() != null) {
                     startNewSuperstep();
                 }

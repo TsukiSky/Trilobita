@@ -27,29 +27,22 @@ public class HeartbeatSender {
 
     public void start() {
         if (running.compareAndSet(false, true)) {
-            heartbeatExecutor.scheduleWithFixedDelay(this::sendHeartbeat, 5, 1, TimeUnit.SECONDS);
-            log.info("Heartbeat service will start in 5 seconds.");
+            heartbeatExecutor.scheduleAtFixedRate(this::sendHeartbeat, 1, 1, TimeUnit.SECONDS);
+            log.info("Heartbeat sending service will start in 1 second.");
         } else {
-            log.info("Heartbeat service is already running.");
+            log.info("Heartbeat sending service is already running.");
         }
     }
 
 
-//    private void sendHeartbeats() {
-//        for (String workerServerId : workerServerIds) {
-//            sendHeartbeat(workerServerId);
-//        }
-//    }
-
     private void sendHeartbeat() {
-        log.info("{} Sending heartbeat to", serverId);
         // TODO: Implement the actual sending logic here
         Message message = new Message();
         message.setContent(serverId);
         Mail mail = new Mail();
         mail.setMessage(message);
         String topic = isWorker ? "HEARTBEAT_WORKER" : "HEARTBEAT_MASTER";
-        MessageProducer.produce(null, mail, topic);
+        MessageProducer.createAndProduce(null, mail, topic);
     }
 
     public void stop() {
@@ -59,13 +52,13 @@ public class HeartbeatSender {
                 if (!heartbeatExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
                     heartbeatExecutor.shutdownNow();
                 }
-                log.info("Heartbeat service stopped.");
+                log.info("Heartbeat sending service stopped.");
             } catch (InterruptedException e) {
                 heartbeatExecutor.shutdownNow();
                 Thread.currentThread().interrupt();
             }
         } else {
-            log.info("Heartbeat service is not running.");
+            log.info("Heartbeat sending service is not running.");
         }
     }
 
