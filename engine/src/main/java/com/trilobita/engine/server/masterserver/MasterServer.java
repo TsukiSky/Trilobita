@@ -32,7 +32,7 @@ public class MasterServer<T> extends AbstractServer<T> {
     ValueSnapshot<T> valueSnapshot;
     List<Integer> WorkingWorkerIdList;                  // the alive working server's id
 
-    public MasterServer(Partioner<T> graphPartitioner, int nWorker) {
+    public MasterServer(Partioner<T> graphPartitioner, int nWorker,int id) {
         super(0, graphPartitioner.getPartitionStrategy());   // the standard server id of master is 0
         this.nWorker = nWorker;
         this.graphPartitioner = graphPartitioner;
