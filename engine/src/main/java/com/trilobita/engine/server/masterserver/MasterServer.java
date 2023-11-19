@@ -8,6 +8,7 @@ import com.trilobita.core.messaging.MessageProducer;
 import com.trilobita.engine.server.AbstractServer;
 import com.trilobita.engine.server.masterserver.partitioner.Partioner;
 import com.trilobita.engine.server.masterserver.partitioner.Partioner;
+import com.trilobita.engine.server.workerserver.WorkerServer;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
@@ -25,8 +26,8 @@ public class MasterServer<T> extends AbstractServer<T> {
     AtomicInteger nFinishedWorker;                      // the number of workers that have finished the superstep
     MessageConsumer completeSignalConsumer;             // the consumer that consume the finish signal from workers
     ConcurrentHashMap<Integer, Boolean> workerStatus;   // the status of the workers
-
     ValueSnapshot<T> valueSnapshot;
+    List<Integer> WorkingWorkerIdList;                  // the alive working server's id
 
     public MasterServer(Partioner<T> graphPartitioner, int nWorker) {
         super(0, graphPartitioner.getPartitionStrategy());   // the standard server id of master is 0
@@ -101,5 +102,19 @@ public class MasterServer<T> extends AbstractServer<T> {
      */
     public void setGraph(Graph<T> graph) {
         this.graph = graph;
+    }
+
+    public void repartition (){
+        List<VertexGroup<T>> vertexGroupArrayList;
+        vertexGroupArrayList = this.graphPartitioner.partition(graph, WorkingWorkerIdList.size());
+
+        for (int i = 1; i <= vertexGroupArrayList.size(); i++) {
+            Map<String, Object> objectMap = new HashMap<>();
+            objectMap.put("PARTITION", vertexGroupArrayList.get(i - 1));
+            objectMap.put("PARTITIONSTRATEGY",this.graphPartitioner.getPartitionStrategy());
+            Message message = new Message(objectMap);
+            Mail mail = new Mail(-1, message, Mail.MailType.PARTITION);
+            MessageProducer.createAndProduce(null, mail, "SERVER_" + WorkingWorkerIdList.get(i) + "_PARTITION");
+        }
     }
 }
