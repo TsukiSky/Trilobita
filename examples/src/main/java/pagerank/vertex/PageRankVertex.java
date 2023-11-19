@@ -14,6 +14,7 @@ import java.io.Serializable;
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")
 public class PageRankVertex extends Vertex<Double> implements Serializable {
     private final double weight = 0.85;
+    private final double epsilon = 0.001;
 
     public PageRankVertex(int id) {
         super(id, new PageRankValue(0.0));
@@ -35,12 +36,17 @@ public class PageRankVertex extends Vertex<Double> implements Serializable {
             this.getValue().add(score.multiply(weight));
         }
         this.setValueOnServer();
+        this.sendMail();
+    }
+
+    @Override
+    public void sendMail(){
         // finished all the job, generate out mail
         Message msg = new Message(new PageRankValue(this.getValue().getValue()/this.getEdges().size()));
         for (Edge edge : this.getEdges()) {
             int vertexId = edge.getToVertexId();
             Mail mail = new Mail(vertexId, msg, Mail.MailType.NORMAL);
-            this.sendMail(mail);
+            this.addMailToServerQueue(mail);
         }
     }
 }

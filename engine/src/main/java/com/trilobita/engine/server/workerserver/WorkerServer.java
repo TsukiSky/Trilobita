@@ -7,6 +7,7 @@ import com.trilobita.core.graph.vertex.Vertex;
 import com.trilobita.core.messaging.MessageConsumer;
 import com.trilobita.core.messaging.MessageProducer;
 import com.trilobita.engine.server.AbstractServer;
+import com.trilobita.engine.server.heartbeat.HeartbeatSender;
 import com.trilobita.engine.server.masterserver.partitioner.PartitionStrategy;
 import com.trilobita.engine.server.masterserver.partitioner.PartitionStrategyFactory;
 import com.trilobita.engine.server.workerserver.execution.ExecutionManager;
@@ -30,13 +31,13 @@ public class WorkerServer<T> extends AbstractServer<T> {
     private final ConcurrentHashMap<Integer, Computable<T>> vertexValues;
     private final MessageConsumer partitionMessageConsumer;
     private final MessageConsumer startMessageConsumer;
+    private final HeartbeatSender heartbeatSender;
 
     public WorkerServer(int serverId, int parallelism, PartitionStrategy partitionStrategy) throws ExecutionException, InterruptedException {
         super(serverId, partitionStrategy);
         this.executionManager = new ExecutionManager<>(parallelism, this);
         this.outMailTable = new ConcurrentHashMap<>();
         this.vertexValues = new ConcurrentHashMap<>();
-
         this.partitionMessageConsumer = new MessageConsumer("SERVER_" + this.getServerId() + "_PARTITION", serverId,
                 new MessageConsumer.MessageHandler() {
                     @Override
@@ -68,19 +69,19 @@ public class WorkerServer<T> extends AbstractServer<T> {
                 }
             }
         });
-
-        startMessageConsumer.start();
-        partitionMessageConsumer.start();
-        this.getMessageConsumer().start();
+        this.heartbeatSender = new HeartbeatSender(this.getServerId(), true);
     }
 
     /**
      * Start running the server
      */
     @Override
-    public void start() throws InterruptedException {
+    public void start() throws InterruptedException, ExecutionException {
         setServerStatus(ServerStatus.RUNNING);
-//        startNewSuperstep();
+        startMessageConsumer.start();
+        partitionMessageConsumer.start();
+        this.getMessageConsumer().start();
+        heartbeatSender.start();
     }
 
     /**

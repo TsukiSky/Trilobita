@@ -55,7 +55,7 @@ public class TrilobitaEnvironment<T> {
     }
 
     public void createMasterServer() {
-        this.masterServer = new MasterServer<>(this.partitioner, (int) this.configuration.get("numOfWorker"));
+        this.masterServer = new MasterServer<>(this.partitioner, (int) this.configuration.get("numOfWorker"), 0);
         this.masterServer.setGraph(this.graph);
     }
 
@@ -67,7 +67,7 @@ public class TrilobitaEnvironment<T> {
         this.masterServer.start();
     }
 
-    public void startWorkerServer() throws InterruptedException {
+    public void startWorkerServer() throws InterruptedException, ExecutionException {
         this.workerServer.start();
     }
 }
