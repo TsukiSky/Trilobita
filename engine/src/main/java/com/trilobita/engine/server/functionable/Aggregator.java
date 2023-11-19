@@ -37,11 +37,6 @@ public abstract class Aggregator implements Functionable {
         Integer serverId = context.getServerId();
         List<Integer> vertexIds = getAllVertexIdsOnOtherWorkers(context.getVertexToServer(), serverId);
 
-        this.broadcast(
-                serverId,
-                vertexIds,
-                context.getOutMailTable(),
-                aggregatedValue);
     }
 
     // how the aggregated value is initialized from the first input value
@@ -52,25 +47,6 @@ public abstract class Aggregator implements Functionable {
     // How multiple partially aggregated values are reduced to one.
     // Aggregation operators should be commutative and associative.
     public abstract void aggregate(VertexGroup vertexGroup);
-
-    private void broadcast(
-            Integer serverId,
-            List<Integer> vertexIds,
-            ConcurrentHashMap<Integer, CopyOnWriteArrayList<Mail>> outMailTable,
-            Computable aggregated_value) {
-
-        // TODO: send to all vertices by mails
-        // create mails for all and send
-
-        Message message = new Message(aggregated_value, Message.MessageType.BROADCAST);
-        Mail newMail = new Mail(serverId, -1, -1, message, MailType.BROADCAST);
-        List<Mail> mailList = new ArrayList<>();
-        mailList.add(newMail);
-
-        for (int i : vertexIds) {
-            outMailTable.put(i, new CopyOnWriteArrayList<>(mailList));
-        }
-    }
 
     public abstract void stop();
 

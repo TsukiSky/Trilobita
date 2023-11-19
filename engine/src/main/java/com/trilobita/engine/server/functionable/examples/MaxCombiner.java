@@ -23,7 +23,7 @@ public class MaxCombiner extends Combiner {
                 } 
             }
         }
-        newMail.setMessage(new Message(newContent, Message.MessageType.NORMAL));
+        newMail.setMessage(new Message(newContent));
         return newMail;
     }
 }
