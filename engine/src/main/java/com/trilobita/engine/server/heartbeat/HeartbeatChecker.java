@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 public class HeartbeatChecker extends Thread{
     private volatile boolean isRunning;
     private ConcurrentHashMap<Integer, Boolean> heartbeatMap;
-    private volatile Boolean isProcessing;
+    private volatile boolean isProcessing;
     private FaultHandler faultHandler;
     private boolean checkWorker;
     private final ScheduledExecutorService heartbeatExecutor;
@@ -49,7 +49,7 @@ public class HeartbeatChecker extends Thread{
         Set<Map.Entry<Integer, Boolean>> set = heartbeatMap.entrySet();
         int id = -1;
         for (Map.Entry<Integer, Boolean> entry: set){
-            if (!entry.getValue()){
+            if (Boolean.FALSE.equals(entry.getValue())){
                 id = entry.getKey();
             }
         }
@@ -67,7 +67,7 @@ public class HeartbeatChecker extends Thread{
     }
 
     @Override
-    public void start(){
+    public void run() {
         if (!isProcessing) {
             heartbeatExecutor.scheduleAtFixedRate(this::check, 5, 2, TimeUnit.SECONDS);
             log.info("Heartbeat checking service will start in 5 seconds.");
