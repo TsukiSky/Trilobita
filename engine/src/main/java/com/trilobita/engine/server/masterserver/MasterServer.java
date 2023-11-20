@@ -6,12 +6,16 @@ import com.trilobita.core.graph.Graph;
 import com.trilobita.core.graph.VertexGroup;
 import com.trilobita.core.messaging.MessageConsumer;
 import com.trilobita.core.messaging.MessageProducer;
+import com.trilobita.engine.monitor.Monitor;
 import com.trilobita.engine.server.AbstractServer;
 import com.trilobita.engine.server.heartbeat.HeartbeatChecker;
 import com.trilobita.engine.server.heartbeat.HeartbeatSender;
 import com.trilobita.engine.server.masterserver.partitioner.Partioner;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -92,12 +96,12 @@ public class MasterServer<T> extends AbstractServer<T> {
 
     @Override
     public void start() throws ExecutionException, InterruptedException {
+        Monitor.start();
         this.completeSignalConsumer.start();
         this.workerHeartbeatChecker.start();
         this.partitionGraph();
         this.heartbeatSender.start();
         this.heatBeatConsumer.start();
-
     }
 
     @Override
@@ -116,9 +120,11 @@ public class MasterServer<T> extends AbstractServer<T> {
      * start a new round of superstep
      */
     public void startNewSuperstep() {
+        Monitor.stopAndStartNewSuperstep();
         this.superstep += 1;
         this.nFinishedWorker.set(0);
         MessageProducer.produceStartSignal();
+        Monitor.store();
     }
 
     /**

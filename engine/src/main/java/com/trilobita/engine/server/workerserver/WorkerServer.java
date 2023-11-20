@@ -1,15 +1,14 @@
 package com.trilobita.engine.server.workerserver;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.trilobita.commons.*;
 import com.trilobita.core.graph.VertexGroup;
 import com.trilobita.core.graph.vertex.Vertex;
 import com.trilobita.core.messaging.MessageConsumer;
 import com.trilobita.core.messaging.MessageProducer;
+import com.trilobita.engine.monitor.Monitor;
 import com.trilobita.engine.server.AbstractServer;
 import com.trilobita.engine.server.heartbeat.HeartbeatSender;
 import com.trilobita.engine.server.masterserver.partitioner.PartitionStrategy;
-import com.trilobita.engine.server.masterserver.partitioner.PartitionStrategyFactory;
 import com.trilobita.engine.server.workerserver.execution.ExecutionManager;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;

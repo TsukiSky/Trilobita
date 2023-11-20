@@ -5,7 +5,7 @@ import com.trilobita.core.graph.vertex.Vertex;
 import com.trilobita.engine.server.masterserver.partitioner.Partioner;
 import com.trilobita.engine.server.masterserver.partitioner.PartitionStrategy;
 import com.trilobita.engine.server.masterserver.partitioner.PartitionStrategyFactory;
-import com.trilobita.runtime.launcher.TrilobitaEnvironment;
+import com.trilobita.runtime.environment.TrilobitaEnvironment;
 import pagerank.vertex.PageRankValue;
 import pagerank.vertex.PageRankVertex;
 

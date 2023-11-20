@@ -1,4 +1,4 @@
-package com.trilobita.runtime.launcher.inputparser;
+package com.trilobita.runtime.parser.inputparser;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.trilobita.core.graph.Graph;
@@ -9,7 +9,7 @@ import java.io.IOException;
 /**
  * JSON file input parser
  */
-public class JsonParser implements Parse {
+public class JsonParser implements InputParse {
     @Override
     public Graph parse(File file) {
         ObjectMapper objectMapper = new ObjectMapper();

@@ -1,6 +1,6 @@
 package pagerank;
 
-import com.trilobita.runtime.launcher.TrilobitaEnvironment;
+import com.trilobita.runtime.environment.TrilobitaEnvironment;
 import pagerank.vertex.PageRankValue;
 
 import java.util.concurrent.ExecutionException;
