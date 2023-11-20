@@ -50,6 +50,7 @@ public class Mail implements Serializable {
         PARTITION,
         FINISH_SIGNAL,
         START_SIGNAL,
-        BROADCAST //TODO: implement mechanism for broadcasting messages
+        FUNCTIONAL,
+        BROADCAST 
     }
 }

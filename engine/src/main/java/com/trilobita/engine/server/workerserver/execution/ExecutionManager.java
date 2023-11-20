@@ -3,15 +3,18 @@ package com.trilobita.engine.server.workerserver.execution;
 import com.trilobita.commons.*;
 import com.trilobita.core.graph.vertex.Vertex;
 import com.trilobita.core.messaging.MessageProducer;
+import com.trilobita.engine.server.functionable.Functionable;
 import com.trilobita.engine.server.workerserver.WorkerServer;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.*;
 
 /**
  * Execution Manager is responsible for the execution of a superstep
+ * 
  * @param <T> the type of the vertex value
  */
 @Slf4j
@@ -48,7 +51,7 @@ public class ExecutionManager<T> {
 
         List<Vertex<T>> vertices = this.server.getVertexGroup().getVertices();
         int activeVertexCount = 0;
-        for (Vertex<T> vertex: vertices) {
+        for (Vertex<T> vertex : vertices) {
             if (vertex.getStatus() == Vertex.VertexStatus.ACTIVE) {
                 activeVertexCount++;
             }
@@ -56,7 +59,7 @@ public class ExecutionManager<T> {
         CountDownLatch computeLatch = new CountDownLatch(activeVertexCount);
 
         // start the computation of the vertices
-        for (Vertex<T> vertex: vertices) {
+        for (Vertex<T> vertex : vertices) {
             if (vertex.getStatus() == Vertex.VertexStatus.ACTIVE) {
                 futures.add(executorService.submit(() -> {
                     vertex.step();
@@ -65,7 +68,14 @@ public class ExecutionManager<T> {
             }
         }
 
-        computeLatch.await();   // block until all computing tasks are finished
+        computeLatch.await(); // block until all computing tasks are finished
+
+        // execute functionables
+        for (Map.Entry<Functionable, CopyOnWriteArrayList<Mail>> entry : server.getFunctionables().entrySet()) {
+            Functionable functionable = entry.getKey();
+            CopyOnWriteArrayList<Mail> mailList = entry.getValue();
+            functionable.execute(server.context, mailList);
+        }
 
         CountDownLatch mailingLatch = new CountDownLatch(server.getOutMailQueue().size());
         // send the mail to the other servers
@@ -77,6 +87,6 @@ public class ExecutionManager<T> {
                 mailingLatch.countDown();
             }));
         }
-        mailingLatch.await();   // block until all mailing tasks are finished
+        mailingLatch.await(); // block until all mailing tasks are finished
     }
 }

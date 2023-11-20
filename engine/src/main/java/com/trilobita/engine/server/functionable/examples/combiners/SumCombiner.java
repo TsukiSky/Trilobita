@@ -1,4 +1,4 @@
-package com.trilobita.engine.server.functionable.examples;
+package com.trilobita.engine.server.functionable.examples.combiners;
 
 import java.util.concurrent.CopyOnWriteArrayList;
 

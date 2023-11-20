@@ -1,4 +1,4 @@
-package com.trilobita.engine.server.functionable.examples;
+package com.trilobita.engine.server.functionable.examples.aggregators;
 
 import com.trilobita.engine.server.Context;
 
@@ -18,20 +18,19 @@ public class EdgeSumAggregator extends Aggregator {
 
         private static EdgeSumAggregator instance;
 
-        public static synchronized EdgeSumAggregator getInstance(Context context) {
+        public EdgeSumAggregator(int instanceID, Computable initAggregatedValue) {
+                super(instanceID, initAggregatedValue);
+        }
+
+        public static synchronized EdgeSumAggregator getInstance(Context context, int instanceID) {
                 if (instance == null) {
-                        instance = new EdgeSumAggregator();
-                        instance.initialize(instance.getEdgeSum(context.getVertexGroup()));
+                        instance = new EdgeSumAggregator(instanceID,instance.aggregate(context.getVertexGroup()));
                 }
                 return instance;
         }
 
         @Override
-        public void aggregate(VertexGroup vertexGroup) {
-                aggregatedValue = instance.getEdgeSum(vertexGroup);
-        }
-
-        private Computable getEdgeSum(VertexGroup vertexGroup) {
+        public Computable aggregate(VertexGroup vertexGroup) {
                 Computable<Integer> total_edges = null;
                 total_edges.setValue(0);
 

@@ -1,12 +1,14 @@
 package com.trilobita.engine.server.functionable;
 
+import java.util.concurrent.CopyOnWriteArrayList;
+
+import com.trilobita.commons.Mail;
 import com.trilobita.engine.server.Context;
 
 /*
- * An interface for easy adding or removing functional blocks, 
+ * An abstract class for easy adding or removing functional blocks, 
  * We provide the implementation of Combiner and Aggregator, as discussed in Pregel.
- * All defined execute functions will be called at the start of a superstep.  
  */
 public interface Functionable {
-    void execute(Context context);
+    void execute(Context context, CopyOnWriteArrayList<Mail> mailList);
 }

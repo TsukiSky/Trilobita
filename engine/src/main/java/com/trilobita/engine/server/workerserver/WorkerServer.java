@@ -1,16 +1,14 @@
 package com.trilobita.engine.server.workerserver;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.trilobita.commons.*;
-import com.trilobita.commons.Mail.MailType;
 import com.trilobita.core.graph.VertexGroup;
 import com.trilobita.core.graph.vertex.Vertex;
 import com.trilobita.core.messaging.MessageConsumer;
 import com.trilobita.core.messaging.MessageProducer;
 import com.trilobita.engine.server.AbstractServer;
+import com.trilobita.engine.server.functionable.Functionable;
 import com.trilobita.engine.server.heartbeat.HeartbeatSender;
 import com.trilobita.engine.server.masterserver.partitioner.PartitionStrategy;
-import com.trilobita.engine.server.masterserver.partitioner.PartitionStrategyFactory;
 import com.trilobita.engine.server.workerserver.execution.ExecutionManager;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -33,8 +31,9 @@ public class WorkerServer<T> extends AbstractServer<T> {
     private final MessageConsumer partitionMessageConsumer;
     private final MessageConsumer startMessageConsumer;
     private final HeartbeatSender heartbeatSender;
+    private ConcurrentHashMap<Functionable, CopyOnWriteArrayList<Mail>> functionables;
 
-    public WorkerServer(int serverId, int parallelism, PartitionStrategy partitionStrategy) throws ExecutionException, InterruptedException {
+    public WorkerServer(int serverId, int parallelism, PartitionStrategy partitionStrategy,List<Functionable> functionables) throws ExecutionException, InterruptedException {
         super(serverId, partitionStrategy);
         this.executionManager = new ExecutionManager<>(parallelism, this);
         this.outMailTable = new ConcurrentHashMap<>();
@@ -46,7 +45,6 @@ public class WorkerServer<T> extends AbstractServer<T> {
                         WorkerServer.this.executionManager.waitForFutures(); // in case of fault, repartition is needed
                         Map<String, Object> res = (Map<String, Object>) mail.getMessage().getContent();
                         setVertexGroup((VertexGroup<T>) res.get("PARTITION"));
-                        PartitionStrategyFactory<T> partitionStrategyFactory = new PartitionStrategyFactory<>();
                         PartitionStrategy partitionStrategy = (PartitionStrategy) res.get("PARTITIONSTRATEGY");
                         setPartitionStrategy(partitionStrategy);
                         // assign the server's hashmap to each vertex
@@ -64,13 +62,15 @@ public class WorkerServer<T> extends AbstractServer<T> {
         this.startMessageConsumer = new MessageConsumer(Mail.MailType.START_SIGNAL.ordinal(), serverId, new MessageConsumer.MessageHandler() {
             @Override
             public void handleMessage(UUID key, Mail mail, int partition, long offset) throws InterruptedException {
-                log.info("start new super step...");
                 if (getVertexGroup() != null) {
                     startNewSuperstep();
                 }
             }
         });
         this.heartbeatSender = new HeartbeatSender(this.getServerId(), true);
+        for (Functionable functionable : functionables) {
+            this.functionables.put(functionable, null);
+        }
     }
 
     /**
@@ -91,6 +91,7 @@ public class WorkerServer<T> extends AbstractServer<T> {
     private void startNewSuperstep() throws InterruptedException {
         log.info("entering a new super step...");
         this.executionManager.execute();
+        // TODO: send functionalMails to master
         sendCompleteSignal();
     }
 

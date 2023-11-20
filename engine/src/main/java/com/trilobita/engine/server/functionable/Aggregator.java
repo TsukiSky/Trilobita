@@ -1,16 +1,11 @@
 package com.trilobita.engine.server.functionable;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.trilobita.commons.Computable;
 import com.trilobita.commons.Mail;
 import com.trilobita.commons.Message;
-import com.trilobita.commons.Mail.MailType;
 import com.trilobita.core.graph.VertexGroup;
 import com.trilobita.engine.server.Context;
 
@@ -28,36 +23,25 @@ import com.trilobita.engine.server.Context;
 public abstract class Aggregator implements Functionable {
 
     public Computable aggregatedValue;
-
-    @Override
-    public void execute(Context context) {
-
-        this.aggregate(context.getVertexGroup());
-
-        Integer serverId = context.getServerId();
-        List<Integer> vertexIds = getAllVertexIdsOnOtherWorkers(context.getVertexToServer(), serverId);
-
-    }
+    public int instanceID;
 
     // how the aggregated value is initialized from the first input value
-    public void initialize(Computable initAggregatedValue) {
-        aggregatedValue = initAggregatedValue;
+    public Aggregator(int instanceID, Computable initAggregatedValue) {
+        this.instanceID = instanceID;
+        this.aggregatedValue = initAggregatedValue;
     }
 
-    // How multiple partially aggregated values are reduced to one.
-    // Aggregation operators should be commutative and associative.
-    public abstract void aggregate(VertexGroup vertexGroup);
+    @Override
+    public void execute(Context context, CopyOnWriteArrayList<Mail> mailList) {
+        this.aggregatedValue = this.aggregate(context.getVertexGroup());
+        Message message = new Message(this.aggregatedValue);
+        mailList.add(new Mail(context.getServerId(),-1,message,Mail.MailType.BROADCAST));
+    }
+    // Retreive certain properties to reduce
+    // Make use of reduce function
+    public abstract Computable aggregate(VertexGroup vertexGroup);
 
     public abstract void stop();
 
-    private List<Integer> getAllVertexIdsOnOtherWorkers(Map<Integer,Integer> vertexToServerMap, Integer serverId){
-        List<Integer> vertexIds = new ArrayList<>();
-        for (Map.Entry<Integer,Integer> entry : vertexToServerMap.entrySet()) {
-            if (entry.getValue() != serverId){
-                vertexIds.add(entry.getKey());
-            }
-        }
-        return vertexIds;
-    }
-
 }
+

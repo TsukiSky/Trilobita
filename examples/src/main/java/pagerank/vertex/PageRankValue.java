@@ -50,4 +50,10 @@ public class PageRankValue implements Computable<Double>, Serializable {
     public void setValue(Double value) {
         this.value = value;
     }
+
+    @Override
+    public int compareTo(Double arg0) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'compareTo'");
+    }
 }

@@ -1,4 +1,4 @@
-package com.trilobita.engine.server.functionable.examples;
+package com.trilobita.engine.server.functionable.examples.aggregators;
 
 import com.trilobita.engine.server.Context;
 
@@ -17,34 +17,19 @@ public class MinValueAggregator extends Aggregator {
 
         private static MinValueAggregator instance;
 
-        public static synchronized MinValueAggregator getInstance(Context context) {
+        public MinValueAggregator(int instanceID, Computable initAggregatedValue) {
+                super(instanceID, initAggregatedValue);
+        }
+
+        public static synchronized MinValueAggregator getInstance(Context context, int instanceID) {
                 if (instance == null) {
-                        instance = new MinValueAggregator();
-                        instance.initialize(instance.getMin(context.getVertexGroup()));
+                        instance = new MinValueAggregator(instanceID, instance.aggregate(context.getVertexGroup()));
                 }
                 return instance;
         }
 
         @Override
-        public void aggregate(VertexGroup vertexGroup) {
-                Computable min_value = null;
-
-                List<Vertex> vertices = vertexGroup.getVertices();
-                for (Vertex vertex : vertices) {
-                        Computable value = vertex.getValue();
-                        if (min_value == null) {
-                                min_value = value;
-                        } else {
-                                if (value.compareTo(min_value) < 0) {
-                                        min_value.setValue(value);
-                                }
-                        }
-
-                }
-                aggregatedValue = min_value;
-        }
-
-        private Computable getMin(VertexGroup vertexGroup) {
+        public Computable aggregate(VertexGroup vertexGroup) {
                 Computable min_value = null;
 
                 List<Vertex> vertices = vertexGroup.getVertices();
