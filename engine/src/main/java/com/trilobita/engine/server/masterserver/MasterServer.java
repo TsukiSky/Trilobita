@@ -48,13 +48,7 @@ public class MasterServer<T> extends AbstractServer<T> {
         this.workerHeartbeatChecker = new HeartbeatChecker(this.workingWorkerIdList, true, new HeartbeatChecker.FaultHandler() {
             @Override
             public void handleFault(int id) {
-                List<Integer> currentWorkingServerIdList = new ArrayList<>();
-                for (int i: workingWorkerIdList){
-                    if (i != id) {
-                        currentWorkingServerIdList.add(i);
-                    }
-                }
-                workingWorkerIdList = currentWorkingServerIdList;
+                workingWorkerIdList.remove((Integer) id);
                 nFinishedWorker.set(0);
                 MasterServer.this.partitionGraph();
                 log.info("finished repartitioning...");
@@ -89,7 +83,7 @@ public class MasterServer<T> extends AbstractServer<T> {
         });
         heatBeatConsumer = new MessageConsumer("HEARTBEAT_WORKER", getServerId(), new MessageConsumer.MessageHandler() {
             @Override
-            public void handleMessage(UUID key, Mail value, int partition, long offset) throws JsonProcessingException, InterruptedException, ExecutionException {
+            public void handleMessage(UUID key, Mail value, int partition, long offset) {
                 int id = (int) value.getMessage().getContent();
                 workerHeartbeatChecker.setHeatBeat(id);
             }

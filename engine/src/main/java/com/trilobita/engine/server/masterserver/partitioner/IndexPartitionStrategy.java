@@ -1,8 +1,5 @@
 package com.trilobita.engine.server.masterserver.partitioner;
 
-import com.trilobita.core.graph.Graph;
-import com.trilobita.core.graph.vertex.Vertex;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +7,7 @@ import java.util.List;
 /**
  * This class implements the PartitionStrategy interface and represents an index-based partitioning strategy.
  */
-public class IndexPartitionStrategy<T> implements PartitionStrategy, Serializable {
+public class IndexPartitionStrategy implements PartitionStrategy, Serializable {
     private final int graphSize;  // The graph to be partitioned.
     private List<Integer> workerIdList;    // The number of workers (servers) available for partitioning.
 

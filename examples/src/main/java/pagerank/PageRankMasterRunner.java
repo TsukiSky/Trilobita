@@ -79,7 +79,7 @@ public class PageRankMasterRunner {
         TrilobitaEnvironment<PageRankValue> trilobitaEnvironment = new TrilobitaEnvironment<>();
         trilobitaEnvironment.initConfig();
         trilobitaEnvironment.loadGraph(PageRankMasterRunner.createVertices());
-        PartitionStrategyFactory partitionStrategyFactory = new PartitionStrategyFactory<>();
+        PartitionStrategyFactory partitionStrategyFactory = new PartitionStrategyFactory();
         PartitionStrategy partitionStrategy = partitionStrategyFactory.getPartitionStrategy("hashPartitionStrategy",(int) trilobitaEnvironment.getConfiguration().get("numOfWorker"),trilobitaEnvironment.getGraph().getSize());
         trilobitaEnvironment.setPartitioner(new Partioner<>(partitionStrategy));
         trilobitaEnvironment.createMasterServer();
