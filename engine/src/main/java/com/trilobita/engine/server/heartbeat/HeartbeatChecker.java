@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 public class HeartbeatChecker extends Thread{
     private volatile boolean isRunning;
     private ConcurrentHashMap<Integer, Boolean> heartbeatMap;
-    private volatile boolean isProcessing;
+    private volatile Boolean isProcessing;
     private FaultHandler faultHandler;
     private boolean checkWorker;
     private final ScheduledExecutorService heartbeatExecutor;
