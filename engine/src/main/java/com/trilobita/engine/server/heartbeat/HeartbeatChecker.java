@@ -42,7 +42,7 @@ public class HeartbeatChecker extends Thread{
     }
 
     public void check(){
-        if (isProcessing){
+        if (isProcessing == (Boolean.TRUE)){
             return;
         }
 //        log.info("checking heartbeat...");
@@ -68,7 +68,7 @@ public class HeartbeatChecker extends Thread{
 
     @Override
     public void run() {
-        if (!isProcessing) {
+        if (isProcessing == Boolean.FALSE) {
             heartbeatExecutor.scheduleAtFixedRate(this::check, 5, 2, TimeUnit.SECONDS);
             log.info("Heartbeat checking service will start in 5 seconds.");
         } else {

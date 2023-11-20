@@ -18,7 +18,8 @@ import java.util.concurrent.ExecutionException;
  */
 @Slf4j
 public class MessageProducer {
-    private static final boolean willLog = false;
+    private MessageProducer() {}
+    private static final boolean LOG_FLAG = false;
 
     /**
      * Produce a message to a topic.
@@ -51,7 +52,7 @@ public class MessageProducer {
                 if (ex != null) {
                     log.error("error producing message: {}", ex.getMessage());
                 } else {
-                    if (willLog){
+                    if (LOG_FLAG){
                         log.info("Produced event to topic {}: key = {} value = {}", topic, finalKey, value);
                     }
                 }
