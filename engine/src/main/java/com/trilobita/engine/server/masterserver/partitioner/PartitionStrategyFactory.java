@@ -1,19 +1,14 @@
 package com.trilobita.engine.server.masterserver.partitioner;
 
-import com.trilobita.core.graph.Graph;
 import lombok.Data;
 
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 
 /**
  * Factory class for creating instances of partition strategies for a graph.
  * This determines how the graph will be divided among different workers.
- *
- * @param <T> The type of data stored in the vertices of the graph.
  */
 @Data
-public class PartitionStrategyFactory<T> {
+public class PartitionStrategyFactory {
 
     /**
      * Retrieves an instance of a partition strategy based on the type specified,
@@ -29,7 +24,7 @@ public class PartitionStrategyFactory<T> {
         if ("hashPartitionStrategy".equalsIgnoreCase(type)) {
             return new HashPartitionStrategy(nWorkers);
         } else if ("indexPartitionStrategy".equalsIgnoreCase(type)) {
-            return new IndexPartitionStrategy<T>(graphSize, nWorkers);
+            return new IndexPartitionStrategy(graphSize, nWorkers);
         }
         return null;
     }
