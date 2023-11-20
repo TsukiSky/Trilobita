@@ -54,8 +54,8 @@ public class TrilobitaEnvironment<T> {
         this.inputParser = inputParser;
     }
 
-    public void createMasterServer() {
-        this.masterServer = new MasterServer<>(this.partitioner, (int) this.configuration.get("numOfWorker"), 0);
+    public void createMasterServer(int id) throws ExecutionException, InterruptedException {
+        this.masterServer = new MasterServer<>(this.partitioner, (int) this.configuration.get("numOfWorker"), id, (int) this.configuration.get("numOfReplica"));
         this.masterServer.setGraph(this.graph);
     }
 

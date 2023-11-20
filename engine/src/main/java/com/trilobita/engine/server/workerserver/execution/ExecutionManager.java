@@ -59,7 +59,6 @@ public class ExecutionManager<T> {
         for (Vertex<T> vertex: vertices) {
             if (vertex.getStatus() == Vertex.VertexStatus.ACTIVE) {
                 futures.add(executorService.submit(() -> {
-                    log.info("vertex value is: {}", vertex.getValue());
                     vertex.step();
                     computeLatch.countDown();
                 }));

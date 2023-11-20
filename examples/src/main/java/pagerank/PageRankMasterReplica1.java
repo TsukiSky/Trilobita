@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-public class PageRankMasterRunner {
+public class PageRankMasterReplica1 {
     public static Graph createVertices(){
         List<PageRankVertex> vertices = new ArrayList<>();
         PageRankVertex vertex0 = new PageRankVertex(0);
@@ -82,7 +82,7 @@ public class PageRankMasterRunner {
         PartitionStrategyFactory partitionStrategyFactory = new PartitionStrategyFactory<>();
         PartitionStrategy partitionStrategy = partitionStrategyFactory.getPartitionStrategy("hashPartitionStrategy",(int) trilobitaEnvironment.getConfiguration().get("numOfWorker"),trilobitaEnvironment.getGraph().getSize());
         trilobitaEnvironment.setPartitioner(new Partioner<>(partitionStrategy));
-        trilobitaEnvironment.createMasterServer(2);
-        trilobitaEnvironment.startMasterServer();
+        trilobitaEnvironment.createMasterServer(1);
+//        trilobitaEnvironment.startMasterServer();
     }
 }
