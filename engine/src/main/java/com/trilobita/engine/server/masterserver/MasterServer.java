@@ -9,6 +9,7 @@ import com.trilobita.engine.server.AbstractServer;
 import com.trilobita.engine.server.heartbeat.HeartbeatChecker;
 import com.trilobita.engine.server.heartbeat.HeartbeatSender;
 import com.trilobita.engine.server.masterserver.partitioner.Partitioner;
+import com.trilobita.engine.server.masterserver.util.Snapshot;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
@@ -147,9 +148,9 @@ public class MasterServer<T> extends AbstractServer<T> {
         });
 
         this.graphConsumer.start();
+        this.completeSignalConsumer.start();
         this.workerHeatBeatConsumer.start();
         this.masterHeatBeatConsumer.start();
-        this.completeSignalConsumer.start();
         this.workerHeartbeatChecker.start();
         this.masterHeartbeatChecker.start();
         this.heartbeatSender.start();

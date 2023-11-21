@@ -1,4 +1,4 @@
-package com.trilobita.engine.server.masterserver;
+package com.trilobita.engine.server.masterserver.util;
 
 import com.trilobita.commons.Computable;
 import com.trilobita.core.graph.Graph;

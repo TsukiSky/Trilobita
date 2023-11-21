@@ -49,6 +49,7 @@ public class WorkerServer<T> extends AbstractServer<T> {
                     vertex.setServerQueue(getOutMailQueue());
                 }
                 log.info("[Partition] Vertex Group: {}", vertexGroup);
+                WorkerServer.this.sendCompleteSignal(false);
             }
         });
 
@@ -61,6 +62,7 @@ public class WorkerServer<T> extends AbstractServer<T> {
                 }
             }
         });
+
         this.heartbeatSender = new HeartbeatSender(this.getServerId(), true);
     }
 

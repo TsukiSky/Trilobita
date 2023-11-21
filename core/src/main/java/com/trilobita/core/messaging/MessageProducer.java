@@ -146,7 +146,7 @@ public class MessageProducer {
     /**
      * Produce a functional message to the master to the topic.
      *
-     * @param mail the mail to be sent
+     * @param message the message to be sent
      */
     public static void produceFunctionalMessage(Message message) {
         Mail mail = new Mail(-1, message, Mail.MailType.FUNCTIONAL);
@@ -156,7 +156,8 @@ public class MessageProducer {
     /**
      * Produce a broadcast message from the master to all workers to the topic.
      *
-     * @param mail the mail to be sent
+     * @param message the message to be sent
+     * @param receiverWorkers receiver worker ids
      */
     public static void produceBroadcastMessage(Message message, List<Integer> receiverWorkers) {
         for (Integer serverId : receiverWorkers) {
@@ -164,5 +165,4 @@ public class MessageProducer {
             MessageProducer.createAndProduce(null, mail,  "SERVER_" + serverId + "_BROADCAST");
         }
     }
-
 }

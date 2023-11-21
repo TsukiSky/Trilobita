@@ -99,7 +99,4 @@ public class HeartbeatChecker extends Thread {
             log.info("Heartbeat checking service is already running.");
         }
     }
-
-
-
 }
