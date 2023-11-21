@@ -1,12 +1,15 @@
 package com.trilobita.core.messaging;
 
+import com.trilobita.commons.Computable;
 import com.trilobita.commons.Mail;
 import com.trilobita.commons.Message;
+import com.trilobita.core.graph.Graph;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
@@ -69,13 +72,27 @@ public class MessageProducer {
 
     /**
      * Produce a finish signal to the topic.
-     * @param superstep current superstep
      * @param vertexValues vertex values to be stored as checkpoints
      */
-    public static void produceFinishSignal(int superstep, HashMap<Integer, Object> vertexValues) {
-        Message message = new Message(new HashMap<>(vertexValues));
+    public static <T> void produceFinishSignal(HashMap<Integer, Computable<T>> vertexValues) {
+        Message message = new Message(vertexValues);
         Mail mail = new Mail(-1, message, Mail.MailType.FINISH_SIGNAL);
-        log.info("[Superstep] super step {} finished", superstep);
         MessageProducer.createAndProduce(null, mail, mail.getMailType().ordinal());
+    }
+
+    /**
+     * Produce a sync message among masters to the topic.
+     * @param graph the graph
+     * @param aliveWorkerIds alive worker ids
+     */
+    public static void produceSyncMessage(Graph<?> graph, List<Integer> aliveWorkerIds) {
+        HashMap<String, Object> syncMap = new HashMap<>();
+        syncMap.put("GRAPH", graph);
+        syncMap.put("ALIVE_WORKER_IDS", aliveWorkerIds);
+        Message message = new Message();
+        message.setContent(syncMap);
+        Mail mail = new Mail();
+        mail.setMessage(message);
+        MessageProducer.createAndProduce(null, mail, "MASTER_SYNC");
     }
 }

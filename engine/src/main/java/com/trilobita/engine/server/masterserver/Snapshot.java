@@ -7,25 +7,43 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * The snapshot of the graph
+ * @param <T>
+ */
 @Slf4j
 @Data
 public class Snapshot<T> {
-    private final HashMap<Integer, Computable<T>> snapshot;
-    public Snapshot(){
-        this.snapshot = new HashMap<>();
-    }
+    private final int id;
+    private final HashMap<Integer, Computable<T>> vertexValues = new HashMap<>();
 
-    public void record(HashMap<Integer, Computable<T>> vertexValues){
-        snapshot.putAll(vertexValues);
-    }
-
-    public void finishSuperstep(Graph<T> graph){
-        for (Vertex<T> v: graph.getVertices()){
-            v.setValue(this.snapshot.get(v.getId()));
+    public Snapshot(int id, Graph<T> graph) {
+        this.id = id;
+        for (Vertex<T> v : graph.getVertices()) {
+            this.vertexValues.put(v.getId(), v.getValue());
         }
+    }
+
+    public void store() {
+
+    }
+
+    /**
+     * Create a snapshot of the graph
+     * @param snapshotId the id of the snapshot
+     * @param graph the graph to be snapshot
+     * @return the snapshot
+     * @param <T> the type of the vertex value
+     */
+    public static <T> Snapshot<T> createSnapshot(int snapshotId, Graph<T> graph) {
+        log.info("[Snapshot] creating snapshot...");
+        // shot the graph
+        Snapshot<T> snapshot = new Snapshot<>(snapshotId, graph);
+
+        for (Vertex<T> v : graph.getVertices()) {
+            snapshot.vertexValues.put(v.getId(), v.getValue());
+        }
+        return snapshot;
     }
 }

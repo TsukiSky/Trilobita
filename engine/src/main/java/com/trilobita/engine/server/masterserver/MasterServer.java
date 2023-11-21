@@ -41,7 +41,6 @@ public class MasterServer<T> extends AbstractServer<T> {
         super(id, graphPartitioner.getPartitionStrategy());   // the standard server id of master is 0
         this.graphPartitioner = graphPartitioner;
         this.nFinishedWorker = new AtomicInteger(0);
-        this.snapshot = new Snapshot<>();
         this.heartbeatSender = new HeartbeatSender(getServerId(), false);
         this.aliveWorkerIds = new ArrayList<>();
         for (int i=0; i<nWorker; i++){
@@ -83,26 +82,29 @@ public class MasterServer<T> extends AbstractServer<T> {
         this.completeSignalConsumer = new MessageConsumer(Mail.MailType.FINISH_SIGNAL.ordinal(), super.getServerId(), new MessageConsumer.MessageHandler() {
             @Override
             public void handleMessage(UUID key, Mail value, int partition, long offset) throws InterruptedException {
-                if (!MasterServer.this.isWorking) {
+                if (!MasterServer.this.isWorking || workerHeartbeatChecker.getIsProcessing() || masterHeartbeatChecker.getIsProcessing()) {
                     return;
                 }
-                if (workerHeartbeatChecker.getIsProcessing() || masterHeartbeatChecker.getIsProcessing()){
-                    return;
+                if (MasterServer.this.isDoingSnapshot()) {
+                    // update the graph
+                    HashMap<Integer, Computable<T>> vertexValues = (HashMap<Integer, Computable<T>>) value.getMessage().getContent();
+                    graph.updateVertexValues(vertexValues);
                 }
-                int val = nFinishedWorker.addAndGet(1);
-                log.info("[Superstep] number of finished workers: " + val);
-//                HashMap<Integer, Computable<T>> vertexValue = (HashMap<Integer, Computable<T>>) value.getMessage().getContent();
-//                snapshot.record(vertexValue);
-                if (val == aliveWorkerIds.size()) {
-                    // start the next superstep
-//                    snapshot.finishSuperstep(graph);
-                    log.info("graph is : {}", graph.getVertices());
-                    // todo: update the new graph to other replicas
+                int nFinishedWorkers = nFinishedWorker.addAndGet(1);
+                log.info("[Superstep] number of finished workers: " + nFinishedWorkers);
+                if (nFinishedWorkers == aliveWorkerIds.size()) {
+                    // start a new superstep
+                    if (MasterServer.this.isDoingSnapshot()) {
+                        // do snapshot
+                        MasterServer.this.snapshotAndSync();
+                    }
+                    log.info("[Graph] graph is : {}", graph.getVertices());
                     Thread.sleep(300);
                     superstep();
                 }
             }
         });
+
         workerHeatBeatConsumer = new MessageConsumer("HEARTBEAT_WORKER", getServerId(), new MessageConsumer.MessageHandler() {
             @Override
             public void handleMessage(UUID key, Mail value, int partition, long offset) {
@@ -129,7 +131,7 @@ public class MasterServer<T> extends AbstractServer<T> {
             public void handleMessage(UUID key, Mail value, int partition, long offset) {
                 Map<String, Object> objectMap = (Map<String, Object>) value.getMessage().getContent();
                 MasterServer.this.graph = (Graph<T>) objectMap.get("GRAPH");
-                MasterServer.this.aliveWorkerIds = (List<Integer>) objectMap.get("WORKING_WORKER_ID_LIST");
+                MasterServer.this.aliveWorkerIds = (List<Integer>) objectMap.get("ALIVE_WORKER_IDS");
             }
         });
 
@@ -148,10 +150,6 @@ public class MasterServer<T> extends AbstractServer<T> {
         this.partitionGraph();
     }
 
-    public void becomeMaster() {
-
-    }
-
     @Override
     public void pause() {
     }
@@ -160,27 +158,13 @@ public class MasterServer<T> extends AbstractServer<T> {
     public void shutdown() {
     }
 
-    public void finish(){
-
-    }
-
     /**
      * start a new round of superstep
      */
     public void superstep() {
         this.superstep += 1;
         this.nFinishedWorker.set(0);
-        MessageProducer.produceStartSignal(superstep % snapshotFrequency == 0);
-
-        // TODO: Change the graph SYNC (with snapshot)
-        Map<String, Object> objectMap = new HashMap<>();
-        objectMap.put("GRAPH", this.graph);
-        objectMap.put("WORKING_WORKER_ID_LIST",this.aliveWorkerIds);
-        Message message = new Message();
-        message.setContent(objectMap);
-        Mail mail = new Mail();
-        mail.setMessage(message);
-        MessageProducer.createAndProduce(null, mail, "MASTER_SYNC");
+        MessageProducer.produceStartSignal(isDoingSnapshot());
     }
 
     /**
@@ -202,6 +186,29 @@ public class MasterServer<T> extends AbstractServer<T> {
             Mail mail = new Mail(-1, message, Mail.MailType.PARTITION);
             MessageProducer.createAndProduce(null, mail, "SERVER_" + entry.getKey() + "_PARTITION");
         }
+    }
+
+    /**
+     * do snapshot and sync the graph with other masters
+     */
+    public void snapshotAndSync() {
+        this.snapshot = Snapshot.createSnapshot(superstep, graph);
+        this.syncGraph();
+    }
+
+    /**
+     * sync the graph with other masters
+     */
+    private void syncGraph() {
+        MessageProducer.produceSyncMessage(this.graph, this.aliveWorkerIds);
+    }
+
+    /**
+     * check whether the server is doing snapshot
+     * @return whether the server is doing snapshot
+     */
+    private boolean isDoingSnapshot() {
+        return superstep % snapshotFrequency == 0;
     }
 
     /**
