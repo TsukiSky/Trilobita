@@ -13,8 +13,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Slf4j
 public class HeartbeatSender {
     private final ScheduledExecutorService heartbeatExecutor;
-    private final AtomicBoolean running = new AtomicBoolean(false);
-//    private final List<String> workerServerIds;
+    private final AtomicBoolean isRunning = new AtomicBoolean(false);
+
+    private long delayed = 1; // in second
+    private long period = 1; // in second
+
     private final int serverId;
     private final boolean isWorker;
 
@@ -25,8 +28,14 @@ public class HeartbeatSender {
     }
 
     public void start() {
-        if (running.compareAndSet(false, true)) {
-            heartbeatExecutor.scheduleAtFixedRate(this::sendHeartbeat, 1, 1, TimeUnit.SECONDS);
+        start(1, 1);
+    }
+
+    public void start(long delayed, long period) {
+        this.delayed = delayed;
+        this.period = period;
+        if (isRunning.compareAndSet(false, true)) {
+            heartbeatExecutor.scheduleAtFixedRate(this::sendHeartbeat, this.delayed, this.period, TimeUnit.SECONDS);
             log.info("Heartbeat sending service will start in 1 second.");
         } else {
             log.info("Heartbeat sending service is already running.");
@@ -39,7 +48,7 @@ public class HeartbeatSender {
     }
 
     public void stop() {
-        if (running.compareAndSet(true, false)) {
+        if (isRunning.compareAndSet(true, false)) {
             heartbeatExecutor.shutdown();
             try {
                 if (!heartbeatExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
@@ -58,6 +67,6 @@ public class HeartbeatSender {
 
     public void restart() {
         stop();
-        start();
+        start(this.delayed, this.period);
     }
 }
