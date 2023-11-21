@@ -2,7 +2,7 @@ package com.trilobita.runtime.launcher;
 
 import com.trilobita.core.graph.Graph;
 import com.trilobita.engine.server.functionable.Functionable;
-import com.trilobita.engine.server.functionable.FunctionalMailsHandler;
+import com.trilobita.engine.server.functionable.FunctionalMessageHandler;
 import com.trilobita.engine.server.masterserver.MasterServer;
 import com.trilobita.engine.server.masterserver.partitioner.Partioner;
 import com.trilobita.engine.server.masterserver.partitioner.PartitionStrategy;
@@ -23,7 +23,7 @@ public class TrilobitaEnvironment<T> {
     private Parse inputParser;
     @Getter
     private final Configuration configuration = new Configuration();
-    private final JCommandHandler jCommandHandler = new JCommandHandler();  // Command-line handler for Trilobita
+    private final JCommandHandler jCommandHandler = new JCommandHandler(); // Command-line handler for Trilobita
     private Graph<T> graph;
     public PartitionStrategy partitionStrategy;
     public Partioner<T> partitioner;
@@ -44,7 +44,7 @@ public class TrilobitaEnvironment<T> {
         this.graph = graph;
     }
 
-    public Graph<T> getGraph(){
+    public Graph<T> getGraph() {
         return this.graph;
     }
 
@@ -57,13 +57,24 @@ public class TrilobitaEnvironment<T> {
         this.inputParser = inputParser;
     }
 
-    public void createMasterServer(FunctionalMailsHandler functionalMailsHandler) {
-        this.masterServer = new MasterServer<>(this.partitioner, (int) this.configuration.get("numOfWorker"), 0,functionalMailsHandler);
+    public void createMasterServer(FunctionalMessageHandler functionalMailsHandler) {
+        this.masterServer = new MasterServer<>(this.partitioner, (int) this.configuration.get("numOfWorker"), 0,
+                functionalMailsHandler);
         this.masterServer.setGraph(this.graph);
     }
 
-    public void createWorkerServer(int workerId, List<Functionable> functionables) throws ExecutionException, InterruptedException {
-        this.workerServer = new WorkerServer<>(workerId, (int) this.configuration.get("parallelism"), this.partitionStrategy, functionables);
+    public void createMasterServer() {
+        this.createMasterServer(null);
+    }
+
+    public void createWorkerServer(int workerId, List<Functionable> functionables)
+            throws ExecutionException, InterruptedException {
+        this.workerServer = new WorkerServer<>(workerId, (int) this.configuration.get("parallelism"),
+                this.partitionStrategy, functionables);
+    }
+
+    public void createWorkerServer(int workerId) throws ExecutionException, InterruptedException {
+        this.createWorkerServer(workerId, null);
     }
 
     public void startMasterServer() throws ExecutionException, InterruptedException {

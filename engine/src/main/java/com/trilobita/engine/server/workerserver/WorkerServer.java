@@ -31,7 +31,7 @@ public class WorkerServer<T> extends AbstractServer<T> {
     private final MessageConsumer partitionMessageConsumer;
     private final MessageConsumer startMessageConsumer;
     private final HeartbeatSender heartbeatSender;
-    private ConcurrentHashMap<Functionable, CopyOnWriteArrayList<Mail>> functionables;
+    private ConcurrentHashMap<Functionable, Mail> functionables;
 
     public WorkerServer(int serverId, int parallelism, PartitionStrategy partitionStrategy,List<Functionable> functionables) throws ExecutionException, InterruptedException {
         super(serverId, partitionStrategy);

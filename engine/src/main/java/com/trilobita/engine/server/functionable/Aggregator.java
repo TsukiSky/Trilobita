@@ -32,10 +32,10 @@ public abstract class Aggregator implements Functionable {
     }
 
     @Override
-    public void execute(Context context, CopyOnWriteArrayList<Mail> mailList) {
+    public void execute(Context context, Mail mail) {
         this.aggregatedValue = this.aggregate(context.getVertexGroup());
         Message message = new Message(this.aggregatedValue);
-        mailList.add(new Mail(context.getServerId(),-1,message,Mail.MailType.BROADCAST));
+        mail = new Mail(context.getServerId(),-1,message,Mail.MailType.BROADCAST);
     }
     // Retreive certain properties to reduce
     // Make use of reduce function

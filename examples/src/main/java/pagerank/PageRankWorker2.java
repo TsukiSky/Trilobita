@@ -11,7 +11,7 @@ public class PageRankWorker2 {
     public static void main(String[] args) throws ExecutionException, InterruptedException {
         TrilobitaEnvironment<PageRankValue> trilobitaEnvironment = new TrilobitaEnvironment<>();
         trilobitaEnvironment.initConfig();
-        trilobitaEnvironment.createWorkerServer(2,null);
+        trilobitaEnvironment.createWorkerServer(2);
         trilobitaEnvironment.startWorkerServer();
     }
 }

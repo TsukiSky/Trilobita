@@ -10,5 +10,5 @@ import com.trilobita.engine.server.Context;
  * We provide the implementation of Combiner and Aggregator, as discussed in Pregel.
  */
 public interface Functionable {
-    void execute(Context context, CopyOnWriteArrayList<Mail> mailList);
+    void execute(Context context, Mail mail);
 }

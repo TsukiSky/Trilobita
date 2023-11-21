@@ -13,7 +13,7 @@ import com.trilobita.engine.server.Context;
  */
 public abstract class Combiner implements Functionable {
     @Override
-    public void execute(Context context, CopyOnWriteArrayList<Mail> mailList) {
+    public void execute(Context context,Mail mail) {
         this.combine(context.getOutMailTable());
     }
 
