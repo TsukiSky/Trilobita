@@ -50,10 +50,10 @@ public class MessageProducer {
         try (final org.apache.kafka.clients.producer.Producer<Object, Object> producer = new KafkaProducer<>(MessageAdmin.getInstance().props)) {
             producer.send(new ProducerRecord<>(topic, finalKey.toString(), value), (event, ex) -> {
                 if (ex != null) {
-                    log.error("error producing message: {}", ex.getMessage());
+                    log.error("[Message] error producing message: {}", ex.getMessage());
                 } else {
                     if (LOG_FLAG){
-                        log.info("Produced event to topic {}: key = {} value = {}", topic, finalKey, value);
+                        log.info("[Message] produced event to topic {}: key = {} value = {}", topic, finalKey, value);
                     }
                 }
             });
@@ -63,8 +63,8 @@ public class MessageProducer {
     /**
      * Produce a start signal to the topic
      */
-    public static void produceStartSignal() {
-        createAndProduce(null, new Mail(-1, null, Mail.MailType.START_SIGNAL), Mail.MailType.START_SIGNAL.ordinal());
+    public static void produceStartSignal(boolean doSnapshot) {
+        createAndProduce(null, new Mail(-1, new Message(doSnapshot), Mail.MailType.START_SIGNAL), Mail.MailType.START_SIGNAL.ordinal());
     }
 
     /**
@@ -75,7 +75,7 @@ public class MessageProducer {
     public static void produceFinishSignal(int superstep, HashMap<Integer, Object> vertexValues) {
         Message message = new Message(new HashMap<>(vertexValues));
         Mail mail = new Mail(-1, message, Mail.MailType.FINISH_SIGNAL);
-        log.info("super step {} finished", superstep);
+        log.info("[Superstep] super step {} finished", superstep);
         MessageProducer.createAndProduce(null, mail, mail.getMailType().ordinal());
     }
 }

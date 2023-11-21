@@ -13,17 +13,14 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Data
-public class ValueSnapshot<T> {
-    private final ConcurrentHashMap<Integer, Computable<T>> snapshot;
-    public ValueSnapshot(){
-        this.snapshot = new ConcurrentHashMap<>();
+public class Snapshot<T> {
+    private final HashMap<Integer, Computable<T>> snapshot;
+    public Snapshot(){
+        this.snapshot = new HashMap<>();
     }
 
-    public void record(HashMap<Integer, Computable<T>> vertexValue){
-        Set<Map.Entry<Integer, Computable<T>>> set = vertexValue.entrySet();
-        for (Map.Entry<Integer, Computable<T>> entry: set){
-            snapshot.put(entry.getKey(), entry.getValue());
-        }
+    public void record(HashMap<Integer, Computable<T>> vertexValues){
+        snapshot.putAll(vertexValues);
     }
 
     public void finishSuperstep(Graph<T> graph){

@@ -5,7 +5,6 @@ import com.trilobita.core.graph.VertexGroup;
 import com.trilobita.core.graph.vertex.Vertex;
 import com.trilobita.core.messaging.MessageConsumer;
 import com.trilobita.core.messaging.MessageProducer;
-import com.trilobita.engine.monitor.Monitor;
 import com.trilobita.engine.server.AbstractServer;
 import com.trilobita.engine.server.heartbeat.HeartbeatSender;
 import com.trilobita.engine.server.masterserver.partitioner.PartitionStrategy;
@@ -45,8 +44,7 @@ public class WorkerServer<T> extends AbstractServer<T> {
                         WorkerServer.this.executionManager.waitForFutures(); // in case of fault, repartition is needed
                         Map<String, Object> res = (Map<String, Object>) mail.getMessage().getContent();
                         setVertexGroup((VertexGroup<T>) res.get("PARTITION"));
-                        PartitionStrategy partitionStrategy = (PartitionStrategy) res.get("PARTITIONSTRATEGY");
-                        log.info(partitionStrategy.getWorkerIdList().toString());
+                        PartitionStrategy partitionStrategy = (PartitionStrategy) res.get("PARTITION_STRATEGY");
                         setPartitionStrategy(partitionStrategy);
                         // assign the server's hashmap to each vertex
                         List<Vertex<T>> vertices = vertexGroup.getVertices();
@@ -54,9 +52,7 @@ public class WorkerServer<T> extends AbstractServer<T> {
                             vertex.setServerQueue(getOutMailQueue());
                             vertex.setServerVertexValue(getVertexValues());
                         }
-                        superstep = 1;
-                        log.info("Vertex Group: {}", vertexGroup);
-                        startNewSuperstep();
+                        log.info("[Partition] Vertex Group: {}", vertexGroup);
                     }
                 });
 
@@ -64,7 +60,7 @@ public class WorkerServer<T> extends AbstractServer<T> {
             @Override
             public void handleMessage(UUID key, Mail mail, int partition, long offset) throws InterruptedException {
                 if (getVertexGroup() != null) {
-                    startNewSuperstep();
+                    superstep();
                 }
             }
         });
@@ -86,8 +82,9 @@ public class WorkerServer<T> extends AbstractServer<T> {
     /**
      * Execute the superstep
      */
-    private void startNewSuperstep() throws InterruptedException {
-        log.info("entering a new super step...");
+    private void superstep() throws InterruptedException {
+        superstep ++;
+        log.info("[Superstep] entering a new super step...");
         this.executionManager.execute();
         sendCompleteSignal();
     }
@@ -105,9 +102,8 @@ public class WorkerServer<T> extends AbstractServer<T> {
      * Send a complete signal to the master server
      */
     public void sendCompleteSignal() {
-        log.info("complete");
+        log.info("[Superstep] complete");
         MessageProducer.produceFinishSignal(this.superstep, new HashMap<>(vertexValues));
-        superstep++;
     }
 
     /**

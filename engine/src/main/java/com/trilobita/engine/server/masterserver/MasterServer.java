@@ -1,6 +1,5 @@
 package com.trilobita.engine.server.masterserver;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.trilobita.commons.*;
 import com.trilobita.core.graph.Graph;
 import com.trilobita.core.graph.VertexGroup;
@@ -23,7 +22,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class MasterServer<T> extends AbstractServer<T> {
     Graph<T> graph;                                     // the graph to be computed
     Partioner<T> graphPartitioner;            // the partitioner of the graph
-    int nWorker;                                        // the number of workers
     AtomicInteger nFinishedWorker;                      // the number of workers that have finished the superstep
     MessageConsumer completeSignalConsumer;             // the consumer that consume the finish signal from workers
     MessageConsumer workerHeatBeatConsumer;
@@ -33,58 +31,55 @@ public class MasterServer<T> extends AbstractServer<T> {
     HeartbeatChecker workerHeartbeatChecker;
     HeartbeatChecker masterHeartbeatChecker;
     HeartbeatSender heartbeatSender;
-    ValueSnapshot<T> valueSnapshot;
-    List<Integer> workingWorkerIdList;                  // the alive working server's id
-    List<Integer> masterIdList;                  // the alive working server's id
+    Snapshot<T> snapshot;
+    int snapshotFrequency = 5;                                   // whether the server is the master
+    List<Integer> aliveWorkerIds;                  // the alive working servers' ids
+    List<Integer> masterIds;                  // the alive master servers' ids
     volatile boolean isWorking;
 
     public MasterServer(Partioner<T> graphPartitioner, int nWorker, int id, int nReplica) throws ExecutionException, InterruptedException {
         super(id, graphPartitioner.getPartitionStrategy());   // the standard server id of master is 0
-        this.nWorker = nWorker;
         this.graphPartitioner = graphPartitioner;
         this.nFinishedWorker = new AtomicInteger(0);
-        this.valueSnapshot = new ValueSnapshot<>();
+        this.snapshot = new Snapshot<>();
         this.heartbeatSender = new HeartbeatSender(getServerId(), false);
-        this.workingWorkerIdList = new ArrayList<>();
-        for (int i=0;i<nWorker;i++){
-            this.workingWorkerIdList.add(i+1);
+        this.aliveWorkerIds = new ArrayList<>();
+        for (int i=0; i<nWorker; i++){
+            this.aliveWorkerIds.add(i + 1);
         }
-        this.masterIdList = new ArrayList<>();
-        for (int i=0;i<nReplica;i++){
-            this.masterIdList.add(i+1);
+        this.masterIds = new ArrayList<>();
+        for (int i=0; i<nReplica; i++){
+            this.masterIds.add(i + 1);
         }
-        this.workerHeartbeatChecker = new HeartbeatChecker(this.workingWorkerIdList, true, this.getServerId(), new HeartbeatChecker.FaultHandler() {
+
+        this.workerHeartbeatChecker = new HeartbeatChecker(this.aliveWorkerIds, true, this.getServerId(), new HeartbeatChecker.FaultHandler() {
             @Override
             public void handleFault(int id) {
                 if (!MasterServer.this.isWorking) {
                     return;
                 }
-                log.info("detected server {} is down, repartitioning...", id);
-                List<Integer> currentWorkingServerIdList = new ArrayList<>();
-                for (int i: workingWorkerIdList){
-                    if (i != id) {
-                        currentWorkingServerIdList.add(i);
-                    }
-                }
-                workingWorkerIdList = currentWorkingServerIdList;
+                log.info("[Fault] detected server {} is down, start repartitioning...", id);
+
+                aliveWorkerIds.remove((Integer) id);
                 nFinishedWorker.set(0);
                 MasterServer.this.partitionGraph();
                 log.info("finished repartitioning...");
             }
         });
 
-        this.masterHeartbeatChecker = new HeartbeatChecker(this.masterIdList, false, this.getServerId(), new HeartbeatChecker.FaultHandler() {
+        this.masterHeartbeatChecker = new HeartbeatChecker(this.masterIds, false, this.getServerId(), new HeartbeatChecker.FaultHandler() {
             @Override
             public void handleFault(int id) {
                 if (isWorking) {
                     return;
                 }
                 // if all id with greater id has died, become the master
-                log.info("detected master {} is down, trying to become master...", id);
+                log.info("[Fault] detected master {} is down, trying to become master...", id);
                 MasterServer.this.partitionGraph();
                 isWorking = true;
             }
         });
+
         this.completeSignalConsumer = new MessageConsumer(Mail.MailType.FINISH_SIGNAL.ordinal(), super.getServerId(), new MessageConsumer.MessageHandler() {
             @Override
             public void handleMessage(UUID key, Mail value, int partition, long offset) throws InterruptedException {
@@ -95,22 +90,22 @@ public class MasterServer<T> extends AbstractServer<T> {
                     return;
                 }
                 int val = nFinishedWorker.addAndGet(1);
-                log.info("number of finished workers: " + val);
-                HashMap<Integer, Computable<T>> vertexValue = (HashMap<Integer, Computable<T>>) value.getMessage().getContent();
-                valueSnapshot.record(vertexValue);
-                if (val == workingWorkerIdList.size()) {
+                log.info("[Superstep] number of finished workers: " + val);
+//                HashMap<Integer, Computable<T>> vertexValue = (HashMap<Integer, Computable<T>>) value.getMessage().getContent();
+//                snapshot.record(vertexValue);
+                if (val == aliveWorkerIds.size()) {
                     // start the next superstep
-                    valueSnapshot.finishSuperstep(graph);
+//                    snapshot.finishSuperstep(graph);
                     log.info("graph is : {}", graph.getVertices());
                     // todo: update the new graph to other replicas
                     Thread.sleep(300);
-                    startNewSuperstep();
+                    superstep();
                 }
             }
         });
         workerHeatBeatConsumer = new MessageConsumer("HEARTBEAT_WORKER", getServerId(), new MessageConsumer.MessageHandler() {
             @Override
-            public void handleMessage(UUID key, Mail value, int partition, long offset) throws JsonProcessingException, InterruptedException, ExecutionException {
+            public void handleMessage(UUID key, Mail value, int partition, long offset) {
                 int id = (int) value.getMessage().getContent();
                 workerHeartbeatChecker.setHeatBeat(id);
             }
@@ -118,7 +113,7 @@ public class MasterServer<T> extends AbstractServer<T> {
 
         masterHeatBeatConsumer = new MessageConsumer("HEARTBEAT_MASTER", getServerId(), new MessageConsumer.MessageHandler() {
             @Override
-            public void handleMessage(UUID key, Mail value, int partition, long offset) throws JsonProcessingException, InterruptedException, ExecutionException {
+            public void handleMessage(UUID key, Mail value, int partition, long offset) {
                 int receivedMasterId = (int) value.getMessage().getContent();
 //                log.info("receiving heart beat from master {}", receivedMasterId);
                 if (receivedMasterId > MasterServer.this.serverId){
@@ -127,14 +122,17 @@ public class MasterServer<T> extends AbstractServer<T> {
                 masterHeartbeatChecker.setHeatBeat(receivedMasterId);
             }
         });
+
+        // TODO: Change the graph SYNC (with snapshot)
         graphConsumer = new MessageConsumer("MASTER_SYNC", getServerId(), new MessageConsumer.MessageHandler() {
             @Override
-            public void handleMessage(UUID key, Mail value, int partition, long offset) throws JsonProcessingException, InterruptedException, ExecutionException {
+            public void handleMessage(UUID key, Mail value, int partition, long offset) {
                 Map<String, Object> objectMap = (Map<String, Object>) value.getMessage().getContent();
                 MasterServer.this.graph = (Graph<T>) objectMap.get("GRAPH");
-                MasterServer.this.workingWorkerIdList = (List<Integer>) objectMap.get("WORKING_WORKER_ID_LIST");
+                MasterServer.this.aliveWorkerIds = (List<Integer>) objectMap.get("WORKING_WORKER_ID_LIST");
             }
         });
+
         this.graphConsumer.start();
         this.workerHeatBeatConsumer.start();
         this.masterHeatBeatConsumer.start();
@@ -145,7 +143,7 @@ public class MasterServer<T> extends AbstractServer<T> {
     }
 
     @Override
-    public void start() throws ExecutionException, InterruptedException {
+    public void start() {
         isWorking = true;
         this.partitionGraph();
     }
@@ -169,13 +167,15 @@ public class MasterServer<T> extends AbstractServer<T> {
     /**
      * start a new round of superstep
      */
-    public void startNewSuperstep() {
+    public void superstep() {
         this.superstep += 1;
         this.nFinishedWorker.set(0);
-        MessageProducer.produceStartSignal();
+        MessageProducer.produceStartSignal(superstep % snapshotFrequency == 0);
+
+        // TODO: Change the graph SYNC (with snapshot)
         Map<String, Object> objectMap = new HashMap<>();
         objectMap.put("GRAPH", this.graph);
-        objectMap.put("WORKING_WORKER_ID_LIST",this.workingWorkerIdList);
+        objectMap.put("WORKING_WORKER_ID_LIST",this.aliveWorkerIds);
         Message message = new Message();
         message.setContent(objectMap);
         Mail mail = new Mail();
@@ -191,14 +191,13 @@ public class MasterServer<T> extends AbstractServer<T> {
             throw new Error("graph is not set!");
         }
         Map<Integer, VertexGroup<T>> map;
-//        log.info("the graph before sending is: {}", graph.getVertices());
-        map = this.graphPartitioner.partition(graph, workingWorkerIdList);
+        map = this.graphPartitioner.partition(graph, aliveWorkerIds);
 
         Set<Map.Entry<Integer, VertexGroup<T>>> set = map.entrySet();
         for (Map.Entry<Integer, VertexGroup<T>> entry: set) {
             Map<String, Object> objectMap = new HashMap<>();
             objectMap.put("PARTITION", entry.getValue());
-            objectMap.put("PARTITIONSTRATEGY",this.graphPartitioner.getPartitionStrategy());
+            objectMap.put("PARTITION_STRATEGY",this.graphPartitioner.getPartitionStrategy());
             Message message = new Message(objectMap);
             Mail mail = new Mail(-1, message, Mail.MailType.PARTITION);
             MessageProducer.createAndProduce(null, mail, "SERVER_" + entry.getKey() + "_PARTITION");
@@ -212,19 +211,4 @@ public class MasterServer<T> extends AbstractServer<T> {
     public void setGraph(Graph<T> graph) {
         this.graph = graph;
     }
-//
-//    public void repartition (){
-//        Map<Integer, VertexGroup<T>> map;
-//        map = this.graphPartitioner.partition(graph, workingWorkerIdList);
-//
-//        Set<Map.Entry<Integer, VertexGroup<T>>> set = map.entrySet();
-//        for (Map.Entry<Integer, VertexGroup<T>> entry: set) {
-//            Map<String, Object> objectMap = new HashMap<>();
-//            objectMap.put("PARTITION", entry.getValue());
-//            objectMap.put("PARTITIONSTRATEGY",this.graphPartitioner.getPartitionStrategy());
-//            Message message = new Message(objectMap);
-//            Mail mail = new Mail(-1, message, Mail.MailType.PARTITION);
-//            MessageProducer.createAndProduce(null, mail, "SERVER_" + entry.getKey() + "_PARTITION");
-//        }
-//    }
 }

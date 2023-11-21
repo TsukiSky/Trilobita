@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
 
 @Data
 @Slf4j
-public class HeartbeatChecker extends Thread{
+public class HeartbeatChecker extends Thread {
     private int serverId;
     private volatile boolean isRunning;
     private ConcurrentHashMap<Integer, Boolean> heartbeatMap;
@@ -91,7 +91,7 @@ public class HeartbeatChecker extends Thread{
     }
 
     @Override
-    public void start(){
+    public void run(){
         if (!isProcessing) {
             heartbeatExecutor.scheduleAtFixedRate(this::check, 5, 2, TimeUnit.SECONDS);
             log.info("Heartbeat checking service will start in 5 seconds.");

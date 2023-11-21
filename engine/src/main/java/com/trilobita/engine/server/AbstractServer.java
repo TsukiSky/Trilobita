@@ -29,7 +29,7 @@ public abstract class AbstractServer<T> {
     @Setter
     public PartitionStrategy partitionStrategy;
     public Context context;
-    public Integer superstep = 1;
+    public Integer superstep = 0;
 
     public AbstractServer(int serverId, PartitionStrategy partitionStrategy) {
         this.serverId = serverId;
