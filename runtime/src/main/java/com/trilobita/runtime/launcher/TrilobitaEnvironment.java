@@ -2,7 +2,7 @@ package com.trilobita.runtime.launcher;
 
 import com.trilobita.core.graph.Graph;
 import com.trilobita.engine.server.functionable.Functionable;
-import com.trilobita.engine.server.functionable.FunctionalMessageHandler;
+import com.trilobita.engine.server.functionable.FunctionalMailHandler;
 import com.trilobita.engine.server.masterserver.MasterServer;
 import com.trilobita.engine.server.masterserver.partitioner.Partioner;
 import com.trilobita.engine.server.masterserver.partitioner.PartitionStrategy;
@@ -57,9 +57,9 @@ public class TrilobitaEnvironment<T> {
         this.inputParser = inputParser;
     }
 
-    public void createMasterServer(FunctionalMessageHandler functionalMailsHandler) {
+    public void createMasterServer(FunctionalMailHandler functionalMailHandler) {
         this.masterServer = new MasterServer<>(this.partitioner, (int) this.configuration.get("numOfWorker"), 0,
-                functionalMailsHandler);
+                functionalMailHandler);
         this.masterServer.setGraph(this.graph);
     }
 

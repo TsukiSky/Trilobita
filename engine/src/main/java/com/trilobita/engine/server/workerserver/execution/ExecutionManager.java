@@ -49,6 +49,8 @@ public class ExecutionManager<T> {
             }
         }
 
+        // TODO: distribute functional mails to the vertices
+
         List<Vertex<T>> vertices = this.server.getVertexGroup().getVertices();
         int activeVertexCount = 0;
         for (Vertex<T> vertex : vertices) {
@@ -71,11 +73,17 @@ public class ExecutionManager<T> {
         computeLatch.await(); // block until all computing tasks are finished
 
         // execute functionables
-        for (Map.Entry<Functionable, CopyOnWriteArrayList<Mail>> entry : server.getFunctionables().entrySet()) {
+        CountDownLatch functionableLatch = new CountDownLatch(server.getFunctionables().size());
+
+        for (Map.Entry<Functionable, Mail> entry : server.getFunctionables().entrySet()) {
             Functionable functionable = entry.getKey();
-            CopyOnWriteArrayList<Mail> mailList = entry.getValue();
-            functionable.execute(server.context, mailList);
+            Mail mail = entry.getValue();
+            futures.add(this.executorService.submit(() -> {
+                functionable.execute(server.context, mail);
+                functionableLatch.countDown();
+            }));
         }
+        functionableLatch.await(); // block until all functionable tasks are finished
 
         CountDownLatch mailingLatch = new CountDownLatch(server.getOutMailQueue().size());
         // send the mail to the other servers

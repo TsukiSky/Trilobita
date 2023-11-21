@@ -68,6 +68,7 @@ public class WorkerServer<T> extends AbstractServer<T> {
             }
         });
         this.heartbeatSender = new HeartbeatSender(this.getServerId(), true);
+
         for (Functionable functionable : functionables) {
             this.functionables.put(functionable, null);
         }

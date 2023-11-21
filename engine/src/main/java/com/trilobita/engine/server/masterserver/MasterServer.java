@@ -6,7 +6,7 @@ import com.trilobita.core.graph.VertexGroup;
 import com.trilobita.core.messaging.MessageConsumer;
 import com.trilobita.core.messaging.MessageProducer;
 import com.trilobita.engine.server.AbstractServer;
-import com.trilobita.engine.server.functionable.FunctionalMessageHandler;
+import com.trilobita.engine.server.functionable.FunctionalMailHandler;
 import com.trilobita.engine.server.heartbeat.HeartbeatChecker;
 import com.trilobita.engine.server.heartbeat.HeartbeatSender;
 import com.trilobita.engine.server.masterserver.partitioner.Partioner;
@@ -32,9 +32,9 @@ public class MasterServer<T> extends AbstractServer<T> {
     HeartbeatSender heartbeatSender;
     ValueSnapshot<T> valueSnapshot;
     List<Integer> WorkingWorkerIdList;                  // the alive working server's id
-    FunctionalMessageHandler functionalMailsHandler;
+    MessageConsumer functionalMessageConsumer;
 
-    public MasterServer(Partioner<T> graphPartitioner, int nWorker,int id, FunctionalMessageHandler functionalMailsHandler) {
+    public MasterServer(Partioner<T> graphPartitioner, int nWorker,int id, FunctionalMailHandler functionalMailHandler) {
         super(0, graphPartitioner.getPartitionStrategy());   // the standard server id of master is 0
         this.nWorker = nWorker;
         this.graphPartitioner = graphPartitioner;
@@ -74,7 +74,7 @@ public class MasterServer<T> extends AbstractServer<T> {
                 }
             }
         });
-        this.functionalMailsHandler = functionalMailsHandler;
+        this.functionalMessageConsumer = new MessageConsumer(Mail.MailType.FUNCTIONAL.ordinal(), super.getServerId(), functionalMailHandler);
     }
 
     @Override
@@ -83,7 +83,7 @@ public class MasterServer<T> extends AbstractServer<T> {
         this.workerHeartbeatChecker.start();
         this.partitionGraph();
         this.heartbeatSender.start();
-
+        this.functionalMessageConsumer.start();
     }
 
     @Override
@@ -104,8 +104,9 @@ public class MasterServer<T> extends AbstractServer<T> {
     public void startNewSuperstep() {
         this.superstep += 1;
         this.nFinishedWorker.set(0);
-        MessageProducer.produceStartSignal();
         // TODO: send functionalMails to vertices in workers
+        MessageProducer.produceStartSignal();
+        
     }
 
     /**
