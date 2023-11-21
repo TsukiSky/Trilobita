@@ -10,6 +10,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * The Graph class
+ *
+ * @param <T>
+ */
 @EqualsAndHashCode(callSuper = true)
 @Data
 @AllArgsConstructor
@@ -20,16 +25,27 @@ public class Graph<T> extends VertexGroup<T> {
         this.size = vertices.size();
     }
 
-    public void addVertex(Vertex<T> v){
+    public void addVertex(Vertex<T> v) {
         this.vertices.add(v);
     }
 
+    /**
+     * Update the values of the vertices
+     *
+     * @param vertexValues the new values of the vertices
+     */
     public void updateVertexValues(HashMap<Integer, Computable<T>> vertexValues) {
-        for (Map.Entry<Integer, Computable<T>> vertex: vertexValues.entrySet()) {
+        for (Map.Entry<Integer, Computable<T>> vertex : vertexValues.entrySet()) {
             updateVertexValue(vertex.getKey(), vertex.getValue());
         }
     }
 
+    /**
+     * Update the value of a vertex
+     *
+     * @param id    the id of the vertex
+     * @param value the new value of the vertex
+     */
     public void updateVertexValue(int id, Computable<T> value) {
         for (Vertex<T> vertex : vertices) {
             if (vertex.getId() == id) {

@@ -8,7 +8,7 @@ import com.trilobita.core.messaging.MessageProducer;
 import com.trilobita.engine.server.AbstractServer;
 import com.trilobita.engine.server.heartbeat.HeartbeatChecker;
 import com.trilobita.engine.server.heartbeat.HeartbeatSender;
-import com.trilobita.engine.server.masterserver.partitioner.Partioner;
+import com.trilobita.engine.server.masterserver.partitioner.Partitioner;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Slf4j
 public class MasterServer<T> extends AbstractServer<T> {
     Graph<T> graph;                                     // the graph to be computed
-    Partioner<T> graphPartitioner;            // the partitioner of the graph
+    Partitioner<T> graphPartitioner;            // the partitioner of the graph
     AtomicInteger nFinishedWorker;                      // the number of workers that have finished the superstep
     MessageConsumer completeSignalConsumer;             // the consumer that consume the finish signal from workers
     MessageConsumer workerHeatBeatConsumer;
@@ -31,23 +31,24 @@ public class MasterServer<T> extends AbstractServer<T> {
     HeartbeatChecker workerHeartbeatChecker;
     HeartbeatChecker masterHeartbeatChecker;
     HeartbeatSender heartbeatSender;
-    Snapshot<T> snapshot;
+    List<Snapshot<T>> snapshots;
     int snapshotFrequency = 5;                                   // whether the server is the master
     List<Integer> aliveWorkerIds;                  // the alive working servers' ids
     List<Integer> masterIds;                  // the alive master servers' ids
     volatile boolean isWorking;
 
-    public MasterServer(Partioner<T> graphPartitioner, int nWorker, int id, int nReplica) throws ExecutionException, InterruptedException {
+    public MasterServer(Partitioner<T> graphPartitioner, int nWorker, int id, int nReplica) throws ExecutionException, InterruptedException {
         super(id, graphPartitioner.getPartitionStrategy());   // the standard server id of master is 0
         this.graphPartitioner = graphPartitioner;
         this.nFinishedWorker = new AtomicInteger(0);
         this.heartbeatSender = new HeartbeatSender(getServerId(), false);
         this.aliveWorkerIds = new ArrayList<>();
-        for (int i=0; i<nWorker; i++){
+        this.snapshots = new ArrayList<>();
+        for (int i = 0; i < nWorker; i++) {
             this.aliveWorkerIds.add(i + 1);
         }
         this.masterIds = new ArrayList<>();
-        for (int i=0; i<nReplica; i++){
+        for (int i = 0; i < nReplica; i++) {
             this.masterIds.add(i + 1);
         }
 
@@ -117,8 +118,8 @@ public class MasterServer<T> extends AbstractServer<T> {
             @Override
             public void handleMessage(UUID key, Mail value, int partition, long offset) {
                 int receivedMasterId = (int) value.getMessage().getContent();
-//                log.info("receiving heart beat from master {}", receivedMasterId);
-                if (receivedMasterId > MasterServer.this.serverId){
+                // log.info("receiving heart beat from master {}", receivedMasterId);
+                if (receivedMasterId > MasterServer.this.serverId) {
                     isWorking = false;
                 }
                 masterHeartbeatChecker.setHeatBeat(receivedMasterId);
@@ -178,10 +179,10 @@ public class MasterServer<T> extends AbstractServer<T> {
         map = this.graphPartitioner.partition(graph, aliveWorkerIds);
 
         Set<Map.Entry<Integer, VertexGroup<T>>> set = map.entrySet();
-        for (Map.Entry<Integer, VertexGroup<T>> entry: set) {
+        for (Map.Entry<Integer, VertexGroup<T>> entry : set) {
             Map<String, Object> objectMap = new HashMap<>();
             objectMap.put("PARTITION", entry.getValue());
-            objectMap.put("PARTITION_STRATEGY",this.graphPartitioner.getPartitionStrategy());
+            objectMap.put("PARTITION_STRATEGY", this.graphPartitioner.getPartitionStrategy());
             Message message = new Message(objectMap);
             Mail mail = new Mail(-1, message, Mail.MailType.PARTITION);
             MessageProducer.createAndProduce(null, mail, "SERVER_" + entry.getKey() + "_PARTITION");
@@ -192,7 +193,7 @@ public class MasterServer<T> extends AbstractServer<T> {
      * do snapshot and sync the graph with other masters
      */
     public void snapshotAndSync() {
-        this.snapshot = Snapshot.createSnapshot(superstep, graph);
+        this.snapshots.add(Snapshot.createSnapshot(superstep, graph));
         this.syncGraph();
     }
 

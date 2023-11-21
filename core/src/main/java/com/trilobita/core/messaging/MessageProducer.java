@@ -21,11 +21,14 @@ import java.util.concurrent.ExecutionException;
  */
 @Slf4j
 public class MessageProducer {
-    private MessageProducer() {}
+    private MessageProducer() {
+    }
+
     private static final boolean LOG_FLAG = false;
 
     /**
      * Produce a message to a topic.
+     *
      * @param key   Message {@link UUID}
      * @param value {@link Mail}, which is the message payload
      * @param topic Target topic, usually used by the destination server. It will be created if it does not exist.
@@ -55,7 +58,7 @@ public class MessageProducer {
                 if (ex != null) {
                     log.error("[Message] error producing message: {}", ex.getMessage());
                 } else {
-                    if (LOG_FLAG){
+                    if (LOG_FLAG) {
                         log.info("[Message] produced event to topic {}: key = {} value = {}", topic, finalKey, value);
                     }
                 }
@@ -72,6 +75,7 @@ public class MessageProducer {
 
     /**
      * Produce a finish signal to the topic.
+     *
      * @param vertexValues vertex values to be stored as checkpoints
      */
     public static <T> void produceFinishSignal(HashMap<Integer, Computable<T>> vertexValues) {
@@ -82,7 +86,8 @@ public class MessageProducer {
 
     /**
      * Produce a sync message among masters to the topic.
-     * @param graph the graph
+     *
+     * @param graph          the graph
      * @param aliveWorkerIds alive worker ids
      */
     public static void produceSyncMessage(Graph<?> graph, List<Integer> aliveWorkerIds) {

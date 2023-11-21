@@ -34,24 +34,23 @@ public class WorkerServer<T> extends AbstractServer<T> {
         super(serverId, partitionStrategy);
         this.executionManager = new ExecutionManager<>(parallelism, this);
         this.outMailTable = new ConcurrentHashMap<>();
-        this.partitionMessageConsumer = new MessageConsumer("SERVER_" + this.getServerId() + "_PARTITION", serverId,
-                new MessageConsumer.MessageHandler() {
-                    @Override
-                    public void handleMessage(UUID key, Mail mail, int partition, long offset) throws InterruptedException, ExecutionException {
-                        log.info("receiving message from server.........");
-                        WorkerServer.this.executionManager.waitForFutures(); // in case of fault, repartition is needed
-                        Map<String, Object> res = (Map<String, Object>) mail.getMessage().getContent();
-                        setVertexGroup((VertexGroup<T>) res.get("PARTITION"));
-                        PartitionStrategy partitionStrategy = (PartitionStrategy) res.get("PARTITION_STRATEGY");
-                        setPartitionStrategy(partitionStrategy);
-                        // assign the server's hashmap to each vertex
-                        List<Vertex<T>> vertices = vertexGroup.getVertices();
-                        for (Vertex<T> vertex : vertices) {
-                            vertex.setServerQueue(getOutMailQueue());
-                        }
-                        log.info("[Partition] Vertex Group: {}", vertexGroup);
-                    }
-                });
+        this.partitionMessageConsumer = new MessageConsumer("SERVER_" + this.getServerId() + "_PARTITION", serverId, new MessageConsumer.MessageHandler() {
+            @Override
+            public void handleMessage(UUID key, Mail mail, int partition, long offset) throws InterruptedException, ExecutionException {
+                log.info("receiving message from server.........");
+                WorkerServer.this.executionManager.waitForFutures(); // in case of fault, repartition is needed
+                Map<String, Object> res = (Map<String, Object>) mail.getMessage().getContent();
+                setVertexGroup((VertexGroup<T>) res.get("PARTITION"));
+                PartitionStrategy partitionStrategy = (PartitionStrategy) res.get("PARTITION_STRATEGY");
+                setPartitionStrategy(partitionStrategy);
+                // assign the server's hashmap to each vertex
+                List<Vertex<T>> vertices = vertexGroup.getVertices();
+                for (Vertex<T> vertex : vertices) {
+                    vertex.setServerQueue(getOutMailQueue());
+                }
+                log.info("[Partition] Vertex Group: {}", vertexGroup);
+            }
+        });
 
         this.startMessageConsumer = new MessageConsumer(Mail.MailType.START_SIGNAL.ordinal(), serverId, new MessageConsumer.MessageHandler() {
             @Override
@@ -81,7 +80,7 @@ public class WorkerServer<T> extends AbstractServer<T> {
      * Execute the superstep
      */
     private void superstep(boolean doSnapshot) throws InterruptedException {
-        superstep ++;
+        superstep++;
         log.info("[Superstep] entering a new super step...");
         this.executionManager.execute();
         sendCompleteSignal(doSnapshot);
@@ -110,6 +109,7 @@ public class WorkerServer<T> extends AbstractServer<T> {
 
     /**
      * Distribute mail to vertex
+     *
      * @param mail mail to be distributed
      */
     public void distributeMailToVertex(Mail mail) {
@@ -121,6 +121,7 @@ public class WorkerServer<T> extends AbstractServer<T> {
 
     /**
      * Find the vertex with the given id
+     *
      * @param vertexId vertex id
      * @return vertex with the given id
      */

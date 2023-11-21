@@ -25,8 +25,11 @@ public class Snapshot<T> {
         }
     }
 
+    /**
+     * Store the snapshot to the disk
+     */
     public void store() {
-
+        // TODO: implement this method after finalizing the JSON structure
     }
 
     /**

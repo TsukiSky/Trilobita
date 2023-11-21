@@ -10,6 +10,11 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * VertexGroup represents a group of vertices
+ *
+ * @param <T>
+ */
 @Data
 public class VertexGroup<T> implements Serializable {
     protected List<Vertex<T>> vertices;
@@ -21,12 +26,13 @@ public class VertexGroup<T> implements Serializable {
 
     /**
      * Get the vertex by id
+     *
      * @param id the id of the vertex
      * @return the vertex if found, null otherwise
      */
     public Vertex<T> getVertexById(int id) {
-        for (Vertex<T> vertex: vertices){
-            if (vertex.getId() == id){
+        for (Vertex<T> vertex : vertices) {
+            if (vertex.getId() == id) {
                 return vertex;
             }
         }
@@ -35,6 +41,7 @@ public class VertexGroup<T> implements Serializable {
 
     /**
      * Get the vertex values of the graph
+     *
      * @return the vertex values
      */
     public HashMap<Integer, Computable<T>> getVertexValues() {
