@@ -36,13 +36,7 @@ public class HeartbeatSender {
 
 
     private void sendHeartbeat() {
-        // TODO: Implement the actual sending logic here
-        Message message = new Message();
-        message.setContent(serverId);
-        Mail mail = new Mail();
-        mail.setMessage(message);
-        String topic = isWorker ? "HEARTBEAT_WORKER" : "HEARTBEAT_MASTER";
-        MessageProducer.createAndProduce(null, mail, topic);
+        MessageProducer.produceHeartbeatMessage(serverId,isWorker);
     }
 
     public void stop() {
