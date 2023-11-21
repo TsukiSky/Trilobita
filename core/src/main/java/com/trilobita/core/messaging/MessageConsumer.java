@@ -21,7 +21,7 @@ import java.util.concurrent.ExecutionException;
  */
 @Slf4j
 public class MessageConsumer {
-    private static final boolean willLog = false;
+    private static final boolean willLog = true;
     private volatile boolean runFlag = false;
     private String topic;
     private final MessageAdmin messageAdmin = MessageAdmin.getInstance();
@@ -66,7 +66,6 @@ public class MessageConsumer {
         if (!existing.contains(topic)) {
             messageAdmin.createIfNotExist(topic);
             log.info("existing topic: {} do not contain {}! Creating, and then subscribe...", existing, topic);
-            return;
         }
         if (runFlag) {
             log.info("already listening to topic: {}!", topic);
@@ -92,7 +91,7 @@ public class MessageConsumer {
                     }
                 }
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                e.printStackTrace();
             }
         });
         consumerThread.start();
