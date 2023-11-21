@@ -102,7 +102,6 @@ public class MasterServer<T> extends AbstractServer<T> {
                     // start the next superstep
                     valueSnapshot.finishSuperstep(graph);
                     log.info("graph is : {}", graph.getVertices());
-                    // todo: update the new graph to other replicas
                     Thread.sleep(300);
                     startNewSuperstep();
                 }
@@ -111,7 +110,15 @@ public class MasterServer<T> extends AbstractServer<T> {
         workerHeatBeatConsumer = new MessageConsumer("HEARTBEAT_WORKER", getServerId(), new MessageConsumer.MessageHandler() {
             @Override
             public void handleMessage(UUID key, Mail value, int partition, long offset) throws JsonProcessingException, InterruptedException, ExecutionException {
+                if (!isWorking) {
+                    return;
+                }
                 int id = (int) value.getMessage().getContent();
+                if (!workingWorkerIdList.contains(id)) {
+                    workingWorkerIdList.add(id);
+                    workerHeartbeatChecker.getHeartbeatMap().put(id, true);
+                    MasterServer.this.partitionGraph();
+                }
                 workerHeartbeatChecker.setHeatBeat(id);
             }
         });
