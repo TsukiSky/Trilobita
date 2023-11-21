@@ -12,7 +12,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 @Slf4j
 public class HeartbeatSender {
-
     private final ScheduledExecutorService heartbeatExecutor;
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
 
@@ -45,11 +44,7 @@ public class HeartbeatSender {
 
 
     private void sendHeartbeat() {
-        Message message = new Message();
-        message.setContent(serverId);
-        Mail mail = new Mail();
-        mail.setMessage(message);
-        MessageProducer.createAndProduce(null, mail,  isWorker ? "HEARTBEAT_WORKER" : "HEARTBEAT_MASTER");
+        MessageProducer.produceHeartbeatMessage(serverId, isWorker);
     }
 
     public void stop() {

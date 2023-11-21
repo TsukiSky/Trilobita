@@ -12,6 +12,7 @@ import java.util.concurrent.*;
 
 /**
  * Execution Manager is responsible for the execution of a superstep
+ *
  * @param <T> the type of the vertex value
  */
 @Slf4j
@@ -40,23 +41,21 @@ public class ExecutionManager<T> {
         while (!server.getInMailQueue().isEmpty()) {
             Mail mail = this.server.getInMailQueue().poll();
             if (mail != null) {
-                futures.add(this.executorService.submit(() -> {
-                    server.distributeMailToVertex(mail);
-                }));
+                futures.add(this.executorService.submit(() -> server.distributeMailToVertex(mail)));
             }
         }
 
         List<Vertex<T>> vertices = this.server.getVertexGroup().getVertices();
         int activeVertexCount = 0;
-        for (Vertex<T> vertex: vertices) {
+        for (Vertex<T> vertex : vertices) {
             if (vertex.getStatus() == Vertex.VertexStatus.ACTIVE) {
                 activeVertexCount++;
             }
         }
-        CountDownLatch computeLatch = new CountDownLatch(activeVertexCount);
 
+        CountDownLatch computeLatch = new CountDownLatch(activeVertexCount);
         // start the computation of the vertices
-        for (Vertex<T> vertex: vertices) {
+        for (Vertex<T> vertex : vertices) {
             if (vertex.getStatus() == Vertex.VertexStatus.ACTIVE) {
                 futures.add(executorService.submit(() -> {
                     vertex.step();
@@ -64,8 +63,7 @@ public class ExecutionManager<T> {
                 }));
             }
         }
-
-        computeLatch.await();   // block until all computing tasks are finished
+        computeLatch.await(); // block until all computing tasks are finished
 
         CountDownLatch mailingLatch = new CountDownLatch(server.getOutMailQueue().size());
         // send the mail to the other servers
@@ -73,10 +71,10 @@ public class ExecutionManager<T> {
             Mail mail = this.server.getOutMailQueue().poll();
             futures.add(executorService.submit(() -> {
                 int receiverId = this.server.findServerByVertexId(mail.getToVertexId());
-                MessageProducer.createAndProduce(null, mail, "SERVER_" + receiverId + "_MESSAGE");
+                MessageProducer.produceWorkerServerMessage(mail, receiverId);
                 mailingLatch.countDown();
             }));
         }
-        mailingLatch.await();   // block until all mailing tasks are finished
+        mailingLatch.await(); // block until all mailing tasks are finished
     }
 }
