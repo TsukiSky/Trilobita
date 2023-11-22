@@ -36,47 +36,56 @@ public class ExecutionManager<T> {
      */
     public void execute() throws InterruptedException {
         futures.clear();
-        // distribute the mail to the vertices
-        while (!server.getInMailQueue().isEmpty()) {
-            Mail mail = this.server.getInMailQueue().poll();
-            if (mail != null) {
-                futures.add(this.executorService.submit(() -> {
-                    server.distributeMailToVertex(mail);
-                }));
-            }
-        }
 
-        List<Vertex<T>> vertices = this.server.getVertexGroup().getVertices();
-        int activeVertexCount = 0;
-        for (Vertex<T> vertex: vertices) {
-            if (vertex.getStatus() == Vertex.VertexStatus.ACTIVE) {
-                activeVertexCount++;
-            }
-        }
-        CountDownLatch computeLatch = new CountDownLatch(activeVertexCount);
+        if (server.getInMailQueue().isEmpty()){
+            //TODO: Worker send signal to Master to show all the vertex are Inactive
 
-        // start the computation of the vertices
-        for (Vertex<T> vertex: vertices) {
-            if (vertex.getStatus() == Vertex.VertexStatus.ACTIVE) {
+
+            // distribute the mail to the vertices
+            while (!server.getInMailQueue().isEmpty()) {
+                Mail mail = this.server.getInMailQueue().poll();
+                if (mail != null) {
+                    futures.add(this.executorService.submit(() -> {
+                        server.distributeMailToVertex(mail);
+                    }));
+                }
+            }
+
+
+
+            List<Vertex<T>> vertices = this.server.getVertexGroup().getVertices();
+            int activeVertexCount = 0;
+            for (Vertex<T> vertex: vertices) {
+                if (vertex.getStatus() == Vertex.VertexStatus.ACTIVE) {
+                    activeVertexCount++;
+                }
+            }
+            CountDownLatch computeLatch = new CountDownLatch(activeVertexCount);
+
+            // start the computation of the vertices
+            for (Vertex<T> vertex: vertices) {
+                if (vertex.getStatus() == Vertex.VertexStatus.ACTIVE) {
+                    futures.add(executorService.submit(() -> {
+                        vertex.step();
+                        vertex.setStatus(Vertex.VertexStatus.INACTIVE);
+                        computeLatch.countDown();
+                    }));
+                }
+            }
+
+            computeLatch.await();   // block until all computing tasks are finished
+
+            CountDownLatch mailingLatch = new CountDownLatch(server.getOutMailQueue().size());
+            // send the mail to the other servers
+            while (!this.server.getOutMailQueue().isEmpty()) {
+                Mail mail = this.server.getOutMailQueue().poll();
                 futures.add(executorService.submit(() -> {
-                    vertex.step();
-                    computeLatch.countDown();
+                    int receiverId = this.server.findServerByVertexId(mail.getToVertexId());
+                    MessageProducer.createAndProduce(null, mail, "SERVER_" + receiverId + "_MESSAGE");
+                    mailingLatch.countDown();
                 }));
             }
+            mailingLatch.await();   // block until all mailing tasks are finished
         }
-
-        computeLatch.await();   // block until all computing tasks are finished
-
-        CountDownLatch mailingLatch = new CountDownLatch(server.getOutMailQueue().size());
-        // send the mail to the other servers
-        while (!this.server.getOutMailQueue().isEmpty()) {
-            Mail mail = this.server.getOutMailQueue().poll();
-            futures.add(executorService.submit(() -> {
-                int receiverId = this.server.findServerByVertexId(mail.getToVertexId());
-                MessageProducer.createAndProduce(null, mail, "SERVER_" + receiverId + "_MESSAGE");
-                mailingLatch.countDown();
-            }));
         }
-        mailingLatch.await();   // block until all mailing tasks are finished
-    }
 }
