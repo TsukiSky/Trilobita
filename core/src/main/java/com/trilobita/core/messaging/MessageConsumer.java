@@ -76,7 +76,6 @@ public class MessageConsumer {
         if (!existing.contains(topic)) {
             messageAdmin.createIfNotExist(topic);
             log.info("existing topic: {} do not contain {}! Creating, and then subscribe...", existing, topic);
-            return;
         }
         if (runFlag) {
             log.info("already listening to topic: {}!", topic);
@@ -102,7 +101,7 @@ public class MessageConsumer {
                     }
                 }
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                e.printStackTrace();
             }
         });
         consumerThread.start();
