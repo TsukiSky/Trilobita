@@ -3,6 +3,7 @@ package com.trilobita.engine.server.heartbeat;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -24,7 +25,7 @@ public class HeartbeatChecker extends Thread {
 
 
     public interface FaultHandler {
-        void handleFault(int id);
+        void handleFault(List<Integer> ids);
     }
 
     public HeartbeatChecker(List<Integer> workerIds, boolean checkWorker, int serverId, FaultHandler faultHandler){
@@ -49,20 +50,21 @@ public class HeartbeatChecker extends Thread {
         }
         if (isCheckWorker()) {
             Set<Map.Entry<Integer, Boolean>> set = heartbeatMap.entrySet();
-            int id = -1;
+            List<Integer> errList = new ArrayList<>();
             for (Map.Entry<Integer, Boolean> entry: set){
-                if (entry.getValue() == Boolean.FALSE){
-                    id = entry.getKey();
+                if (!entry.getValue()){
+                    errList.add(entry.getKey());
                 }
             }
             for (Map.Entry<Integer, Boolean> entry: set){
                 heartbeatMap.put(entry.getKey(), false);
             }
-            if (id != -1){
+            if (errList.size()>0){
+                for (int id: errList){
+                    heartbeatMap.remove(id);
+                }
                 isProcessing = true;
-                faultHandler.handleFault(id);
-                heartbeatMap.remove(id);
-                isProcessing = false;
+                faultHandler.handleFault(errList);
             }
         } else {
             Set<Map.Entry<Integer, Boolean>> set = heartbeatMap.entrySet();
@@ -71,9 +73,8 @@ public class HeartbeatChecker extends Thread {
             boolean flag = true;
             for (Map.Entry<Integer, Boolean> entry: set){
                 if (entry.getValue() == Boolean.TRUE && (entry.getKey() > id)){
-                        flag = false;
-                        break;
-
+                    flag = false;
+                    break;
                 }
             }
 
@@ -82,7 +83,7 @@ public class HeartbeatChecker extends Thread {
             }
             if (flag) {
                 isProcessing = true;
-                faultHandler.handleFault(id);
+                faultHandler.handleFault(new ArrayList<>());
                 isProcessing = false;
             }
         }
@@ -90,7 +91,7 @@ public class HeartbeatChecker extends Thread {
 
     @Override
     public void run(){
-        if (isProcessing == Boolean.FALSE) {
+        if (!isProcessing) {
             heartbeatExecutor.scheduleAtFixedRate(this::check, 5, 2, TimeUnit.SECONDS);
             log.info("Heartbeat checking service will start in 5 seconds.");
         } else {

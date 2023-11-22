@@ -106,7 +106,9 @@ public class MessageConsumer {
                                     topic, consumerRecord.key(), value, partition, offset
                             );
                         }
+//                        if (value != null){
                         messageHandler.handleMessage(UUID.fromString(consumerRecord.key()), value, partition, offset);
+//                        }
                     }
                 }
             } catch (ExecutionException | JsonProcessingException | InterruptedException e) {
