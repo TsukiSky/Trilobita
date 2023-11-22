@@ -1,17 +1,20 @@
 package com.trilobita.core.graph;
 
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.trilobita.commons.Computable;
 import com.trilobita.core.graph.vertex.Vertex;
 import lombok.Data;
-import lombok.Getter;
 
 import java.io.Serializable;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * VertexGroup represents a group of vertices
+ *
+ * @param <T>
+ */
 @Data
 public class VertexGroup<T> implements Serializable {
     protected List<Vertex<T>> vertices;
@@ -21,13 +24,31 @@ public class VertexGroup<T> implements Serializable {
         this.vertices = new LinkedList<>();
     }
 
+    /**
+     * Get the vertex by id
+     *
+     * @param id the id of the vertex
+     * @return the vertex if found, null otherwise
+     */
     public Vertex<T> getVertexById(int id) {
-        for (Vertex<T> vertex: vertices){
-            if (vertex.getId() == id){
+        for (Vertex<T> vertex : vertices) {
+            if (vertex.getId() == id) {
                 return vertex;
             }
         }
         return null;
     }
 
+    /**
+     * Get the vertex values of the graph
+     *
+     * @return the vertex values
+     */
+    public HashMap<Integer, Computable<T>> getVertexValues() {
+        HashMap<Integer, Computable<T>> vertexValues = new HashMap<>();
+        for (Vertex<T> v : vertices) {
+            vertexValues.put(v.getId(), v.getValue());
+        }
+        return vertexValues;
+    }
 }

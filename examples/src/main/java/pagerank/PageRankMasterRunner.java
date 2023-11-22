@@ -2,7 +2,7 @@ package pagerank;
 
 import com.trilobita.core.graph.Graph;
 import com.trilobita.core.graph.vertex.Vertex;
-import com.trilobita.engine.server.masterserver.partitioner.Partioner;
+import com.trilobita.engine.server.masterserver.partitioner.Partitioner;
 import com.trilobita.engine.server.masterserver.partitioner.PartitionStrategy;
 import com.trilobita.engine.server.masterserver.partitioner.PartitionStrategyFactory;
 import com.trilobita.runtime.environment.TrilobitaEnvironment;
@@ -81,7 +81,7 @@ public class PageRankMasterRunner {
         trilobitaEnvironment.loadGraph(PageRankMasterRunner.createVertices());
         PartitionStrategyFactory partitionStrategyFactory = new PartitionStrategyFactory();
         PartitionStrategy partitionStrategy = partitionStrategyFactory.getPartitionStrategy("hashPartitionStrategy",(int) trilobitaEnvironment.getConfiguration().get("numOfWorker"),trilobitaEnvironment.getGraph().getSize());
-        trilobitaEnvironment.setPartitioner(new Partioner<>(partitionStrategy));
+        trilobitaEnvironment.setPartitioner(new Partitioner<>(partitionStrategy));
         trilobitaEnvironment.createMasterServer(2);
         trilobitaEnvironment.startMasterServer();
     }

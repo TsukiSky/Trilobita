@@ -2,7 +2,7 @@ package com.trilobita.runtime.environment;
 
 import com.trilobita.core.graph.Graph;
 import com.trilobita.engine.server.masterserver.MasterServer;
-import com.trilobita.engine.server.masterserver.partitioner.Partioner;
+import com.trilobita.engine.server.masterserver.partitioner.Partitioner;
 import com.trilobita.engine.server.masterserver.partitioner.PartitionStrategy;
 import com.trilobita.engine.server.workerserver.WorkerServer;
 import com.trilobita.runtime.configuration.Configuration;
@@ -24,7 +24,7 @@ public class TrilobitaEnvironment<T> {
     @Getter
     private Graph<T> graph;
     public PartitionStrategy partitionStrategy;
-    public Partioner<T> partitioner;
+    public Partitioner<T> partitioner;
     public MasterServer<T> masterServer;
     public WorkerServer<T> workerServer;
     public Cluster<T> cluster;
@@ -42,7 +42,7 @@ public class TrilobitaEnvironment<T> {
         this.graph = graph;
     }
 
-    public void setPartitioner(Partioner<T> partitioner) {
+    public void setPartitioner(Partitioner<T> partitioner) {
         this.partitioner = partitioner;
         this.partitionStrategy = partitioner.getPartitionStrategy();
     }
@@ -52,6 +52,8 @@ public class TrilobitaEnvironment<T> {
     }
 
     public void createMasterServer(int id) throws ExecutionException, InterruptedException {
+
+
         this.masterServer = new MasterServer<>(this.partitioner, (int) this.configuration.get("numOfWorker"), id, (int) this.configuration.get("numOfReplica"));
         this.masterServer.setGraph(this.graph);
     }
@@ -61,11 +63,11 @@ public class TrilobitaEnvironment<T> {
     }
 
 
-    public void createWorkerServer(int workerId) throws ExecutionException, InterruptedException {
+    public void createWorkerServer(int workerId) {
         this.workerServer = new WorkerServer<>(workerId, (int) this.configuration.get("parallelism"), this.partitionStrategy);
     }
 
-    public void startMasterServer() throws ExecutionException, InterruptedException {
+    public void startMasterServer() {
         this.masterServer.start();
     }
 

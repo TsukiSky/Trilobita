@@ -1,9 +1,9 @@
 package com.trilobita.engine.server.heartbeat;
 
-import com.trilobita.core.messaging.MessageProducer;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
 
 @Data
 @Slf4j
-public class HeartbeatChecker extends Thread{
+public class HeartbeatChecker extends Thread {
     private int serverId;
     private volatile boolean isRunning;
     private ConcurrentHashMap<Integer, Boolean> heartbeatMap;
@@ -25,7 +25,7 @@ public class HeartbeatChecker extends Thread{
 
 
     public interface FaultHandler {
-        void handleFault(int id);
+        void handleFault(List<Integer> ids);
     }
 
     public HeartbeatChecker(List<Integer> workerIds, boolean checkWorker, int serverId, FaultHandler faultHandler){
@@ -45,25 +45,34 @@ public class HeartbeatChecker extends Thread{
     }
 
     public void check(){
+        if (isCheckWorker()){
+            log.info("check worker: {}", isCheckWorker());
+
+        }
         if (isProcessing){
             return;
         }
         if (isCheckWorker()) {
+            System.out.println("checking worker error....");
+
             Set<Map.Entry<Integer, Boolean>> set = heartbeatMap.entrySet();
-            int id = -1;
+            List<Integer> errList = new ArrayList<>();
             for (Map.Entry<Integer, Boolean> entry: set){
                 if (!entry.getValue()){
-                    id = entry.getKey();
+                    errList.add(entry.getKey());
                 }
             }
             for (Map.Entry<Integer, Boolean> entry: set){
                 heartbeatMap.put(entry.getKey(), false);
             }
-            if (id != -1){
+            if (errList.size()>0){
+                System.out.println("checking worker error here....");
+
                 isProcessing = true;
-                faultHandler.handleFault(id);
-                heartbeatMap.remove(id);
-                isProcessing = false;
+                faultHandler.handleFault(errList);
+                for (int id: errList){
+                    heartbeatMap.remove(id);
+                }
             }
         } else {
             Set<Map.Entry<Integer, Boolean>> set = heartbeatMap.entrySet();
@@ -84,14 +93,14 @@ public class HeartbeatChecker extends Thread{
             }
             if (flag) {
                 isProcessing = true;
-                faultHandler.handleFault(id);
+                faultHandler.handleFault(new ArrayList<>());
                 isProcessing = false;
             }
         }
     }
 
     @Override
-    public void start(){
+    public void run(){
         if (!isProcessing) {
             heartbeatExecutor.scheduleAtFixedRate(this::check, 5, 2, TimeUnit.SECONDS);
             log.info("Heartbeat checking service will start in 5 seconds.");
@@ -99,7 +108,4 @@ public class HeartbeatChecker extends Thread{
             log.info("Heartbeat checking service is already running.");
         }
     }
-
-
-
 }
