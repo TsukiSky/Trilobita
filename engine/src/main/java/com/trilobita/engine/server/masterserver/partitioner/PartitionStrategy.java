@@ -6,7 +6,6 @@ import java.util.List;
  * This is an interface for defining the partitioning strategy used by the Master Server.
  */
 public interface PartitionStrategy {
-
     /**
      * Get the server ID based on the vertex ID.
      *

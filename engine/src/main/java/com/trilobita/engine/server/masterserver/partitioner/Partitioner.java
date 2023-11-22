@@ -3,27 +3,25 @@ package com.trilobita.engine.server.masterserver.partitioner;
 import com.trilobita.core.graph.Graph;
 import com.trilobita.core.graph.VertexGroup;
 import com.trilobita.core.graph.vertex.Vertex;
-import java.util.ArrayList;
+import lombok.Data;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import lombok.Data;
 
 /**
  * This class is responsible for partitioning a graph into multiple VertexGroups based on a given partitioning strategy.
  */
 @Data
-public class Partioner<T> {
-
+public class Partitioner<T> {
     protected final PartitionStrategy partitionStrategy;
 
     /**
-     * Constructor to initialize the Partioner with a partitioning strategy.
+     * Constructor to initialize the Partitioner with a partitioning strategy.
      *
      * @param partitionStrategy The strategy used for partitioning the graph.
      */
-    public Partioner(PartitionStrategy partitionStrategy) {
+    public Partitioner(PartitionStrategy partitionStrategy) {
         this.partitionStrategy = partitionStrategy;
     }
 
@@ -36,10 +34,9 @@ public class Partioner<T> {
      */
     public Map<Integer, VertexGroup<T>> partition(Graph<T> graph, List<Integer> workerList) {
         partitionStrategy.setWorkerIdList(workerList);
-        int nWorkers = workerList.size();
         Map<Integer, VertexGroup<T>> map = new HashMap<>();
         for (int i: workerList) {
-            map.put(i, new VertexGroup<T>());
+            map.put(i, new VertexGroup<>());
         }
         List<Vertex<T>> graphVertexSet = graph.getVertices();
         for (Vertex<T> vertex : graphVertexSet) {

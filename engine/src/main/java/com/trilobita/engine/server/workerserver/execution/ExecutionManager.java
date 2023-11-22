@@ -12,6 +12,7 @@ import java.util.concurrent.*;
 
 /**
  * Execution Manager is responsible for the execution of a superstep
+ *
  * @param <T> the type of the vertex value
  */
 @Slf4j
@@ -36,56 +37,44 @@ public class ExecutionManager<T> {
      */
     public void execute() throws InterruptedException {
         futures.clear();
-
-        if (server.getInMailQueue().isEmpty()){
-            //TODO: Worker send signal to Master to show all the vertex are Inactive
-
-
-            // distribute the mail to the vertices
-            while (!server.getInMailQueue().isEmpty()) {
-                Mail mail = this.server.getInMailQueue().poll();
-                if (mail != null) {
-                    futures.add(this.executorService.submit(() -> {
-                        server.distributeMailToVertex(mail);
-                    }));
-                }
+        // distribute the mail to the vertices
+        while (!server.getInMailQueue().isEmpty()) {
+            Mail mail = this.server.getInMailQueue().poll();
+            if (mail != null) {
+                futures.add(this.executorService.submit(() -> server.distributeMailToVertex(mail)));
             }
+        }
 
-
-
-            List<Vertex<T>> vertices = this.server.getVertexGroup().getVertices();
-            int activeVertexCount = 0;
-            for (Vertex<T> vertex: vertices) {
-                if (vertex.getStatus() == Vertex.VertexStatus.ACTIVE) {
-                    activeVertexCount++;
-                }
+        List<Vertex<T>> vertices = this.server.getVertexGroup().getVertices();
+        int activeVertexCount = 0;
+        for (Vertex<T> vertex : vertices) {
+            if (vertex.getStatus() == Vertex.VertexStatus.ACTIVE) {
+                activeVertexCount++;
             }
-            CountDownLatch computeLatch = new CountDownLatch(activeVertexCount);
+        }
 
-            // start the computation of the vertices
-            for (Vertex<T> vertex: vertices) {
-                if (vertex.getStatus() == Vertex.VertexStatus.ACTIVE) {
-                    futures.add(executorService.submit(() -> {
-                        vertex.step();
-                        vertex.setStatus(Vertex.VertexStatus.INACTIVE);
-                        computeLatch.countDown();
-                    }));
-                }
-            }
-
-            computeLatch.await();   // block until all computing tasks are finished
-
-            CountDownLatch mailingLatch = new CountDownLatch(server.getOutMailQueue().size());
-            // send the mail to the other servers
-            while (!this.server.getOutMailQueue().isEmpty()) {
-                Mail mail = this.server.getOutMailQueue().poll();
+        CountDownLatch computeLatch = new CountDownLatch(activeVertexCount);
+        // start the computation of the vertices
+        for (Vertex<T> vertex : vertices) {
+            if (vertex.getStatus() == Vertex.VertexStatus.ACTIVE) {
                 futures.add(executorService.submit(() -> {
-                    int receiverId = this.server.findServerByVertexId(mail.getToVertexId());
-                    MessageProducer.createAndProduce(null, mail, "SERVER_" + receiverId + "_MESSAGE");
-                    mailingLatch.countDown();
+                    vertex.step();
+                    computeLatch.countDown();
                 }));
             }
-            mailingLatch.await();   // block until all mailing tasks are finished
         }
+        computeLatch.await(); // block until all computing tasks are finished
+
+        CountDownLatch mailingLatch = new CountDownLatch(server.getOutMailQueue().size());
+        // send the mail to the other servers
+        while (!this.server.getOutMailQueue().isEmpty()) {
+            Mail mail = this.server.getOutMailQueue().poll();
+            futures.add(executorService.submit(() -> {
+                int receiverId = this.server.findServerByVertexId(mail.getToVertexId());
+                MessageProducer.produceWorkerServerMessage(mail, receiverId);
+                mailingLatch.countDown();
+            }));
         }
+        mailingLatch.await(); // block until all mailing tasks are finished
+    }
 }

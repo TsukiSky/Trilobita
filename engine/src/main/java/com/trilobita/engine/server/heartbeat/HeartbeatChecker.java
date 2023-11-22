@@ -1,6 +1,5 @@
 package com.trilobita.engine.server.heartbeat;
 
-import com.trilobita.core.messaging.MessageProducer;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
@@ -45,14 +44,14 @@ public class HeartbeatChecker extends Thread {
     }
 
     public void check(){
-        if (isProcessing){
+        if (isProcessing == Boolean.TRUE){
             return;
         }
         if (isCheckWorker()) {
             Set<Map.Entry<Integer, Boolean>> set = heartbeatMap.entrySet();
             int id = -1;
             for (Map.Entry<Integer, Boolean> entry: set){
-                if (!entry.getValue()){
+                if (entry.getValue() == Boolean.FALSE){
                     id = entry.getKey();
                 }
             }
@@ -71,11 +70,10 @@ public class HeartbeatChecker extends Thread {
 //            log.info("the master hashmap is: {}", heartbeatMap);
             boolean flag = true;
             for (Map.Entry<Integer, Boolean> entry: set){
-                if (entry.getValue()){
-                    if (entry.getKey() > id){
+                if (entry.getValue() == Boolean.TRUE && (entry.getKey() > id)){
                         flag = false;
                         break;
-                    }
+
                 }
             }
 
@@ -92,14 +90,11 @@ public class HeartbeatChecker extends Thread {
 
     @Override
     public void run(){
-        if (!isProcessing) {
+        if (isProcessing == Boolean.FALSE) {
             heartbeatExecutor.scheduleAtFixedRate(this::check, 5, 2, TimeUnit.SECONDS);
             log.info("Heartbeat checking service will start in 5 seconds.");
         } else {
             log.info("Heartbeat checking service is already running.");
         }
     }
-
-
-
 }

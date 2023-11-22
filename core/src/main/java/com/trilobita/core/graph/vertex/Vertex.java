@@ -1,15 +1,12 @@
 package com.trilobita.core.graph.vertex;
 
 import com.trilobita.commons.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
@@ -25,7 +22,6 @@ public abstract class Vertex<T> implements Serializable {
     private boolean stepFinished;
     private BlockingQueue<Mail> incomingQueue;
     private BlockingQueue<Mail> serverQueue;
-    private ConcurrentHashMap<Integer, Computable<T>> serverVertexValue;
 
     public Vertex(int id, Computable<T> value) {
         this.id = id;
@@ -83,6 +79,7 @@ public abstract class Vertex<T> implements Serializable {
         this.addEdge(edge);
     }
 
+
     /**
      * Add an edge to the vertex
      * @param to the destination vertex
@@ -93,9 +90,7 @@ public abstract class Vertex<T> implements Serializable {
         this.addEdge(edge);
     }
 
-    public void setValueOnServer(){
-        this.serverVertexValue.put(this.id, this.value);
-    }
+
 
     /**
      * execute the superstep of the vertex

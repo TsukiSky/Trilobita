@@ -1,2 +1,4 @@
-package shortestpath;public class ShortestPathMasterReplica1 {
+package shortestpath;
+
+public class ShortestPathMasterReplica1 {
 }

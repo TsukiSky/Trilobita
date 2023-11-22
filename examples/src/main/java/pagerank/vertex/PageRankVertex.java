@@ -11,7 +11,7 @@ import java.io.Serializable;
 
 @Slf4j
 @EqualsAndHashCode(callSuper = true)
-@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, property = "@class")
 public class PageRankVertex extends Vertex<Double> implements Serializable {
     private final double weight = 0.85;
     private final double epsilon = 0.001;
@@ -35,7 +35,6 @@ public class PageRankVertex extends Vertex<Double> implements Serializable {
             // update the state of the vertex according to the incoming score
             this.getValue().add(score.multiply(weight));
         }
-        this.setValueOnServer();
         this.sendMail();
     }
 

@@ -32,6 +32,13 @@ public class Mail implements Serializable {
         this.mailType = mailType;
     }
 
+        public Mail(Message message, MailType mailType) {
+        this.fromVertexId = -1;
+        this.toVertexId = -1;
+        this.message = message;
+        this.mailType = mailType;
+    }
+
     /**
      * MailType is used to distinguish different types of mails
      */
@@ -40,5 +47,8 @@ public class Mail implements Serializable {
         PARTITION,
         FINISH_SIGNAL,
         START_SIGNAL,
+        HEARTBEAT,
+        FUNCTIONAL,
+        BROADCAST,
     }
 }

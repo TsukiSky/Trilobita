@@ -26,44 +26,43 @@ import java.util.concurrent.*;
 public class WorkerServer<T> extends AbstractServer<T> {
     private final ExecutionManager<T> executionManager;
     private final ConcurrentHashMap<Integer, CopyOnWriteArrayList<Mail>> outMailTable;
-    private final ConcurrentHashMap<Integer, Computable<T>> vertexValues;
     private final MessageConsumer partitionMessageConsumer;
     private final MessageConsumer startMessageConsumer;
     private final HeartbeatSender heartbeatSender;
 
-    public WorkerServer(int serverId, int parallelism, PartitionStrategy partitionStrategy) throws ExecutionException, InterruptedException {
+    public WorkerServer(int serverId, int parallelism, PartitionStrategy partitionStrategy) {
         super(serverId, partitionStrategy);
         this.executionManager = new ExecutionManager<>(parallelism, this);
         this.outMailTable = new ConcurrentHashMap<>();
-        this.vertexValues = new ConcurrentHashMap<>();
-        this.partitionMessageConsumer = new MessageConsumer("SERVER_" + this.getServerId() + "_PARTITION", serverId,
-                new MessageConsumer.MessageHandler() {
-                    @Override
-                    public void handleMessage(UUID key, Mail mail, int partition, long offset) throws InterruptedException, ExecutionException {
-                        log.info("receiving message from server.........");
-                        WorkerServer.this.executionManager.waitForFutures(); // in case of fault, repartition is needed
-                        Map<String, Object> res = (Map<String, Object>) mail.getMessage().getContent();
-                        setVertexGroup((VertexGroup<T>) res.get("PARTITION"));
-                        PartitionStrategy partitionStrategy = (PartitionStrategy) res.get("PARTITION_STRATEGY");
-                        setPartitionStrategy(partitionStrategy);
-                        // assign the server's hashmap to each vertex
-                        List<Vertex<T>> vertices = vertexGroup.getVertices();
-                        for (Vertex<T> vertex : vertices) {
-                            vertex.setServerQueue(getOutMailQueue());
-                            vertex.setServerVertexValue(getVertexValues());
-                        }
-                        log.info("[Partition] Vertex Group: {}", vertexGroup);
-                    }
-                });
+        this.partitionMessageConsumer = new MessageConsumer("SERVER_" + this.getServerId() + "_PARTITION", serverId, new MessageConsumer.MessageHandler() {
+            @Override
+            public void handleMessage(UUID key, Mail mail, int partition, long offset) throws InterruptedException, ExecutionException {
+                log.info("receiving message from server.........");
+                WorkerServer.this.executionManager.waitForFutures(); // in case of fault, repartition is needed
+                Map<String, Object> res = (Map<String, Object>) mail.getMessage().getContent();
+                setVertexGroup((VertexGroup<T>) res.get("PARTITION"));
+                PartitionStrategy partitionStrategy = (PartitionStrategy) res.get("PARTITION_STRATEGY");
+                setPartitionStrategy(partitionStrategy);
+                // assign the server's hashmap to each vertex
+                List<Vertex<T>> vertices = vertexGroup.getVertices();
+                for (Vertex<T> vertex : vertices) {
+                    vertex.setServerQueue(getOutMailQueue());
+                }
+                log.info("[Partition] Vertex Group: {}", vertexGroup);
+                WorkerServer.this.sendCompleteSignal(false);
+            }
+        });
 
         this.startMessageConsumer = new MessageConsumer(Mail.MailType.START_SIGNAL.ordinal(), serverId, new MessageConsumer.MessageHandler() {
             @Override
             public void handleMessage(UUID key, Mail mail, int partition, long offset) throws InterruptedException {
                 if (getVertexGroup() != null) {
-                    superstep();
+                    boolean doSnapshot = (boolean) mail.getMessage().getContent();
+                    superstep(doSnapshot);
                 }
             }
         });
+
         this.heartbeatSender = new HeartbeatSender(this.getServerId(), true);
     }
 
@@ -82,11 +81,11 @@ public class WorkerServer<T> extends AbstractServer<T> {
     /**
      * Execute the superstep
      */
-    private void superstep() throws InterruptedException {
-        superstep ++;
+    private void superstep(boolean doSnapshot) throws InterruptedException {
+        superstep++;
         log.info("[Superstep] entering a new super step...");
         this.executionManager.execute();
-        sendCompleteSignal();
+        sendCompleteSignal(doSnapshot);
     }
 
     @Override
@@ -101,13 +100,18 @@ public class WorkerServer<T> extends AbstractServer<T> {
     /**
      * Send a complete signal to the master server
      */
-    public void sendCompleteSignal() {
-        log.info("[Superstep] complete");
-        MessageProducer.produceFinishSignal(this.superstep, new HashMap<>(vertexValues));
+    public void sendCompleteSignal(boolean doSnapshot) {
+        log.info("[Superstep] super step {} completed", superstep);
+        if (doSnapshot) {
+            MessageProducer.produceFinishSignal(this.vertexGroup.getVertexValues());
+        } else {
+            MessageProducer.produceFinishSignal(new HashMap<>());
+        }
     }
 
     /**
      * Distribute mail to vertex
+     *
      * @param mail mail to be distributed
      */
     public void distributeMailToVertex(Mail mail) {
@@ -119,6 +123,7 @@ public class WorkerServer<T> extends AbstractServer<T> {
 
     /**
      * Find the vertex with the given id
+     *
      * @param vertexId vertex id
      * @return vertex with the given id
      */
