@@ -45,16 +45,10 @@ public class HeartbeatChecker extends Thread {
     }
 
     public void check(){
-        if (isCheckWorker()){
-            log.info("check worker: {}", isCheckWorker());
-
-        }
-        if (isProcessing){
+        if (isProcessing == Boolean.TRUE){
             return;
         }
         if (isCheckWorker()) {
-            System.out.println("checking worker error....");
-
             Set<Map.Entry<Integer, Boolean>> set = heartbeatMap.entrySet();
             List<Integer> errList = new ArrayList<>();
             for (Map.Entry<Integer, Boolean> entry: set){
@@ -66,13 +60,11 @@ public class HeartbeatChecker extends Thread {
                 heartbeatMap.put(entry.getKey(), false);
             }
             if (errList.size()>0){
-                System.out.println("checking worker error here....");
-
-                isProcessing = true;
-                faultHandler.handleFault(errList);
                 for (int id: errList){
                     heartbeatMap.remove(id);
                 }
+                isProcessing = true;
+                faultHandler.handleFault(errList);
             }
         } else {
             Set<Map.Entry<Integer, Boolean>> set = heartbeatMap.entrySet();
@@ -80,11 +72,9 @@ public class HeartbeatChecker extends Thread {
 //            log.info("the master hashmap is: {}", heartbeatMap);
             boolean flag = true;
             for (Map.Entry<Integer, Boolean> entry: set){
-                if (entry.getValue()){
-                    if (entry.getKey() > id){
-                        flag = false;
-                        break;
-                    }
+                if (entry.getValue() == Boolean.TRUE && (entry.getKey() > id)){
+                    flag = false;
+                    break;
                 }
             }
 

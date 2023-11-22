@@ -43,7 +43,7 @@ public class MasterServer<T> extends AbstractServer<T> {
     List<Integer> masterIds; // the alive master servers' ids
     volatile boolean isWorking;
 
-    public MasterServer(Partitioner<T> graphPartitioner, int nWorker, int id, int nReplica)
+    public MasterServer(Partitioner<T> graphPartitioner, int nWorker, int id, int nReplica, int snapshotFrequency)
             throws ExecutionException, InterruptedException {
         super(id, graphPartitioner.getPartitionStrategy()); // the standard server id of master is 0
         this.confirmMessage = new ConcurrentHashMap<>();
@@ -53,6 +53,7 @@ public class MasterServer<T> extends AbstractServer<T> {
         this.heartbeatSender = new HeartbeatSender(getServerId(), false);
         this.aliveWorkerIds = new ArrayList<>();
         this.snapshots = new ArrayList<>();
+        this.snapshotFrequency = snapshotFrequency;
         for (int i = 0; i < nWorker; i++) {
             this.aliveWorkerIds.add(i + 1);
             this.confirmMessage.put(i + 1, false);
@@ -65,21 +66,27 @@ public class MasterServer<T> extends AbstractServer<T> {
         this.confirmReceiveConsumer = new MessageConsumer("CONFIRM_RECEIVE", this.getServerId(), new MessageConsumer.MessageHandler() {
             @Override
             public void handleMessage(UUID key, Mail value, int partition, long offset) throws JsonProcessingException, InterruptedException, ExecutionException {
-                log.info("{}", value.getMessage().getContent());
+                if (!isWorking) {
+                    return;
+                }
+
                 int workerId = (int) value.getMessage().getContent();
-                log.info("received confirm receive message from worker {}", workerId);
                 confirmMessage.put(workerId, true);
 
 //               check if all are true, set all to false and send confirm start signal
                 boolean flag = true;
                 Set<Map.Entry<Integer, Boolean>> set = confirmMessage.entrySet();
                 for (Map.Entry<Integer, Boolean> entry: set){
-                    log.info("{} : {}", entry.getKey(), entry.getValue());
                     if (!entry.getValue()){
                         flag = false;
                         break;
                     }
                 }
+
+                if (!flag){
+                    log.info("received confirm receive message from worker {}", workerId);
+                }
+
                 if (flag) {
 //                 send start message to all workers
                     for (Map.Entry<Integer, Boolean> entry: set){
@@ -134,13 +141,15 @@ public class MasterServer<T> extends AbstractServer<T> {
                                 || masterHeartbeatChecker.getIsProcessing()) {
                             return;
                         }
-                        if (MasterServer.this.isDoingSnapshot()) {
+                        Map<String, Object> map = (Map<String, Object>) value.getMessage().getContent();
+                        HashMap<Integer, Computable<T>> vertexValues = (HashMap<Integer, Computable<T>>) map.get("VERTEX_VALUES");
+
+                        if (vertexValues.size()>0) {
                             // update the graph
-                            Map<String, Object> map = (Map<String, Object>) value.getMessage().getContent();
-                            HashMap<Integer, Computable<T>> vertexValues = (HashMap<Integer, Computable<T>>) map.get("VERTEX_VALUES");
                             boolean finish = (boolean) map.get("FINISH");
                             int workerId = (int) map.get("ID");
                             graph.updateVertexValues(vertexValues);
+                            log.info("[Graph] graph is : {}", graph);
                             finished.put(workerId, finish);
                         }
                         int nFinishedWorkers = nFinishedWorker.addAndGet(1);
@@ -164,7 +173,6 @@ public class MasterServer<T> extends AbstractServer<T> {
                                     return;
                                 }
                             }
-                            log.info("[Graph] graph is : {}", graph);
                             Thread.sleep(300);
                             superstep();
                         }
@@ -175,9 +183,6 @@ public class MasterServer<T> extends AbstractServer<T> {
                 new MessageConsumer.MessageHandler() {
                     @Override
                     public void handleMessage(UUID key, Mail value, int partition, long offset) {
-                        if (!isWorking) {
-                            return;
-                        }
                         int id = (int) value.getMessage().getContent();
                         if (!aliveWorkerIds.contains(id)){
                             aliveWorkerIds.add(id);
@@ -204,7 +209,6 @@ public class MasterServer<T> extends AbstractServer<T> {
                     }
                 });
 
-        // TODO: Change the graph SYNC (with snapshot)
         graphConsumer = new MessageConsumer("MASTER_SYNC", getServerId(), new MessageConsumer.MessageHandler() {
             @Override
             public void handleMessage(UUID key, Mail value, int partition, long offset) {
@@ -270,7 +274,9 @@ public class MasterServer<T> extends AbstractServer<T> {
      * do snapshot and sync the graph with other masters
      */
     public void snapshotAndSync() {
-        this.snapshots.add(Snapshot.createSnapshot(superstep, graph));
+        Snapshot<T> snapshot = Snapshot.createSnapshot(superstep, this.superstep, graph);
+        snapshot.store();
+        this.snapshots.add(snapshot);
         this.syncGraph();
     }
 

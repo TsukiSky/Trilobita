@@ -72,6 +72,7 @@ public class WorkerServer<T> extends AbstractServer<T> {
             public void handleMessage(UUID key, Mail mail, int partition, long offset) throws InterruptedException {
                 if (getVertexGroup() != null) {
                     boolean doSnapshot = (boolean) mail.getMessage().getContent();
+                    log.info("is doing snapshot: {}", doSnapshot);
                     superstep(doSnapshot);
                 }
             }

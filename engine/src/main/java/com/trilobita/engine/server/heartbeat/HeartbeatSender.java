@@ -1,7 +1,5 @@
 package com.trilobita.engine.server.heartbeat;
 
-import com.trilobita.commons.Mail;
-import com.trilobita.commons.Message;
 import com.trilobita.core.messaging.MessageProducer;
 import lombok.extern.slf4j.Slf4j;
 
