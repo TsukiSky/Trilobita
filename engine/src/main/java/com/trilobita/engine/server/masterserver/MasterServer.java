@@ -34,12 +34,12 @@ public class MasterServer<T> extends AbstractServer<T> {
     HeartbeatChecker masterHeartbeatChecker;
     HeartbeatSender heartbeatSender;
     List<Snapshot<T>> snapshots;
-    int snapshotFrequency = 5; // whether the server is the master
+    int snapshotFrequency = 10; // whether the server is the master
     List<Integer> aliveWorkerIds; // the alive working servers' ids
     List<Integer> masterIds; // the alive master servers' ids
     volatile boolean isWorking;
 
-    public MasterServer(Partitioner<T> graphPartitioner, int nWorker, int id, int nReplica)
+    public MasterServer(Partitioner<T> graphPartitioner, int nWorker, int id, int nReplica, int snapshotFrequency)
             throws ExecutionException, InterruptedException {
         super(id, graphPartitioner.getPartitionStrategy()); // the standard server id of master is 0
         this.graphPartitioner = graphPartitioner;
@@ -47,6 +47,7 @@ public class MasterServer<T> extends AbstractServer<T> {
         this.heartbeatSender = new HeartbeatSender(getServerId(), false);
         this.aliveWorkerIds = new ArrayList<>();
         this.snapshots = new ArrayList<>();
+        this.snapshotFrequency = snapshotFrequency;
         for (int i = 0; i < nWorker; i++) {
             this.aliveWorkerIds.add(i + 1);
         }
@@ -63,7 +64,6 @@ public class MasterServer<T> extends AbstractServer<T> {
                             return;
                         }
                         log.info("[Fault] detected server {} is down, start repartitioning...", id);
-
                         aliveWorkerIds.remove((Integer) id);
                         nFinishedWorker.set(0);
                         MasterServer.this.partitionGraph();
@@ -137,7 +137,6 @@ public class MasterServer<T> extends AbstractServer<T> {
                     }
                 });
 
-        // TODO: Change the graph SYNC (with snapshot)
         graphConsumer = new MessageConsumer("MASTER_SYNC", getServerId(), new MessageConsumer.MessageHandler() {
             @Override
             public void handleMessage(UUID key, Mail value, int partition, long offset) {
@@ -202,7 +201,9 @@ public class MasterServer<T> extends AbstractServer<T> {
      * do snapshot and sync the graph with other masters
      */
     public void snapshotAndSync() {
-        this.snapshots.add(Snapshot.createSnapshot(superstep, graph));
+        Snapshot<T> snapshot = Snapshot.createSnapshot(superstep, this.superstep, graph);
+        snapshot.store();
+        this.snapshots.add(snapshot);
         this.syncGraph();
     }
 

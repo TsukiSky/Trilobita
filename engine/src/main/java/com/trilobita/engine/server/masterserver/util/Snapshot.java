@@ -1,11 +1,14 @@
 package com.trilobita.engine.server.masterserver.util;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.trilobita.commons.Computable;
 import com.trilobita.core.graph.Graph;
 import com.trilobita.core.graph.vertex.Vertex;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 
 /**
@@ -16,20 +19,36 @@ import java.util.HashMap;
 @Data
 public class Snapshot<T> {
     private final int id;
-    private final HashMap<Integer, Computable<T>> vertexValues = new HashMap<>();
+    private final int superstep;
+    private final Graph<T> graph;
+    private final String snapshotDirectory = "data/snapshot/";
 
-    public Snapshot(int id, Graph<T> graph) {
+    private Snapshot(int id, int superstep, Graph<T> graph) {
         this.id = id;
-        for (Vertex<T> v : graph.getVertices()) {
-            this.vertexValues.put(v.getId(), v.getValue());
-        }
+        this.superstep = superstep;
+        this.graph = graph;
     }
 
     /**
      * Store the snapshot to the disk
      */
     public void store() {
-        // TODO: implement this method after finalizing the JSON structure
+        File directory = new File(snapshotDirectory);
+        if (!directory.exists()) {
+            if (directory.mkdirs()) {
+                log.info("[Snapshot] Snapshot directory data/snapshot created successfully");
+            } else {
+                log.info("[Snapshot] Failed to create snapshot directory");
+            }
+        }
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        try {
+            objectMapper.writeValue(new File(directory, "snapshot_superstep_" + this.superstep + ".json"), this);
+            log.info("[Snapshot] Snapshot stored");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -39,14 +58,7 @@ public class Snapshot<T> {
      * @return the snapshot
      * @param <T> the type of the vertex value
      */
-    public static <T> Snapshot<T> createSnapshot(int snapshotId, Graph<T> graph) {
-        log.info("[Snapshot] creating snapshot...");
-        // shot the graph
-        Snapshot<T> snapshot = new Snapshot<>(snapshotId, graph);
-
-        for (Vertex<T> v : graph.getVertices()) {
-            snapshot.vertexValues.put(v.getId(), v.getValue());
-        }
-        return snapshot;
+    public static <T> Snapshot<T> createSnapshot(int snapshotId, int superstep, Graph<T> graph) {
+        return new Snapshot<>(snapshotId, superstep, graph);
     }
 }

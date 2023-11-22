@@ -4,7 +4,6 @@ import com.trilobita.commons.Computable;
 import com.trilobita.commons.Mail;
 import com.trilobita.commons.Message;
 import com.trilobita.core.graph.Graph;
-import com.trilobita.core.graph.VertexGroup;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.KafkaProducer;
