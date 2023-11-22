@@ -11,9 +11,9 @@ import com.trilobita.engine.server.Context;
 /*
  * Combine outcoming messages from a workerserver to another workerserver.
  */
-public abstract class Combiner implements Functionable {
+public abstract class Combiner<T> extends Functionable<T> {
     @Override
-    public void execute(Context context,Mail mail) {
+    public void execute(Context context) {
         this.combine(context.getOutMailTable());
     }
 

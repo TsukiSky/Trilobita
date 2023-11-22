@@ -73,16 +73,9 @@ public class ExecutionManager<T> {
         computeLatch.await(); // block until all computing tasks are finished
 
         // execute functionables
-        CountDownLatch functionableLatch = new CountDownLatch(server.getFunctionables().size());
+        CountDownLatch functionableLatch = new CountDownLatch(1);
 
-        for (Map.Entry<Functionable, Mail> entry : server.getFunctionables().entrySet()) {
-            Functionable functionable = entry.getKey();
-            Mail mail = entry.getValue();
-            futures.add(this.executorService.submit(() -> {
-                functionable.execute(server.context, mail);
-                functionableLatch.countDown();
-            }));
-        }
+        server.getFunctionableRunner().runFunctionableTasks();
         functionableLatch.await(); // block until all functionable tasks are finished
 
         CountDownLatch mailingLatch = new CountDownLatch(server.getOutMailQueue().size());

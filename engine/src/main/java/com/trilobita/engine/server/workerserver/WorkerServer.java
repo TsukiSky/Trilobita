@@ -7,6 +7,7 @@ import com.trilobita.core.messaging.MessageConsumer;
 import com.trilobita.core.messaging.MessageProducer;
 import com.trilobita.engine.server.AbstractServer;
 import com.trilobita.engine.server.functionable.Functionable;
+import com.trilobita.engine.server.functionable.FunctionableRunner;
 import com.trilobita.engine.server.heartbeat.HeartbeatSender;
 import com.trilobita.engine.server.masterserver.partitioner.PartitionStrategy;
 import com.trilobita.engine.server.workerserver.execution.ExecutionManager;
@@ -18,7 +19,8 @@ import java.util.concurrent.*;
 
 /**
  * Worker Server is the worker of a server cluster.
- * It executes the superstep, controls vertex computations and communicate with other servers
+ * It executes the superstep, controls vertex computations and communicate with
+ * other servers
  *
  * @param <T> the type of the vertex value
  */
@@ -31,9 +33,11 @@ public class WorkerServer<T> extends AbstractServer<T> {
     private final MessageConsumer partitionMessageConsumer;
     private final MessageConsumer startMessageConsumer;
     private final HeartbeatSender heartbeatSender;
-    private ConcurrentHashMap<Functionable, Mail> functionables;
+    private final FunctionableRunner functionableRunner = FunctionableRunner.getInstance(this.context);
 
-    public WorkerServer(int serverId, int parallelism, PartitionStrategy partitionStrategy,List<Functionable> functionables) throws ExecutionException, InterruptedException {
+    public WorkerServer(int serverId, int parallelism, PartitionStrategy partitionStrategy,
+            String[] functionablesClassNames)
+            throws ExecutionException, InterruptedException {
         super(serverId, partitionStrategy);
         this.executionManager = new ExecutionManager<>(parallelism, this);
         this.outMailTable = new ConcurrentHashMap<>();
@@ -41,7 +45,8 @@ public class WorkerServer<T> extends AbstractServer<T> {
         this.partitionMessageConsumer = new MessageConsumer("SERVER_" + this.getServerId() + "_PARTITION", serverId,
                 new MessageConsumer.MessageHandler() {
                     @Override
-                    public void handleMessage(UUID key, Mail mail, int partition, long offset) throws InterruptedException, ExecutionException {
+                    public void handleMessage(UUID key, Mail mail, int partition, long offset)
+                            throws InterruptedException, ExecutionException {
                         WorkerServer.this.executionManager.waitForFutures(); // in case of fault, repartition is needed
                         Map<String, Object> res = (Map<String, Object>) mail.getMessage().getContent();
                         setVertexGroup((VertexGroup<T>) res.get("PARTITION"));
@@ -59,18 +64,19 @@ public class WorkerServer<T> extends AbstractServer<T> {
                     }
                 });
 
-        this.startMessageConsumer = new MessageConsumer(Mail.MailType.START_SIGNAL.ordinal(), serverId, new MessageConsumer.MessageHandler() {
-            @Override
-            public void handleMessage(UUID key, Mail mail, int partition, long offset) throws InterruptedException {
-                if (getVertexGroup() != null) {
-                    startNewSuperstep();
-                }
-            }
-        });
+        this.startMessageConsumer = new MessageConsumer(Mail.MailType.START_SIGNAL.ordinal(), serverId,
+                new MessageConsumer.MessageHandler() {
+                    @Override
+                    public void handleMessage(UUID key, Mail mail, int partition, long offset)
+                            throws InterruptedException {
+                        if (getVertexGroup() != null) {
+                            startNewSuperstep();
+                        }
+                    }
+                });
         this.heartbeatSender = new HeartbeatSender(this.getServerId(), true);
-
-        for (Functionable functionable : functionables) {
-            this.functionables.put(functionable, null);
+        if (functionablesClassNames != null) {
+            this.functionableRunner.registerFunctionables(functionablesClassNames);
         }
     }
 
@@ -116,6 +122,7 @@ public class WorkerServer<T> extends AbstractServer<T> {
 
     /**
      * Distribute mail to vertex
+     * 
      * @param mail mail to be distributed
      */
     public void distributeMailToVertex(Mail mail) {
@@ -127,6 +134,7 @@ public class WorkerServer<T> extends AbstractServer<T> {
 
     /**
      * Find the vertex with the given id
+     * 
      * @param vertexId vertex id
      * @return vertex with the given id
      */

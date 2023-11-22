@@ -1,8 +1,6 @@
 package com.trilobita.runtime.launcher;
 
 import com.trilobita.core.graph.Graph;
-import com.trilobita.engine.server.functionable.Functionable;
-import com.trilobita.engine.server.functionable.FunctionalMailHandler;
 import com.trilobita.engine.server.masterserver.MasterServer;
 import com.trilobita.engine.server.masterserver.partitioner.Partioner;
 import com.trilobita.engine.server.masterserver.partitioner.PartitionStrategy;
@@ -12,7 +10,6 @@ import com.trilobita.runtime.configuration.JCommandHandler;
 import com.trilobita.runtime.launcher.inputparser.Parse;
 import lombok.Getter;
 
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -57,20 +54,15 @@ public class TrilobitaEnvironment<T> {
         this.inputParser = inputParser;
     }
 
-    public void createMasterServer(FunctionalMailHandler functionalMailHandler) {
-        this.masterServer = new MasterServer<>(this.partitioner, (int) this.configuration.get("numOfWorker"), 0,
-                functionalMailHandler);
+    public void createMasterServer() {
+        this.masterServer = new MasterServer<>(this.partitioner, (int) this.configuration.get("numOfWorker"), 0);
         this.masterServer.setGraph(this.graph);
     }
 
-    public void createMasterServer() {
-        this.createMasterServer(null);
-    }
-
-    public void createWorkerServer(int workerId, List<Functionable> functionables)
+    public void createWorkerServer(int workerId, String[] functionablesClassNames)
             throws ExecutionException, InterruptedException {
         this.workerServer = new WorkerServer<>(workerId, (int) this.configuration.get("parallelism"),
-                this.partitionStrategy, functionables);
+                this.partitionStrategy, functionablesClassNames);
     }
 
     public void createWorkerServer(int workerId) throws ExecutionException, InterruptedException {
