@@ -21,7 +21,7 @@ import java.util.concurrent.ExecutionException;
  */
 @Slf4j
 public class MessageConsumer {
-    private static final boolean willLog = false;
+    private static final boolean willLog = true;
     private volatile boolean runFlag = false;
     private String topic;
     private final MessageAdmin messageAdmin = MessageAdmin.getInstance();
@@ -51,6 +51,15 @@ public class MessageConsumer {
     public MessageConsumer(String topic, Integer serverId, MessageHandler messageHandler) {
         consumerProperties.putAll(messageAdmin.props);
         consumerProperties.put(ConsumerConfig.GROUP_ID_CONFIG, "group-kafka-trilobita-"+ serverId); // Master topic probably is subscribed by multiple workers.
+        consumerProperties.put(ConsumerConfig.GROUP_INSTANCE_ID_CONFIG, ("consumer-kafka-trilobita-" + topic)); // one worker has multiple consumer (group instance) differentiated by topic.
+        consumerProperties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
+        this.messageHandler = messageHandler;
+        this.topic = topic;
+    }
+
+    public MessageConsumer(String topic, String gid, MessageHandler messageHandler) {
+        consumerProperties.putAll(messageAdmin.props);
+        consumerProperties.put(ConsumerConfig.GROUP_ID_CONFIG, gid); // Master topic probably is subscribed by multiple workers.
         consumerProperties.put(ConsumerConfig.GROUP_INSTANCE_ID_CONFIG, ("consumer-kafka-trilobita-" + topic)); // one worker has multiple consumer (group instance) differentiated by topic.
         consumerProperties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
         this.messageHandler = messageHandler;
@@ -102,8 +111,8 @@ public class MessageConsumer {
 //                        }
                     }
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (ExecutionException | JsonProcessingException | InterruptedException e) {
+                log.error("[MessageConsumer]", e);
             }
         });
         consumerThread.start();
