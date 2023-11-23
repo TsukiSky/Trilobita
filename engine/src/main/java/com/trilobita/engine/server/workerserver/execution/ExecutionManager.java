@@ -46,8 +46,7 @@ public class ExecutionManager<T> {
             }
         }
 
-        // TODO: wait until all functionables values are noticed by functionable instances
-        // is this blocking in sequence or latch? 
+        // inform functionable instances of functionables values 
         futures.add(this.executorService.submit(() -> {
             server.getFunctionableRunner().distributeValues();
         }));
@@ -76,7 +75,7 @@ public class ExecutionManager<T> {
         // execute functionables
         CountDownLatch functionableLatch = new CountDownLatch(1);
         server.getFunctionableRunner().runFunctionableTasks(this.server.getVertexGroup());
-        functionableLatch.await(); // TODO: block until all functionable tasks are finished (future?)
+        functionableLatch.await(); // block until all functionable tasks are finished (future?)
 
         CountDownLatch mailingLatch = new CountDownLatch(server.getOutMailQueue().size());
         // send the mail to the other servers

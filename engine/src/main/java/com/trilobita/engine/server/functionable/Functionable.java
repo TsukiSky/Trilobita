@@ -27,7 +27,7 @@ public abstract class Functionable<T> implements Serializable {
 
     public abstract void execute(Object object);
 
-    public abstract void execute(List<Computable<?>> computables);
+    public abstract void execute(List<Computable<T>> computables);
 
     public Functionable() {
         this.instanceName = this.getClass().getName();

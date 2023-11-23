@@ -25,7 +25,7 @@ public abstract class Combiner<T> extends Functionable<T> {
     }
 
     @Override
-    public void execute(List<Computable<?>> computables) {
+    public void execute(List<Computable<T>> computables) {
         return;
     }
 

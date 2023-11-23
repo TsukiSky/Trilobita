@@ -1,15 +1,12 @@
 package com.trilobita.engine.server.functionable.examples.aggregators;
 
-import com.trilobita.engine.server.Context;
-
+import java.util.ArrayList;
 import java.util.List;
 
 import com.trilobita.commons.Computable;
 import com.trilobita.core.graph.VertexGroup;
-import com.trilobita.core.graph.vertex.Edge;
 import com.trilobita.core.graph.vertex.Vertex;
 import com.trilobita.engine.server.functionable.Aggregator;
-import com.trilobita.core.messaging.MessageConsumer.MessageHandler;
 
 /*
  * Sum total number of edges in the graph.
@@ -23,20 +20,24 @@ public class EdgeSumAggregator extends Aggregator<Integer> {
 
         private static EdgeSumAggregator instance;
 
-        public static synchronized EdgeSumAggregator getInstance(Context context) {
+        public static synchronized EdgeSumAggregator getInstance() {
                 if (instance == null) {
-                        instance = new EdgeSumAggregator(instance.aggregate(context.getVertexGroup()));
+                        Computable<Integer> init = null;
+                        init.setValue(0);
+                        instance = new EdgeSumAggregator(init);
                 }
                 return instance;
         }
 
         @Override
         public Computable<Integer> aggregate(VertexGroup vertexGroup) {
-                List<Computable<Integer>> computables = new List<Computable<?>>();
+                List<Computable<Integer>> computables = new ArrayList<Computable<Integer>>();
                 List<Vertex<?>> vertices = vertexGroup.getVertices();
                 for (Vertex<?> vertex : vertices) {
-                        Integer numEdges = (Integer) vertex.getEdges().size();
-                        computables.add(numEdges);
+                        Computable<Integer> com = null;
+                        Integer numEdges = vertex.getEdges().size();
+                        com.setValue(numEdges);
+                        computables.add(com);
                 }
                 return this.reduce(computables);
         }
@@ -47,7 +48,7 @@ public class EdgeSumAggregator extends Aggregator<Integer> {
         }
 
         @Override
-        public Computable<Integer> reduce(List<Computable<?>> computables) {
+        public Computable<Integer> reduce(List<Computable<Integer>> computables) {
                 Computable<Integer> total_edges = this.initAggregatedValue;
                 for (Computable<?> edge : computables) {
                         total_edges.add((Computable<Integer>) edge);

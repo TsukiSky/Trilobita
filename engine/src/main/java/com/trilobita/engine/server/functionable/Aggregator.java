@@ -32,7 +32,7 @@ public abstract class Aggregator<T> extends Functionable<T> {
     }
 
     @Override
-    public void execute(List<Computable<?>> computables) {
+    public void execute(List<Computable<T>> computables) {
         this.setNewFunctionableValue(this.reduce(computables));
     }
 
@@ -40,7 +40,7 @@ public abstract class Aggregator<T> extends Functionable<T> {
     // Make use of reduce function
     public abstract Computable<T> aggregate(VertexGroup<?> vertexGroup);
 
-    public abstract Computable<T> reduce(List<Computable<?>> computables);
+    public abstract Computable<T> reduce(List<Computable<T>> computables);
 
     public abstract void stop();
 
