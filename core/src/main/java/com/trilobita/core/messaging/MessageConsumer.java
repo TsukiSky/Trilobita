@@ -97,11 +97,13 @@ public class MessageConsumer {
                                     topic, consumerRecord.key(), value, partition, offset
                             );
                         }
+//                        if (value != null){
                         messageHandler.handleMessage(UUID.fromString(consumerRecord.key()), value, partition, offset);
+//                        }
                     }
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (ExecutionException | JsonProcessingException | InterruptedException e) {
+                log.error("[MessageConsumer]", e);
             }
         });
         consumerThread.start();

@@ -14,7 +14,7 @@ public class HeartbeatSender {
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
 
     private long delayed = 1; // in second
-    private long period = 1; // in second
+    private long period = 500; // in milliseconds
 
     private final int serverId;
     private final boolean isWorker;
@@ -33,7 +33,7 @@ public class HeartbeatSender {
         this.delayed = delayed;
         this.period = period;
         if (isRunning.compareAndSet(false, true)) {
-            heartbeatExecutor.scheduleAtFixedRate(this::sendHeartbeat, this.delayed, this.period, TimeUnit.SECONDS);
+            heartbeatExecutor.scheduleAtFixedRate(this::sendHeartbeat, this.delayed, this.period, TimeUnit.MICROSECONDS);
             log.info("Heartbeat sending service will start in 1 second.");
         } else {
             log.info("Heartbeat sending service is already running.");

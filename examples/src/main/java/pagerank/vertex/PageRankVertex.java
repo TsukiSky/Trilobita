@@ -27,13 +27,26 @@ public class PageRankVertex extends Vertex<Double> implements Serializable {
     }
 
     @Override
+    public boolean checkStop(Computable<Double> c) {
+        if (this.getValue().getValue() == 0){
+            return false;
+        }
+        return Math.abs(c.getValue()-this.getValue().getValue()) < epsilon;
+    }
+
+    @Override
     public void compute() {
-        startSuperstep();
-        while (!this.getIncomingQueue().isEmpty()) {
-            Message message = this.getIncomingQueue().poll().getMessage();
-            PageRankValue score = (PageRankValue) message.getContent();
-            // update the state of the vertex according to the incoming score
-            this.getValue().add(score.multiply(weight));
+        if (!isShouldStop()){
+            double oldValue = this.getValue().getValue();
+            startSuperstep();
+            while (!this.getIncomingQueue().isEmpty()) {
+                Message message = this.getIncomingQueue().poll().getMessage();
+                PageRankValue score = (PageRankValue) message.getContent();
+                this.getValue().add(score.multiply(weight));
+            }
+            if (this.checkStop(new PageRankValue(oldValue))){
+                this.setShouldStop(true);
+            }
         }
         this.sendMail();
     }

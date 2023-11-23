@@ -16,6 +16,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 @Data
 public abstract class Vertex<T> implements Serializable {
     private int id;
+    private boolean shouldStop;
     private List<Edge> edges;
     private VertexStatus status;
     private Computable<T> value;
@@ -90,6 +91,13 @@ public abstract class Vertex<T> implements Serializable {
      * compute incoming messages
      */
     public abstract void compute();
+
+    public abstract boolean checkStop(Computable<T> c);
+
+    @Override
+    public String toString(){
+        return "{" + "vertex id: " + this.id + ", vertex value: " + this.value + ", shouldStop: " + this.shouldStop + "}";
+    }
 
     /**
      * The status of the vertex

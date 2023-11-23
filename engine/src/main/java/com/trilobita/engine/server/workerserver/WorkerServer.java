@@ -1,5 +1,6 @@
 package com.trilobita.engine.server.workerserver;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.trilobita.commons.*;
 import com.trilobita.core.graph.VertexGroup;
 import com.trilobita.core.graph.vertex.Vertex;
@@ -29,11 +30,20 @@ public class WorkerServer<T> extends AbstractServer<T> {
     private final MessageConsumer partitionMessageConsumer;
     private final MessageConsumer startMessageConsumer;
     private final HeartbeatSender heartbeatSender;
+    private final MessageConsumer confirmStartConsumer;
 
     public WorkerServer(int serverId, int parallelism, PartitionStrategy partitionStrategy) {
         super(serverId, partitionStrategy);
         this.executionManager = new ExecutionManager<>(parallelism, this);
         this.outMailTable = new ConcurrentHashMap<>();
+        this.confirmStartConsumer = new MessageConsumer("CONFIRM_START", this.getServerId(), new MessageConsumer.MessageHandler() {
+            @Override
+            public void handleMessage(UUID key, Mail value, int partition, long offset) throws JsonProcessingException, InterruptedException, ExecutionException {
+                if (getVertexGroup() != null) {
+                    WorkerServer.this.superstep(false);
+                }
+            }
+        });
         this.partitionMessageConsumer = new MessageConsumer("SERVER_" + this.getServerId() + "_PARTITION", serverId, new MessageConsumer.MessageHandler() {
             @Override
             public void handleMessage(UUID key, Mail mail, int partition, long offset) throws InterruptedException, ExecutionException {
@@ -49,7 +59,11 @@ public class WorkerServer<T> extends AbstractServer<T> {
                     vertex.setServerQueue(getOutMailQueue());
                 }
                 log.info("[Partition] Vertex Group: {}", vertexGroup);
-                WorkerServer.this.sendCompleteSignal(false);
+                Message message = new Message();
+                message.setContent(WorkerServer.this.getServerId());
+                Mail mailToConfirmReceive = new Mail();
+                mailToConfirmReceive.setMessage(message);
+                MessageProducer.createAndProduce(null, mailToConfirmReceive,"CONFIRM_RECEIVE");
             }
         });
 
@@ -58,6 +72,7 @@ public class WorkerServer<T> extends AbstractServer<T> {
             public void handleMessage(UUID key, Mail mail, int partition, long offset) throws InterruptedException {
                 if (getVertexGroup() != null) {
                     boolean doSnapshot = (boolean) mail.getMessage().getContent();
+                    log.info("is doing snapshot: {}", doSnapshot);
                     superstep(doSnapshot);
                 }
             }
@@ -74,7 +89,8 @@ public class WorkerServer<T> extends AbstractServer<T> {
         setServerStatus(ServerStatus.RUNNING);
         startMessageConsumer.start();
         partitionMessageConsumer.start();
-        this.getMessageConsumer().start();
+        confirmStartConsumer.start();
+        getMessageConsumer().start();
         heartbeatSender.start();
     }
 
@@ -85,7 +101,16 @@ public class WorkerServer<T> extends AbstractServer<T> {
         superstep++;
         log.info("[Superstep] entering a new super step...");
         this.executionManager.execute();
-        sendCompleteSignal(doSnapshot);
+
+//        todo: check whether all vertices are shouldStop
+        boolean flag = true;
+        for (Vertex<T> v: this.vertexGroup.getVertices()){
+            if (!v.isShouldStop()){
+                flag = false;
+                break;
+            }
+        }
+        sendCompleteSignal(doSnapshot, flag);
     }
 
     @Override
@@ -100,12 +125,13 @@ public class WorkerServer<T> extends AbstractServer<T> {
     /**
      * Send a complete signal to the master server
      */
-    public void sendCompleteSignal(boolean doSnapshot) {
+    public void sendCompleteSignal(boolean doSnapshot, boolean finish) {
         log.info("[Superstep] super step {} completed", superstep);
         if (doSnapshot) {
-            MessageProducer.produceFinishSignal(this.vertexGroup.getVertexValues());
+            log.info("[Graph] {}", this.vertexGroup);
+            MessageProducer.produceFinishSignal(this.vertexGroup.getVertexValues(), finish, this.serverId);
         } else {
-            MessageProducer.produceFinishSignal(new HashMap<>());
+            MessageProducer.produceFinishSignal(new HashMap<>(), finish, this.serverId);
         }
     }
 
