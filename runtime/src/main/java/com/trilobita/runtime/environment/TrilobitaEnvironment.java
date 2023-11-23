@@ -27,7 +27,6 @@ public class TrilobitaEnvironment<T> {
     public Partitioner<T> partitioner;
     public MasterServer<T> masterServer;
     public WorkerServer<T> workerServer;
-    public Cluster<T> cluster;
 
     public TrilobitaEnvironment() {}
 
