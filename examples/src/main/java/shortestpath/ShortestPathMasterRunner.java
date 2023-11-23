@@ -16,7 +16,7 @@ import java.util.concurrent.ExecutionException;
 public class ShortestPathMasterRunner {
     public static Graph createVertices(){
         List<ShortestPathVertex> vertices = new ArrayList<>();
-        ShortestPathVertex vertex0 = new ShortestPathVertex(0,0.0);
+        ShortestPathVertex vertex0 = new ShortestPathVertex(0,0.0,true);
         vertex0.setStatus(Vertex.VertexStatus.ACTIVE);
         vertices.add(vertex0);
 

@@ -1,6 +1,7 @@
 package shortestpath.vertex;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.trilobita.commons.Computable;
 import com.trilobita.commons.Mail;
 import com.trilobita.commons.Message;
 import com.trilobita.core.graph.vertex.Edge;
@@ -17,12 +18,16 @@ import java.util.List;
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")
 public class ShortestPathVertex extends Vertex<Double> implements Serializable {
 
+    private boolean source = false;
+
     public ShortestPathVertex(int id) {
         super(id, new ShortestPathValue(Double.MAX_VALUE));
+        this.source = false;
     }
 
-    public ShortestPathVertex(int id,Double value) {
+    public ShortestPathVertex(int id,Double value, Boolean source) {
         super(id, new ShortestPathValue(value));
+        this.source = source;
     }
 
     @Override
@@ -34,6 +39,9 @@ public class ShortestPathVertex extends Vertex<Double> implements Serializable {
     @Override
     public void compute() {
 //        startSuperstep();
+        if(source){
+            this.sendMail();
+        }
         List<Double> allvalue = new ArrayList<>();
         while (!this.getIncomingQueue().isEmpty()) {
             Message message = this.getIncomingQueue().poll().getMessage();
@@ -52,6 +60,11 @@ public class ShortestPathVertex extends Vertex<Double> implements Serializable {
             this.getValue().setValue(minvalue);
             this.sendMail();
         }
+    }
+
+    @Override
+    public boolean checkStop(Computable<Double> c) {
+        return false;
     }
 
     @Override

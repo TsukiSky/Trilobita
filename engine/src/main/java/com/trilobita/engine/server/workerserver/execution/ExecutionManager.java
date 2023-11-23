@@ -63,6 +63,15 @@ public class ExecutionManager<T> {
                 }));
             }
         }
+
+        //TODO: Set all the vertices inactive
+        if (server.getInMailQueue().isEmpty()){
+            for (Vertex<T> vertex : vertices) {
+                vertex.setStatus(Vertex.VertexStatus.INACTIVE);
+            }
+        }
+
+
         computeLatch.await(); // block until all computing tasks are finished
 
         CountDownLatch mailingLatch = new CountDownLatch(server.getOutMailQueue().size());
