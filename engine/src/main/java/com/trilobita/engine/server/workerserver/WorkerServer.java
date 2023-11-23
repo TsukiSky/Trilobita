@@ -7,7 +7,8 @@ import com.trilobita.core.messaging.MessageConsumer;
 import com.trilobita.core.messaging.MessageProducer;
 import com.trilobita.engine.server.AbstractServer;
 import com.trilobita.engine.server.functionable.Functionable;
-import com.trilobita.engine.server.functionable.FunctionableRunner;
+import com.trilobita.engine.server.functionable.FunctionableRunner.MasterFunctionableRunner;
+import com.trilobita.engine.server.functionable.FunctionableRunner.WorkerFunctionableRunner;
 import com.trilobita.engine.server.heartbeat.HeartbeatSender;
 import com.trilobita.engine.server.masterserver.partitioner.PartitionStrategy;
 import com.trilobita.engine.server.workerserver.execution.ExecutionManager;
@@ -33,10 +34,9 @@ public class WorkerServer<T> extends AbstractServer<T> {
     private final MessageConsumer partitionMessageConsumer;
     private final MessageConsumer startMessageConsumer;
     private final HeartbeatSender heartbeatSender;
-    private final FunctionableRunner functionableRunner = FunctionableRunner.getInstance(this.context);
+    private final WorkerFunctionableRunner functionableRunner = WorkerFunctionableRunner.getInstance(this.context);
 
-    public WorkerServer(int serverId, int parallelism, PartitionStrategy partitionStrategy,
-            String[] functionablesClassNames)
+    public WorkerServer(int serverId, int parallelism, PartitionStrategy partitionStrategy)
             throws ExecutionException, InterruptedException {
         super(serverId, partitionStrategy);
         this.executionManager = new ExecutionManager<>(parallelism, this);
@@ -75,9 +75,6 @@ public class WorkerServer<T> extends AbstractServer<T> {
                     }
                 });
         this.heartbeatSender = new HeartbeatSender(this.getServerId(), true);
-        if (functionablesClassNames != null) {
-            this.functionableRunner.registerFunctionables(functionablesClassNames);
-        }
     }
 
     /**
@@ -90,6 +87,7 @@ public class WorkerServer<T> extends AbstractServer<T> {
         partitionMessageConsumer.start();
         this.getMessageConsumer().start();
         heartbeatSender.start();
+        this.functionableRunner.start();
     }
 
     /**
@@ -98,7 +96,6 @@ public class WorkerServer<T> extends AbstractServer<T> {
     private void startNewSuperstep() throws InterruptedException {
         log.info("entering a new super step...");
         this.executionManager.execute();
-        // TODO: send functionalMails to master
         sendCompleteSignal();
     }
 

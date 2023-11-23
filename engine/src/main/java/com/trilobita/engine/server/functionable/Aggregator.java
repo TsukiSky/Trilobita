@@ -1,11 +1,8 @@
 package com.trilobita.engine.server.functionable;
 
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.trilobita.commons.Computable;
-import com.trilobita.commons.Mail;
-import com.trilobita.commons.Message;
 import com.trilobita.core.graph.VertexGroup;
 import com.trilobita.engine.server.Context;
 
@@ -21,27 +18,30 @@ import com.trilobita.engine.server.Context;
  */
 
 public abstract class Aggregator<T> extends Functionable<T> {
-
-    public int instanceID;
-
+    public Computable<T> initAggregatedValue;
     // how the aggregated value is initialized from the first input value
-    public Aggregator(int instanceID, Computable<T> initAggregatedValue) {
-        this.instanceID = instanceID;
-        this.setFunctionableValue(initAggregatedValue); 
+    public Aggregator(Computable<T> initAggregatedValue) {
+        super();
+        this.initAggregatedValue = initAggregatedValue;
+        this.setNewFunctionableValue(initAggregatedValue);
     }
 
     @Override
     public void execute(Context context) {
-        this.setFunctionableValue(this.aggregate(context.getVertexGroup()));
-        Message message = new Message(this.getFunctionableValue());
-        Mail mail = new Mail(context.getServerId(),-1,message,Mail.MailType.FUNCTIONAL);
-        this.sendMail(mail);
+        this.setNewFunctionableValue(this.aggregate(context.getVertexGroup()));
     }
+
+    @Override
+    public void execute(List<Computable<?>> computables) {
+        this.setNewFunctionableValue(this.reduce(computables));
+    }
+
     // Retreive certain properties to reduce
     // Make use of reduce function
     public abstract Computable<T> aggregate(VertexGroup<?> vertexGroup);
 
+    public abstract Computable<T> reduce(List<Computable<?>> computables);
+
     public abstract void stop();
 
 }
-

@@ -55,18 +55,19 @@ public class TrilobitaEnvironment<T> {
     }
 
     public void createMasterServer() {
+        this.createMasterServer(null, null);
+    }
+
+    public void createMasterServer(String[] classNames, String[] topicNames) {
         this.masterServer = new MasterServer<>(this.partitioner, (int) this.configuration.get("numOfWorker"), 0);
         this.masterServer.setGraph(this.graph);
+        this.masterServer.setFunctionables(classNames, topicNames);
     }
 
-    public void createWorkerServer(int workerId, String[] functionablesClassNames)
+    public void createWorkerServer(int workerId)
             throws ExecutionException, InterruptedException {
         this.workerServer = new WorkerServer<>(workerId, (int) this.configuration.get("parallelism"),
-                this.partitionStrategy, functionablesClassNames);
-    }
-
-    public void createWorkerServer(int workerId) throws ExecutionException, InterruptedException {
-        this.createWorkerServer(workerId, null);
+                this.partitionStrategy);
     }
 
     public void startMasterServer() throws ExecutionException, InterruptedException {

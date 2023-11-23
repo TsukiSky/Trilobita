@@ -6,6 +6,8 @@ import com.trilobita.core.graph.VertexGroup;
 import com.trilobita.core.messaging.MessageConsumer;
 import com.trilobita.core.messaging.MessageProducer;
 import com.trilobita.engine.server.AbstractServer;
+import com.trilobita.engine.server.functionable.Functionable;
+import com.trilobita.engine.server.functionable.FunctionableRunner.MasterFunctionableRunner;
 import com.trilobita.engine.server.heartbeat.HeartbeatChecker;
 import com.trilobita.engine.server.heartbeat.HeartbeatSender;
 import com.trilobita.engine.server.masterserver.partitioner.Partioner;
@@ -32,6 +34,7 @@ public class MasterServer<T> extends AbstractServer<T> {
     HeartbeatSender heartbeatSender;
     ValueSnapshot<T> valueSnapshot;
     List<Integer> WorkingWorkerIdList; // the alive working server's id
+    MasterFunctionableRunner masterFunctionableRunner;
 
     public MasterServer(Partioner<T> graphPartitioner, int nWorker, int id) {
         super(0, graphPartitioner.getPartitionStrategy()); // the standard server id of master is 0
@@ -69,6 +72,7 @@ public class MasterServer<T> extends AbstractServer<T> {
                                 .getMessage().getContent();
                         log.info(vertexValue.toString());
                         valueSnapshot.record(vertexValue);
+                        MasterServer.this.masterFunctionableRunner.runFunctionableTasks(MasterServer.this.getInMailQueue());
                         if (val == nWorker) {
                             // start the next superstep
                             valueSnapshot.finishSuperstep(graph);
@@ -78,6 +82,7 @@ public class MasterServer<T> extends AbstractServer<T> {
                         }
                     }
                 });
+        this.masterFunctionableRunner = MasterFunctionableRunner.getInstance();
     }
 
     @Override
@@ -85,7 +90,9 @@ public class MasterServer<T> extends AbstractServer<T> {
         this.completeSignalConsumer.start();
         this.workerHeartbeatChecker.start();
         this.partitionGraph();
+        this.sendfunctionables();
         this.heartbeatSender.start();
+        this.messageConsumer.start();
     }
 
     @Override
@@ -106,7 +113,6 @@ public class MasterServer<T> extends AbstractServer<T> {
     public void startNewSuperstep() {
         this.superstep += 1;
         this.nFinishedWorker.set(0);
-        // TODO: send functionalMails to vertices in workers
         MessageProducer.produceStartSignal();
 
     }
@@ -154,4 +160,26 @@ public class MasterServer<T> extends AbstractServer<T> {
             MessageProducer.createAndProduce(null, mail, "SERVER_" + WorkingWorkerIdList.get(i) + "_PARTITION");
         }
     }
+
+    /**
+     * Register functionables to masterFunctionableRunner
+     * 
+     * @param classNames a list of class names of functionables
+     * @param topicNames a list of topic names attached with respective
+     *                   functionables; null if no global communication
+     */
+    public void setFunctionables(String[] classNames, String[] topicNames) {
+        if (classNames != null && topicNames != null && classNames.length == topicNames.length) {
+            this.masterFunctionableRunner.registerFunctionables(classNames, topicNames);
+        }
+    }
+
+    /**
+     * Send regitsered functionable instances to all working servers to their
+     * message topics.
+     */
+    private void sendfunctionables() {
+        this.masterFunctionableRunner.broadcastFunctionables();
+    }
+
 }

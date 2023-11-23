@@ -1,12 +1,14 @@
 package com.trilobita.engine.server.functionable;
 
-import java.util.UUID;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.trilobita.commons.Computable;
 import com.trilobita.commons.Mail;
+import com.trilobita.commons.Message;
+import com.trilobita.commons.Mail.MailType;
 import com.trilobita.core.messaging.MessageConsumer;
 import com.trilobita.core.messaging.MessageProducer;
 import com.trilobita.core.messaging.MessageConsumer.MessageHandler;
@@ -19,26 +21,22 @@ import lombok.Data;
  * We provide the implementation of Combiner and Aggregator, as discussed in Pregel.
  */
 @Data
-public abstract class Functionable<T> {
+public abstract class Functionable<T> implements Serializable {
 
-    private Computable<T> functionableValue;
+    public String instanceName;
+    private Computable<T> lastFunctionableValue; // returned by master for last superstep
+    private Computable<T> newFunctionableValue; // this superstep
     private String topic = null;
+    private static String MASTER_TOPIC = "SERVER_0_MESSAGE";
     private MessageConsumer workerMessageConsumer = null;
-    private MessageHandler masterMessageHandler = null;
-    private MessageHandler workerMessageHandler = null;
-    public static Integer MASTER_ID = 0; // TODO: TO BE DELETED
+    private Integer serverId;
 
     public abstract void execute(Context context);
 
-    // if has consumer
-    public Functionable(String topic, MessageHandler workerMessageHandler,
-            MessageHandler masterMessageHandler) {
-
-        registerConsumer(topic, workerMessageHandler, masterMessageHandler);
-    }
+    public abstract void execute(List<Computable<?>> computables);
 
     public Functionable() {
-
+        this.instanceName = this.getClass().getName();
     }
 
     /**
@@ -46,23 +44,26 @@ public abstract class Functionable<T> {
      * 
      * @param topic                topic that the consumer consumes
      * @param workerMessageHandler MessageHandler that handles message on the worker
-     * @param masterMessageHandler MessageHandler that handles message on the master
      */
-    public void registerConsumer(String topic, MessageHandler workerMessageHandler,
-            MessageHandler masterMessageHandler) {
-        this.setTopic(topic);
-        this.setWorkerMessageHandler(workerMessageHandler);
-        this.setMasterMessageHandler(masterMessageHandler);
+    public void registerConsumer(MessageHandler workerMessageHandler) {
+        assert this.topic != null;
+        this.setTopic(this.topic);
         this.setWorkerMessageConsumer(
-                new MessageConsumer(topic, MASTER_ID, this.getWorkerMessageHandler()));
+                new MessageConsumer(this.topic, this.serverId, workerMessageHandler));
     }
 
     /**
-     * Send mail to the topic
+     * Send mail to master/workers if needed.
+     * (this.workerMessageConsumer == null) means that no need to communicate
      * 
      * @param mail
      */
-    public void sendMail(Mail mail) {
-        MessageProducer.createAndProduce(null, mail, this.getTopic());
+    public void sendMail(Computable<?> computable, boolean serverIsMaster) {
+        if (this.workerMessageConsumer != null) {
+            Mail mail = new FunctionalMail(this.instanceName, computable);
+            String topic = serverIsMaster ? this.topic : MASTER_TOPIC;
+            MessageProducer.createAndProduce(null, mail, topic);
+        }
     }
+
 }

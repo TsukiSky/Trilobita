@@ -49,7 +49,11 @@ public class ExecutionManager<T> {
             }
         }
 
-        // TODO: distribute functional mails to the vertices
+        // TODO: wait until all functionables values are noticed by functionable instances
+        // is this blocking in sequence or latch? 
+        futures.add(this.executorService.submit(() -> {
+            server.getFunctionableRunner().distributeValues();
+        }));
 
         List<Vertex<T>> vertices = this.server.getVertexGroup().getVertices();
         int activeVertexCount = 0;
@@ -74,9 +78,8 @@ public class ExecutionManager<T> {
 
         // execute functionables
         CountDownLatch functionableLatch = new CountDownLatch(1);
-
         server.getFunctionableRunner().runFunctionableTasks();
-        functionableLatch.await(); // block until all functionable tasks are finished
+        functionableLatch.await(); // TODO: block until all functionable tasks are finished (future?)
 
         CountDownLatch mailingLatch = new CountDownLatch(server.getOutMailQueue().size());
         // send the mail to the other servers
