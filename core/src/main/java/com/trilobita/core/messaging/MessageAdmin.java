@@ -158,6 +158,16 @@ public class MessageAdmin {
     }
 
     /**
+     * Clear all the topics
+     */
+    public void purgeAllTopics() throws ExecutionException, InterruptedException {
+        Set<String> topics = getTopics();
+        for (String topic : topics) {
+            purgeTopic(topic);
+        }
+    }
+
+    /**
      * Clear all the topics by deleting them
      */
     public void deleteAllTopics() throws ExecutionException, InterruptedException {
