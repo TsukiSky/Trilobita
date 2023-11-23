@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.trilobita.commons.Computable;
 import com.trilobita.core.graph.VertexGroup;
-import com.trilobita.engine.server.Context;
 
 /*
  * Monitor and communicate vertices metadata on a workerserver.
@@ -27,8 +26,9 @@ public abstract class Aggregator<T> extends Functionable<T> {
     }
 
     @Override
-    public void execute(Context context) {
-        this.setNewFunctionableValue(this.aggregate(context.getVertexGroup()));
+    public void execute(Object object) {
+        VertexGroup<?> vertexGroup = (VertexGroup<?>) object;
+        this.setNewFunctionableValue(this.aggregate(vertexGroup));
     }
 
     @Override

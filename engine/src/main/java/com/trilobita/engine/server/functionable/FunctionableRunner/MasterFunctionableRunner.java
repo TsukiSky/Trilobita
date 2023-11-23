@@ -26,10 +26,6 @@ public class MasterFunctionableRunner extends FunctionableRunner {
     private static MasterFunctionableRunner instance = null;
     private Map<String, List<Computable<?>>> functionalValues = new HashMap<>();
 
-    private MasterFunctionableRunner() {
-        instance = new MasterFunctionableRunner();
-    }
-
     public synchronized static MasterFunctionableRunner getInstance() {
         if (instance == null) {
             instance = new MasterFunctionableRunner();

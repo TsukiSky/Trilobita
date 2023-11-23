@@ -1,18 +1,12 @@
 package com.trilobita.engine.server.functionable;
 
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
 import com.trilobita.commons.Computable;
 import com.trilobita.commons.Mail;
-import com.trilobita.commons.Message;
-import com.trilobita.commons.Mail.MailType;
 import com.trilobita.core.messaging.MessageConsumer;
 import com.trilobita.core.messaging.MessageProducer;
 import com.trilobita.core.messaging.MessageConsumer.MessageHandler;
-import com.trilobita.engine.server.Context;
 
 import lombok.Data;
 
@@ -31,7 +25,7 @@ public abstract class Functionable<T> implements Serializable {
     private MessageConsumer workerMessageConsumer = null;
     private Integer serverId;
 
-    public abstract void execute(Context context);
+    public abstract void execute(Object object);
 
     public abstract void execute(List<Computable<?>> computables);
 

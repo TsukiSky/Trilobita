@@ -3,13 +3,11 @@ package com.trilobita.engine.server.workerserver.execution;
 import com.trilobita.commons.*;
 import com.trilobita.core.graph.vertex.Vertex;
 import com.trilobita.core.messaging.MessageProducer;
-import com.trilobita.engine.server.functionable.Functionable;
 import com.trilobita.engine.server.workerserver.WorkerServer;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.*;
 
 /**
@@ -78,7 +76,7 @@ public class ExecutionManager<T> {
 
         // execute functionables
         CountDownLatch functionableLatch = new CountDownLatch(1);
-        server.getFunctionableRunner().runFunctionableTasks();
+        server.getFunctionableRunner().runFunctionableTasks(this.server.getVertexGroup());
         functionableLatch.await(); // TODO: block until all functionable tasks are finished (future?)
 
         CountDownLatch mailingLatch = new CountDownLatch(server.getOutMailQueue().size());

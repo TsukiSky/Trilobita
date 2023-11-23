@@ -10,7 +10,7 @@ import com.trilobita.engine.server.functionable.Combiner;
  */
 public class SumCombiner<T> extends Combiner<T> {
     @Override
-    public Mail combineMails(int toVertexId, CopyOnWriteArrayList<Mail> mails) {
+    public Mail combineMails(Integer toVertexId, CopyOnWriteArrayList<Mail> mails) {
         Mail newMail = new Mail(toVertexId, null, Mail.MailType.NORMAL);
         Computable<T> newContent = null;
         for (Mail mail : mails) {

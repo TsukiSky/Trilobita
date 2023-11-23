@@ -34,7 +34,7 @@ public class WorkerServer<T> extends AbstractServer<T> {
     private final MessageConsumer partitionMessageConsumer;
     private final MessageConsumer startMessageConsumer;
     private final HeartbeatSender heartbeatSender;
-    private final WorkerFunctionableRunner functionableRunner = WorkerFunctionableRunner.getInstance(this.context);
+    private final WorkerFunctionableRunner functionableRunner = WorkerFunctionableRunner.getInstance(serverId);
 
     public WorkerServer(int serverId, int parallelism, PartitionStrategy partitionStrategy)
             throws ExecutionException, InterruptedException {

@@ -1,12 +1,7 @@
 package com.trilobita.engine.server.functionable.FunctionableRunner;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -15,7 +10,6 @@ import com.trilobita.commons.Mail;
 import com.trilobita.commons.Mail.MailType;
 import com.trilobita.core.messaging.MessageConsumer;
 import com.trilobita.core.messaging.MessageConsumer.MessageHandler;
-import com.trilobita.engine.server.Context;
 import com.trilobita.engine.server.functionable.Functionable;
 
 /**
@@ -29,13 +23,10 @@ public class WorkerFunctionableRunner extends FunctionableRunner {
     private boolean finishedRegisterFunctionables = false;
     private static int POSITIVE_INF = 10000;
     private MessageConsumer initFunctionablesConsumer;
-    private Context serverContext;
     private MessageHandler functionalMessageHandler;
     private Map<String, Computable<?>> incomingFunctionableValues;
 
-    private WorkerFunctionableRunner(Context serverContext) {
-        instance = new WorkerFunctionableRunner(serverContext);
-        this.serverContext = serverContext;
+    private WorkerFunctionableRunner(Integer serverId) {
         this.functionalMessageHandler = new MessageHandler() {
             @Override
             public void handleMessage(UUID key, Mail value, int partition, long offset)
@@ -45,14 +36,14 @@ public class WorkerFunctionableRunner extends FunctionableRunner {
             }
         };
         this.initFunctionablesConsumer = new MessageConsumer("INIT_FUNCTIONAL",
-                this.serverContext.getServerId(), new MessageHandler() {
+                serverId, new MessageHandler() {
                     @Override
                     public void handleMessage(UUID key, Mail value, int partition, long offset)
                             throws InterruptedException {
                         int totalNumFunc = POSITIVE_INF; // a very large number
                         if (value.getMailType() == MailType.FUNCTIONAL) {
                             Functionable<?> functionable = (Functionable<?>) value.getMessage().getContent();
-                            functionable.setServerId(serverContext.getServerId());
+                            functionable.setServerId(serverId);
                             WorkerFunctionableRunner.this.registerFunctionable(functionable);
                             if (functionable.getTopic() != null) {
                                 functionable.registerConsumer(functionalMessageHandler);
@@ -72,9 +63,9 @@ public class WorkerFunctionableRunner extends FunctionableRunner {
                 });
     }
 
-    public synchronized static WorkerFunctionableRunner getInstance(Context serverContext) {
+    public synchronized static WorkerFunctionableRunner getInstance(Integer serverId) {
         if (instance == null) {
-            instance = new WorkerFunctionableRunner(serverContext);
+            instance = new WorkerFunctionableRunner(serverId);
         }
         return instance;
     }
@@ -109,9 +100,9 @@ public class WorkerFunctionableRunner extends FunctionableRunner {
     /**
      * To run all functionable tasks in worker and send to master
      */
-    public void runFunctionableTasks() {
+    public void runFunctionableTasks(Object object) {
         for (Functionable<?> functionable : this.getFunctionables()) {
-            functionable.execute(this.serverContext);
+            functionable.execute(object);
             functionable.sendMail(functionable.getNewFunctionableValue(), false);
         }
     }
