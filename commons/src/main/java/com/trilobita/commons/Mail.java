@@ -46,6 +46,7 @@ public class Mail implements Serializable {
         NORMAL,
         PARTITION,
         FINISH_SIGNAL,
+        Vertex_STATUS_SIGNAL,
         START_SIGNAL,
         HEARTBEAT,
         FUNCTIONAL,

@@ -32,6 +32,8 @@ public class WorkerServer<T> extends AbstractServer<T> {
     private final HeartbeatSender heartbeatSender;
     private final MessageConsumer confirmStartConsumer;
 
+
+
     public WorkerServer(int serverId, int parallelism, PartitionStrategy partitionStrategy) {
         super(serverId, partitionStrategy);
         this.executionManager = new ExecutionManager<>(parallelism, this);
@@ -105,10 +107,11 @@ public class WorkerServer<T> extends AbstractServer<T> {
 //        todo: check whether all vertices are shouldStop
         boolean flag = true;
         for (Vertex<T> v: this.vertexGroup.getVertices()){
-            if (!v.isShouldStop()){
+            if (!v.isShouldStop() && v.getStatus() == Vertex.VertexStatus.ACTIVE){
                 flag = false;
                 break;
             }
+
         }
         sendCompleteSignal(doSnapshot, flag);
     }

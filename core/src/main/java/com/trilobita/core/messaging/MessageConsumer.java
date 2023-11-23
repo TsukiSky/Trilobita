@@ -11,6 +11,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -21,7 +22,7 @@ import java.util.concurrent.ExecutionException;
  */
 @Slf4j
 public class MessageConsumer {
-    private static final boolean willLog = false;
+    private static final boolean DEBUG_LOG = false;
     private volatile boolean runFlag = false;
     private String topic;
     private final MessageAdmin messageAdmin = MessageAdmin.getInstance();
@@ -57,16 +58,7 @@ public class MessageConsumer {
         this.topic = topic;
     }
 
-    public MessageConsumer(String topic, String serverId, MessageHandler messageHandler) {
-        consumerProperties.putAll(messageAdmin.props);
-        consumerProperties.put(ConsumerConfig.GROUP_ID_CONFIG, "group-kafka-trilobita-"+ serverId+"-"+UUID.randomUUID()); // Master topic probably is subscribed by multiple workers.
-        consumerProperties.put(ConsumerConfig.GROUP_INSTANCE_ID_CONFIG, ("consumer-kafka-trilobita-" + topic)); // one worker has multiple consumer (group instance) differentiated by topic.
-        consumerProperties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
-        this.messageHandler = messageHandler;
-        this.topic = topic;
-    }
-
-    public MessageConsumer(String topic, Integer serverId, MessageHandler messageHandler, String offsetPolicy) {
+    public MessageConsumer(String topic, Integer serverId, String offsetPolicy, MessageHandler messageHandler) {
         consumerProperties.putAll(messageAdmin.props);
         consumerProperties.put(ConsumerConfig.GROUP_ID_CONFIG, "group-kafka-trilobita-"+ serverId+"-"+UUID.randomUUID()); // Master topic probably is subscribed by multiple workers.
         consumerProperties.put(ConsumerConfig.GROUP_INSTANCE_ID_CONFIG, ("consumer-kafka-trilobita-" + topic)); // one worker has multiple consumer (group instance) differentiated by topic.
@@ -91,9 +83,11 @@ public class MessageConsumer {
             return;
         }
         runFlag = true;
+        CountDownLatch latch = new CountDownLatch(1);
         consumerThread = new Thread(() -> {
             try (Consumer<String, Mail> consumer = new KafkaConsumer<>(consumerProperties)) {
                 consumer.subscribe(Collections.singletonList(topic));
+                latch.countDown();
                 while (runFlag) {
                     ConsumerRecords<String, Mail> records = consumer.poll(Duration.ofMillis(100));
                     for (ConsumerRecord<String, Mail> consumerRecord : records) {
@@ -101,7 +95,7 @@ public class MessageConsumer {
                         Mail value = consumerRecord.value();
                         int partition = consumerRecord.partition();
                         long offset = consumerRecord.offset();
-                        if (willLog){
+                        if (DEBUG_LOG){
                             log.info("Consumer Record: Topic: {}, key: {}, value: {}, partition: {}, offset: {}",
                                     topic, consumerRecord.key(), value, partition, offset
                             );
@@ -116,6 +110,7 @@ public class MessageConsumer {
             }
         });
         consumerThread.start();
+        latch.await();
     }
 
     /**
