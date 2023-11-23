@@ -7,7 +7,6 @@ import com.trilobita.core.graph.VertexGroup;
 import com.trilobita.core.messaging.MessageConsumer;
 import com.trilobita.core.messaging.MessageProducer;
 import com.trilobita.engine.server.AbstractServer;
-import com.trilobita.engine.server.functionable.Functionable;
 import com.trilobita.engine.server.functionable.FunctionableRunner.MasterFunctionableRunner;
 import com.trilobita.engine.server.heartbeat.HeartbeatChecker;
 import com.trilobita.engine.server.heartbeat.HeartbeatSender;
@@ -17,7 +16,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Master Server is the master of a server cluster, coordinate the start and the

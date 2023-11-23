@@ -7,8 +7,6 @@ import com.trilobita.core.graph.vertex.Vertex;
 import com.trilobita.core.messaging.MessageConsumer;
 import com.trilobita.core.messaging.MessageProducer;
 import com.trilobita.engine.server.AbstractServer;
-import com.trilobita.engine.server.functionable.Functionable;
-import com.trilobita.engine.server.functionable.FunctionableRunner.MasterFunctionableRunner;
 import com.trilobita.engine.server.functionable.FunctionableRunner.WorkerFunctionableRunner;
 import com.trilobita.engine.server.heartbeat.HeartbeatSender;
 import com.trilobita.engine.server.masterserver.partitioner.PartitionStrategy;
