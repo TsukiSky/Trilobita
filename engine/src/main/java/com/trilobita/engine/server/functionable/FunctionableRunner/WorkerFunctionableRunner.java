@@ -1,5 +1,6 @@
 package com.trilobita.engine.server.functionable.FunctionableRunner;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
@@ -12,21 +13,23 @@ import com.trilobita.core.messaging.MessageConsumer;
 import com.trilobita.core.messaging.MessageConsumer.MessageHandler;
 import com.trilobita.engine.server.functionable.Functionable;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * An FunctionableRunner is a singleton in one worker.
  * It is used to register, initiate, and run functionable instances added by the
  * user.
  */
+@Slf4j
 public class WorkerFunctionableRunner extends FunctionableRunner {
 
     private static WorkerFunctionableRunner instance = null;
-    private boolean finishedRegisterFunctionables = false;
     private static int POSITIVE_INF = 10000;
     private MessageConsumer initFunctionablesConsumer;
     private MessageHandler functionalMessageHandler;
-    private Map<String, Computable<?>> incomingFunctionableValues;
+    private Map<String, Computable<?>> incomingFunctionableValues = new HashMap<>();
 
-    private WorkerFunctionableRunner(Integer serverId) {
+    private WorkerFunctionableRunner(Integer serverId) throws ExecutionException, InterruptedException {
         this.functionalMessageHandler = new MessageHandler() {
             @Override
             public void handleMessage(UUID key, Mail value, int partition, long offset)
@@ -42,6 +45,7 @@ public class WorkerFunctionableRunner extends FunctionableRunner {
                             throws InterruptedException {
                         int totalNumFunc = POSITIVE_INF; // a very large number
                         if (value.getMailType() == MailType.FUNCTIONAL) {
+                            log.info("Received INIT_FUNCTIONAL FUNCTIONAL message from master.");
                             Functionable<?> functionable = (Functionable<?>) value.getMessage().getContent();
                             functionable.setServerId(serverId);
                             WorkerFunctionableRunner.this.registerFunctionable(functionable);
@@ -50,20 +54,21 @@ public class WorkerFunctionableRunner extends FunctionableRunner {
                             }
                             if (totalNumFunc < POSITIVE_INF) {
                                 if (WorkerFunctionableRunner.this.getFunctionables().size() == totalNumFunc) {
-                                    WorkerFunctionableRunner.this.finishedRegisterFunctionables = true;
+                                    WorkerFunctionableRunner.this.finishRegisterFunctionables();
                                 }
                             }
                         } else if (value.getMailType() == MailType.FINISH_SIGNAL) {
+                            log.info("Received INIT_FUNCTIONAL FINISH_SIGNAL message from master.");
                             totalNumFunc = (int) value.getMessage().getContent();
                             if (WorkerFunctionableRunner.this.getFunctionables().size() == totalNumFunc) {
-                                WorkerFunctionableRunner.this.finishedRegisterFunctionables = true;
+                                WorkerFunctionableRunner.this.finishRegisterFunctionables();
                             }
                         }
                     }
                 });
     }
 
-    public synchronized static WorkerFunctionableRunner getInstance(Integer serverId) {
+    public synchronized static WorkerFunctionableRunner getInstance(Integer serverId) throws ExecutionException, InterruptedException {
         if (instance == null) {
             instance = new WorkerFunctionableRunner(serverId);
         }
@@ -71,20 +76,16 @@ public class WorkerFunctionableRunner extends FunctionableRunner {
     }
 
     public void finishRegisterFunctionables() {
-        if (finishedRegisterFunctionables) {
-            try {
+         try {
                 this.initFunctionablesConsumer.stop();
                 startConsumers();
             } catch (ExecutionException | InterruptedException e) {
                 e.printStackTrace();
             }
-
-        }
-
     }
 
     /**
-     * Distribute functional values process by master from last superstep
+     * Distribute functional values processed by master from last superstep
      */
     public void distributeValues() {
         for (Map.Entry<String, Computable<?>> map : this.incomingFunctionableValues.entrySet()) {
@@ -101,9 +102,11 @@ public class WorkerFunctionableRunner extends FunctionableRunner {
      * To run all functionable tasks in worker and send to master
      */
     public void runFunctionableTasks(Object object) {
-        for (Functionable<?> functionable : this.getFunctionables()) {
-            functionable.execute(object);
-            functionable.sendMail(functionable.getNewFunctionableValue(), false);
+        if (this.getFunctionables() != null) {
+            for (Functionable<?> functionable : this.getFunctionables()) {
+                functionable.execute(object);
+                functionable.sendMail(functionable.getNewFunctionableValue(), false);
+            }
         }
     }
 
@@ -114,10 +117,12 @@ public class WorkerFunctionableRunner extends FunctionableRunner {
      * @throws InterruptedException
      */
     public void startConsumers() throws ExecutionException, InterruptedException {
-        for (Functionable<?> functionable : this.getFunctionables()) {
-            MessageConsumer consumer = functionable.getWorkerMessageConsumer();
-            if (consumer != null) {
-                consumer.start();
+        if (this.getFunctionables() != null) {
+            for (Functionable<?> functionable : this.getFunctionables()) {
+                MessageConsumer consumer = functionable.getWorkerMessageConsumer();
+                if (consumer != null) {
+                    consumer.start();
+                }
             }
         }
     }

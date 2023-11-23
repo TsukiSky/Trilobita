@@ -121,13 +121,15 @@ public class MasterFunctionableRunner extends FunctionableRunner {
 
     // send functionable instances to all workers
     public void broadcastFunctionables() {
-        for (Functionable<?> functionable : this.getFunctionables()) {
-            Mail mail = new Mail(-1, new Message(functionable), Mail.MailType.FUNCTIONAL);
+        if (this.getFunctionables() != null) {
+            for (Functionable<?> functionable : this.getFunctionables()) {
+                Mail mail = new Mail(-1, new Message(functionable), Mail.MailType.FUNCTIONAL);
+                MessageProducer.createAndProduce(null, mail, "INIT_FUNCTIONAL");
+            }
+            // send stop signal
+            Mail mail = new Mail(-1, new Message(this.getFunctionables().size()), Mail.MailType.FINISH_SIGNAL);
             MessageProducer.createAndProduce(null, mail, "INIT_FUNCTIONAL");
         }
-        // send stop signal
-        Mail mail = new Mail(-1, new Message(this.getFunctionables().size()), Mail.MailType.FINISH_SIGNAL);
-        MessageProducer.createAndProduce(null, mail, "INIT_FUNCTIONAL");
 
     }
 

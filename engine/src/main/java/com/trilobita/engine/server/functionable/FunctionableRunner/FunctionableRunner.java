@@ -14,10 +14,12 @@ import lombok.Data;
 public abstract class FunctionableRunner {
     private List<Functionable<?>> functionables; // functionable, topic
 
-    public Functionable<?> findFunctionableByName(String name){
-        for (Functionable<?> functionable : this.functionables) {
-            if (functionable.instanceName == name) {
-                return functionable;
+    public Functionable<?> findFunctionableByName(String name) {
+        if (this.functionables != null) {
+            for (Functionable<?> functionable : this.functionables) {
+                if (functionable.instanceName == name) {
+                    return functionable;
+                }
             }
         }
         return null;
@@ -34,7 +36,7 @@ public abstract class FunctionableRunner {
         }
     }
 
-        public void registerFunctionable(Functionable<?> functionable) {
+    public void registerFunctionable(Functionable<?> functionable) {
         if (functionable.getClass() == Functionable.class) {
             System.out.println("The functionable class is abstract.");
         } else {

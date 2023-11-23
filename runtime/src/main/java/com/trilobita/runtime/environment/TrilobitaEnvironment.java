@@ -68,7 +68,7 @@ public class TrilobitaEnvironment<T> {
 
     }
 
-    public void createWorkerServer(int workerId) {
+    public void createWorkerServer(int workerId) throws ExecutionException, InterruptedException {
         this.workerServer = new WorkerServer<>(workerId, (int) this.configuration.get("parallelism"),
                 this.partitionStrategy);
     }
