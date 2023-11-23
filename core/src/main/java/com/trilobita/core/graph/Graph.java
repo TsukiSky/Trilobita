@@ -54,4 +54,9 @@ public class Graph<T> extends VertexGroup<T> {
             }
         }
     }
+
+    @Override
+    public String toString(){
+        return this.getVertices().toString();
+    }
 }

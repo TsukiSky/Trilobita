@@ -46,7 +46,7 @@ public class MessageProducer {
         try {
             MessageAdmin.getInstance().createIfNotExist(topic);
         } catch (ExecutionException | InterruptedException exception) {
-            log.error("produce create topic: {}", exception.getMessage());
+//            log.error("produce create topic: {}", exception.getMessage());
         }
         produce(key, value, topic);
     }
@@ -84,8 +84,12 @@ public class MessageProducer {
      *
      * @param vertexValues vertex values to be stored as checkpoints
      */
-    public static <T> void produceFinishSignal(HashMap<Integer, Computable<T>> vertexValues) {
-        Message message = new Message(vertexValues);
+    public static <T> void produceFinishSignal(HashMap<Integer, Computable<T>> vertexValues, boolean finish, int id) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("VERTEX_VALUES", vertexValues);
+        map.put("FINISH", finish);
+        map.put("ID", id);
+        Message message = new Message(map);
         Mail mail = new Mail(-1, message, Mail.MailType.FINISH_SIGNAL);
         MessageProducer.createAndProduce(null, mail, mail.getMailType().ordinal());
     }
