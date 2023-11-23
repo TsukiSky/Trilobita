@@ -57,16 +57,7 @@ public class MessageConsumer {
         this.topic = topic;
     }
 
-    public MessageConsumer(String topic, String gid, MessageHandler messageHandler) {
-        consumerProperties.putAll(messageAdmin.props);
-        consumerProperties.put(ConsumerConfig.GROUP_ID_CONFIG, gid); // Master topic probably is subscribed by multiple workers.
-        consumerProperties.put(ConsumerConfig.GROUP_INSTANCE_ID_CONFIG, ("consumer-kafka-trilobita-" + topic)); // one worker has multiple consumer (group instance) differentiated by topic.
-        consumerProperties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
-        this.messageHandler = messageHandler;
-        this.topic = topic;
-    }
-
-    public MessageConsumer(String topic, Integer serverId, MessageHandler messageHandler, String offsetPolicy) {
+    public MessageConsumer(String topic, Integer serverId, String offsetPolicy, MessageHandler messageHandler) {
         consumerProperties.putAll(messageAdmin.props);
         consumerProperties.put(ConsumerConfig.GROUP_ID_CONFIG, "group-kafka-trilobita-"+ serverId); // Master topic probably is subscribed by multiple workers.
         consumerProperties.put(ConsumerConfig.GROUP_INSTANCE_ID_CONFIG, ("consumer-kafka-trilobita-" + topic)); // one worker has multiple consumer (group instance) differentiated by topic.
