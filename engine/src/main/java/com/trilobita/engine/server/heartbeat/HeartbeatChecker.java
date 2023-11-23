@@ -60,9 +60,6 @@ public class HeartbeatChecker extends Thread {
                 heartbeatMap.put(entry.getKey(), false);
             }
             if (errList.size()>0){
-                for (int id: errList){
-                    heartbeatMap.remove(id);
-                }
                 isProcessing = true;
                 faultHandler.handleFault(errList);
             }
@@ -92,7 +89,7 @@ public class HeartbeatChecker extends Thread {
     @Override
     public void run(){
         if (!isProcessing) {
-            heartbeatExecutor.scheduleAtFixedRate(this::check, 5, 2, TimeUnit.SECONDS);
+            heartbeatExecutor.scheduleAtFixedRate(this::check, 5, 1, TimeUnit.SECONDS);
             log.info("Heartbeat checking service will start in 5 seconds.");
         } else {
             log.info("Heartbeat checking service is already running.");
