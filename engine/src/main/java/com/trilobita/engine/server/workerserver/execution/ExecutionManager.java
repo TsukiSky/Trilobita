@@ -12,7 +12,7 @@ import java.util.concurrent.*;
 
 /**
  * Execution Manager is responsible for the execution of a superstep
- * 
+ *
  * @param <T> the type of the vertex value
  */
 @Slf4j
@@ -41,8 +41,7 @@ public class ExecutionManager<T> {
         while (!server.getInMailQueue().isEmpty()) {
             Mail mail = this.server.getInMailQueue().poll();
             if (mail != null) {
-                futures.add(this.executorService.submit(() -> {
-                    server.distributeMailToVertex(mail);
+                futures.add(this.executorService.submit(() -> { server.distributeMailToVertex(mail);
                 }));
             }
         }
@@ -60,8 +59,8 @@ public class ExecutionManager<T> {
                 activeVertexCount++;
             }
         }
-        CountDownLatch computeLatch = new CountDownLatch(activeVertexCount);
 
+        CountDownLatch computeLatch = new CountDownLatch(activeVertexCount);
         // start the computation of the vertices
         for (Vertex<T> vertex : vertices) {
             if (vertex.getStatus() == Vertex.VertexStatus.ACTIVE) {
@@ -85,7 +84,7 @@ public class ExecutionManager<T> {
             Mail mail = this.server.getOutMailQueue().poll();
             futures.add(executorService.submit(() -> {
                 int receiverId = this.server.findServerByVertexId(mail.getToVertexId());
-                MessageProducer.createAndProduce(null, mail, "SERVER_" + receiverId + "_MESSAGE");
+                MessageProducer.produceWorkerServerMessage(mail, receiverId);
                 mailingLatch.countDown();
             }));
         }

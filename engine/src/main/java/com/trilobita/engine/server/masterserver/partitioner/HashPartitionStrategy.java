@@ -1,12 +1,14 @@
 package com.trilobita.engine.server.masterserver.partitioner;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class implements the PartitionStrategy interface and represents a hash-based partitioning strategy.
  */
 public class HashPartitionStrategy implements PartitionStrategy, Serializable {
-    private final int nWorkers; // The number of workers (servers) available for partitioning.
+    private List<Integer> workerIdList; // The number of workers (servers) available for partitioning.
 
     /**
      * Constructor to initialize the HashPartitionStrategy with the number of workers.
@@ -14,7 +16,10 @@ public class HashPartitionStrategy implements PartitionStrategy, Serializable {
      * @param nWorkers The number of workers/servers to which the partitioning will be distributed.
      */
     public HashPartitionStrategy(int nWorkers) {
-        this.nWorkers = nWorkers;
+        this.workerIdList = new ArrayList<>();
+        for (int i=1;i<=nWorkers;i++){
+            this.workerIdList.add(i);
+        }
     }
 
     /**
@@ -27,11 +32,21 @@ public class HashPartitionStrategy implements PartitionStrategy, Serializable {
     public int getServerIdByVertexId(int vertexId) {
         int serverId;
         // Calculate the server ID based on the vertex ID using a hash-based approach.
-        if (vertexId % nWorkers == 0) {
-            serverId = nWorkers;
+        if (vertexId % workerIdList.size() == 0) {
+            serverId = workerIdList.size();
         } else {
-            serverId = vertexId % nWorkers;
+            serverId = vertexId % workerIdList.size();
         }
-        return serverId;
+        return workerIdList.get(serverId-1);
+    }
+
+    @Override
+    public List<Integer> getWorkerIdList() {
+        return this.workerIdList;
+    }
+
+    @Override
+    public void setWorkerIdList(List<Integer> workerIdList) {
+        this.workerIdList = workerIdList;
     }
 }

@@ -28,7 +28,7 @@ public abstract class AbstractServer<T> {
     public final MessageConsumer messageConsumer;
     @Setter
     public PartitionStrategy partitionStrategy;
-    public Integer superstep = 1;
+    public Integer superstep = 0;
 
     public AbstractServer(int serverId, PartitionStrategy partitionStrategy) {
         this.serverId = serverId;

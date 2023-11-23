@@ -1,13 +1,13 @@
-package com.trilobita.runtime.launcher;
+package com.trilobita.runtime.environment;
 
 import com.trilobita.core.graph.Graph;
 import com.trilobita.engine.server.masterserver.MasterServer;
-import com.trilobita.engine.server.masterserver.partitioner.Partioner;
+import com.trilobita.engine.server.masterserver.partitioner.Partitioner;
 import com.trilobita.engine.server.masterserver.partitioner.PartitionStrategy;
 import com.trilobita.engine.server.workerserver.WorkerServer;
 import com.trilobita.runtime.configuration.Configuration;
 import com.trilobita.runtime.configuration.JCommandHandler;
-import com.trilobita.runtime.launcher.inputparser.Parse;
+import com.trilobita.runtime.parser.inputparser.InputParse;
 import lombok.Getter;
 
 import java.util.concurrent.ExecutionException;
@@ -17,15 +17,17 @@ import java.util.concurrent.ExecutionException;
  */
 public class TrilobitaEnvironment<T> {
     public static TrilobitaEnvironment<?> trilobitaEnvironment;
-    private Parse inputParser;
+    private InputParse inputParser;
     @Getter
     private final Configuration configuration = new Configuration();
     private final JCommandHandler jCommandHandler = new JCommandHandler(); // Command-line handler for Trilobita
+    @Getter
     private Graph<T> graph;
     public PartitionStrategy partitionStrategy;
-    public Partioner<T> partitioner;
+    public Partitioner<T> partitioner;
     public MasterServer<T> masterServer;
-    public WorkerServer<?> workerServer;
+    public WorkerServer<T> workerServer;
+    public Cluster<T> cluster;
 
     public TrilobitaEnvironment() {
     }
@@ -41,36 +43,37 @@ public class TrilobitaEnvironment<T> {
         this.graph = graph;
     }
 
-    public Graph<T> getGraph() {
-        return this.graph;
-    }
-
-    public void setPartitioner(Partioner<T> partitioner) {
+    public void setPartitioner(Partitioner<T> partitioner) {
         this.partitioner = partitioner;
         this.partitionStrategy = partitioner.getPartitionStrategy();
     }
 
-    public void setInputParser(Parse inputParser) {
+    public void setInputParser(InputParse inputParser) {
         this.inputParser = inputParser;
     }
 
-    public void createMasterServer() {
-        this.createMasterServer(null, null);
+    public void createMasterServer(int id, int snapshotFrequency) throws ExecutionException, InterruptedException {
+        this.createMasterServer(id, snapshotFrequency, null, null);
     }
 
-    public void createMasterServer(String[] classNames, String[] topicNames) {
-        this.masterServer = new MasterServer<>(this.partitioner, (int) this.configuration.get("numOfWorker"), 0);
+    public void createMasterServer(int id, int snapshotFrequency, String[] classNames, String[] topicNames)
+            throws ExecutionException, InterruptedException {
+        this.masterServer = new MasterServer<>(this.partitioner, (int) this.configuration.get("numOfWorker"), id,
+                (int) this.configuration.get("numOfReplica"), snapshotFrequency);
         this.masterServer.setGraph(this.graph);
         this.masterServer.setFunctionables(classNames, topicNames);
     }
 
-    public void createWorkerServer(int workerId)
-            throws ExecutionException, InterruptedException {
+    public void join(String clusterName) {
+
+    }
+
+    public void createWorkerServer(int workerId) {
         this.workerServer = new WorkerServer<>(workerId, (int) this.configuration.get("parallelism"),
                 this.partitionStrategy);
     }
 
-    public void startMasterServer() throws ExecutionException, InterruptedException {
+    public void startMasterServer() {
         this.masterServer.start();
     }
 

@@ -1,15 +1,12 @@
 package com.trilobita.core.graph.vertex;
 
 import com.trilobita.commons.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
@@ -19,13 +16,13 @@ import java.util.concurrent.LinkedBlockingQueue;
 @Data
 public abstract class Vertex<T> implements Serializable {
     private int id;
+    private boolean shouldStop;
     private List<Edge> edges;
     private VertexStatus status;
     private Computable<T> value;
     private boolean stepFinished;
     private BlockingQueue<Mail> incomingQueue;
     private BlockingQueue<Mail> serverQueue;
-    private ConcurrentHashMap<Integer, Computable<T>> serverVertexValue;
 
     public Vertex(int id, Computable<T> value) {
         this.id = id;
@@ -83,10 +80,6 @@ public abstract class Vertex<T> implements Serializable {
         this.addEdge(edge);
     }
 
-    public void setValueOnServer(){
-        this.serverVertexValue.put(this.id, this.value);
-    }
-
     /**
      * execute the superstep of the vertex
      */
@@ -98,6 +91,13 @@ public abstract class Vertex<T> implements Serializable {
      * compute incoming messages
      */
     public abstract void compute();
+
+    public abstract boolean checkStop(Computable<T> c);
+
+    @Override
+    public String toString(){
+        return "{" + "vertex id: " + this.id + ", vertex value: " + this.value + ", shouldStop: " + this.shouldStop + "}";
+    }
 
     /**
      * The status of the vertex

@@ -7,6 +7,7 @@ import org.apache.kafka.common.KafkaFuture;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class MessageAdmin {
@@ -34,6 +35,72 @@ public class MessageAdmin {
     public Set<String> getTopics() throws ExecutionException, InterruptedException {
         ListTopicsResult listTopics = adminClient.listTopics();
         return listTopics.names().get();
+    }
+
+    /**
+     * <p>Return all the consumer groups that subscribe to given topic.
+     * </p>
+     *
+     * @param topic the topic which you want to get consumer groups for
+     * @return All the consumer groups that subscribe to given topic.
+     * @author Guo Ziniu: ziniu@catroll.io
+     */
+    public Set<String> getConsumerGroupsForTopic(String topic) throws ExecutionException, InterruptedException {
+        Set<String> consumerGroups = adminClient.listConsumerGroups().all().get().stream()
+                .map(ConsumerGroupListing::groupId)
+                .collect(Collectors.toSet());
+        Set<String> ret = new HashSet<>();
+        for (String group : consumerGroups) {
+            DescribeConsumerGroupsResult describeResult = adminClient.describeConsumerGroups(Collections.singletonList(group));
+            KafkaFuture<Map<String, ConsumerGroupDescription>> future = describeResult.all();
+            Map<String, ConsumerGroupDescription> res = future.get();
+            for (Map.Entry<String, ConsumerGroupDescription> entry : res.entrySet()) {
+                ConsumerGroupDescription description = entry.getValue();
+                for (MemberDescription memberDescription : description.members()) {
+                    if (memberDescription.assignment().topicPartitions().stream()
+                            .anyMatch(tp -> tp.topic().equals(topic))) {
+                        log.debug("Group " + group + " is subscribed to topic " + topic);
+                        ret.add(group);
+                    }
+                }
+            }
+        }
+        return ret;
+    }
+
+    /**
+     * <p>Return all the consumer groups and their consumers that subscribe to given topic.
+     * </p>
+     *
+     * @param topic the topic which you want to get consumers for
+     * @return All the consumer groups that subscribe to given topic, and their consumers.
+     * @author Guo Ziniu: ziniu@catroll.io
+     */
+    public Map<String, Set<String>> getConsumersForTopic(String topic) throws ExecutionException, InterruptedException {
+        Map<String, Set<String>> groupToConsumersMap = new HashMap<>();
+        Set<String> consumerGroups = adminClient.listConsumerGroups().all().get().stream()
+                .map(ConsumerGroupListing::groupId)
+                .collect(Collectors.toSet());
+        for (String group : consumerGroups) {
+            DescribeConsumerGroupsResult describeResult = adminClient.describeConsumerGroups(Collections.singletonList(group));
+            KafkaFuture<Map<String, ConsumerGroupDescription>> future = describeResult.all();
+            Map<String, ConsumerGroupDescription> res = future.get();
+            for (Map.Entry<String, ConsumerGroupDescription> entry : res.entrySet()) {
+                ConsumerGroupDescription description = entry.getValue();
+                Set<String> consumersInGroup = new HashSet<>();
+                for (MemberDescription memberDescription : description.members()) {
+                    if (memberDescription.assignment().topicPartitions().stream()
+                            .anyMatch(tp -> tp.topic().equals(topic))) {
+                        log.debug("Consumer " + memberDescription.consumerId() + " in group " + group + " is subscribed to topic " + topic);
+                        consumersInGroup.add(memberDescription.consumerId());
+                    }
+                }
+                if (!consumersInGroup.isEmpty()) {
+                    groupToConsumersMap.put(group, consumersInGroup);
+                }
+            }
+        }
+        return groupToConsumersMap;
     }
 
     /**
@@ -81,6 +148,7 @@ public class MessageAdmin {
 
     /**
      * Clear a topic by deleting and recreating it.
+     *
      * @param topic the topic to be cleared
      */
     public void purgeTopic(String topic) throws ExecutionException, InterruptedException {
@@ -93,7 +161,7 @@ public class MessageAdmin {
      */
     public void deleteAllTopics() throws ExecutionException, InterruptedException {
         Set<String> topics = getTopics();
-        for (String topic: topics) {
+        for (String topic : topics) {
             deleteIfExist(topic);
         }
     }
