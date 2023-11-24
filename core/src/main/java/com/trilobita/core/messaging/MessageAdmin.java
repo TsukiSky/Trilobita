@@ -59,7 +59,8 @@ public class MessageAdmin {
                 for (MemberDescription memberDescription : description.members()) {
                     if (memberDescription.assignment().topicPartitions().stream()
                             .anyMatch(tp -> tp.topic().equals(topic))) {
-                        log.debug("Group " + group + " is subscribed to topic " + topic);
+
+                        log.info("Group " + group + " is subscribed to topic " + topic);
                         ret.add(group);
                     }
                 }
@@ -157,12 +158,31 @@ public class MessageAdmin {
     }
 
     /**
+     * Clear all the topics
+     */
+    public void purgeAllTopics() throws ExecutionException, InterruptedException {
+        Set<String> topics = getTopics();
+        for (String topic : topics) {
+            purgeTopic(topic);
+        }
+    }
+
+    /**
      * Clear all the topics by deleting them
      */
     public void deleteAllTopics() throws ExecutionException, InterruptedException {
         Set<String> topics = getTopics();
         for (String topic : topics) {
             deleteIfExist(topic);
+        }
+    }
+
+    public boolean existTopic(String topic) {
+        try {
+            return getTopics().contains(topic);
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+            return false;
         }
     }
 }
