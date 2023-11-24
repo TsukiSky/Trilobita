@@ -78,7 +78,7 @@ public class MasterServer<T> extends AbstractServer<T> {
                 boolean flag = true;
                 Set<Map.Entry<Integer, Boolean>> set = confirmMessage.entrySet();
                 for (Map.Entry<Integer, Boolean> entry: set){
-                    if (!entry.getValue()){
+                    if (Boolean.FALSE.equals(entry.getValue())){
                         flag = false;
                         break;
                     }
@@ -100,53 +100,47 @@ public class MasterServer<T> extends AbstractServer<T> {
         });
 
         this.workerHeartbeatChecker = new HeartbeatChecker(this.aliveWorkerIds, true, this.getServerId(),
-                new HeartbeatChecker.FaultHandler() {
-                    @Override
-                    public void handleFault(List<Integer> errList) {
+                errList -> {
 //                        if (!MasterServer.this.isWorking) {
 //                            return;
 //                        }
-                        for (int id: errList){
-                            log.info("[Fault] detected server {} is down, start repartitioning...", id);
-                            aliveWorkerIds.remove((Integer) id);
-                            confirmMessage.remove(id);
-                            finished.remove(id);
-                            workerHeartbeatChecker.getHeartbeatMap().remove(id);
-                        }
-
-                        MasterServer.this.partitionGraph(aliveWorkerIds);
-                        log.info("finished repartitioning...");
+                    for (Integer id1 : errList){
+                        log.info("[Fault] detected server {} is down, start repartitioning...", id1);
+                        aliveWorkerIds.remove(id1);
+                        confirmMessage.remove(id1);
+                        finished.remove(id1);
+                        workerHeartbeatChecker.getHeartbeatMap().remove(id1);
                     }
+
+                    MasterServer.this.partitionGraph(aliveWorkerIds);
+                    log.info("finished repartitioning...");
                 });
 
         this.masterHeartbeatChecker = new HeartbeatChecker(this.masterIds, false, this.getServerId(),
-                new HeartbeatChecker.FaultHandler() {
-                    @Override
-                    public void handleFault(List<Integer> errList) {
-                        if (isWorking) {
-                            return;
-                        }
-                        // if all id with greater id has died, become the master
-                        log.info("[Fault] detected current master is down, trying to become master...");
-                        isWorking = true;
-                        MasterServer.this.partitionGraph(aliveWorkerIds);
+                errList -> {
+                    if (isWorking) {
+                        return;
                     }
+                    // if all id with greater id has died, become the master
+                    log.info("[Fault] detected current master is down, trying to become master...");
+                    isWorking = true;
+                    MasterServer.this.partitionGraph(aliveWorkerIds);
                 });
 
         this.completeSignalConsumer = new MessageConsumer(Mail.MailType.FINISH_SIGNAL.ordinal(), super.getServerId(),
                 new MessageConsumer.MessageHandler() {
                     @Override
+                    @SuppressWarnings("unchecked")
                     public void handleMessage(UUID key, Mail value, int partition, long offset)
                             throws InterruptedException {
-                        if (!MasterServer.this.isWorking || workerHeartbeatChecker.getIsProcessing()
-                                || masterHeartbeatChecker.getIsProcessing()) {
+                        if (Boolean.FALSE.equals(MasterServer.this.isWorking) || Boolean.TRUE.equals(workerHeartbeatChecker.getIsProcessing()) || Boolean.TRUE.equals(masterHeartbeatChecker.getIsProcessing())) {
                             return;
                         }
                         Map<String, Object> map = (Map<String, Object>) value.getMessage().getContent();
                         HashMap<Integer, Computable<T>> vertexValues = (HashMap<Integer, Computable<T>>) map.get("VERTEX_VALUES");
                         int workerId = (int) map.get("ID");
 
-                        if (vertexValues.size()>0) {
+                        if (!vertexValues.isEmpty()) {
                             // update the graph
                             boolean finish = (boolean) map.get("FINISH");
                             graph.updateVertexValues(vertexValues);
@@ -158,7 +152,7 @@ public class MasterServer<T> extends AbstractServer<T> {
 
                         boolean finishSuperstep = true;
                         for (int id: aliveWorkerIds){
-                            if (!nFinishedWorker.get(id)){
+                            if (Boolean.FALSE.equals(nFinishedWorker.get(id))){
                                 finishSuperstep = false;
                                 break;
                             }
@@ -178,7 +172,7 @@ public class MasterServer<T> extends AbstractServer<T> {
                                 boolean flag = true;
                                 Set<Map.Entry<Integer, Boolean>> set = finished.entrySet();
                                 for (Map.Entry<Integer, Boolean> entry: set) {
-                                    if (!entry.getValue()){
+                                    if (Boolean.FALSE.equals(entry.getValue())){
                                         flag = false;
                                         break;
                                     }
@@ -195,38 +189,33 @@ public class MasterServer<T> extends AbstractServer<T> {
                 });
 
         workerHeatBeatConsumer = new MessageConsumer("HEARTBEAT_WORKER", getServerId(),
-                new MessageConsumer.MessageHandler() {
-                    @Override
-                    public void handleMessage(UUID key, Mail value, int partition, long offset) {
-                        int id = (int) value.getMessage().getContent();
+                (key, value, partition, offset) -> {
+                    int id12 = (int) value.getMessage().getContent();
 //                        log.info("heart beat from : {}", id);
-                        if (!aliveWorkerIds.contains(id)){
-                            aliveWorkerIds.add(id);
-                            confirmMessage.put(id, false);
-                            finished.put(id, false);
-                            workerHeartbeatChecker.getHeartbeatMap().put(id, true);
-                            MasterServer.this.partitionGraph(aliveWorkerIds);
-                        } else {
-                            workerHeartbeatChecker.setHeatBeat(id);
-                        }
+                    if (!aliveWorkerIds.contains(id12)){
+                        aliveWorkerIds.add(id12);
+                        confirmMessage.put(id12, false);
+                        finished.put(id12, false);
+                        workerHeartbeatChecker.getHeartbeatMap().put(id12, true);
+                        MasterServer.this.partitionGraph(aliveWorkerIds);
+                    } else {
+                        workerHeartbeatChecker.setHeatBeat(id12);
                     }
                 });
 
         masterHeatBeatConsumer = new MessageConsumer("HEARTBEAT_MASTER", getServerId(),
-                new MessageConsumer.MessageHandler() {
-                    @Override
-                    public void handleMessage(UUID key, Mail value, int partition, long offset) {
-                        int receivedMasterId = (int) value.getMessage().getContent();
-                        // log.info("receiving heart beat from master {}", receivedMasterId);
-                        if (receivedMasterId > MasterServer.this.serverId) {
-                            isWorking = false;
-                        }
-                        masterHeartbeatChecker.setHeatBeat(receivedMasterId);
+                (key, value, partition, offset) -> {
+                    int receivedMasterId = (int) value.getMessage().getContent();
+                    // log.info("receiving heart beat from master {}", receivedMasterId);
+                    if (receivedMasterId > MasterServer.this.serverId) {
+                        isWorking = false;
                     }
+                    masterHeartbeatChecker.setHeatBeat(receivedMasterId);
                 });
 
         graphConsumer = new MessageConsumer("MASTER_SYNC", getServerId(), new MessageConsumer.MessageHandler() {
             @Override
+            @SuppressWarnings("unchecked")
             public void handleMessage(UUID key, Mail value, int partition, long offset) {
                 Map<String, Object> objectMap = (Map<String, Object>) value.getMessage().getContent();
                 MasterServer.this.graph = (Graph<T>) objectMap.get("GRAPH");

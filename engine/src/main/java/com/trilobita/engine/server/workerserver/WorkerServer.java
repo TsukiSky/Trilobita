@@ -48,6 +48,7 @@ public class WorkerServer<T> extends AbstractServer<T> {
         });
         this.partitionMessageConsumer = new MessageConsumer("SERVER_" + this.getServerId() + "_PARTITION", serverId, new MessageConsumer.MessageHandler() {
             @Override
+            @SuppressWarnings("unchecked")
             public void handleMessage(UUID key, Mail mail, int partition, long offset) throws InterruptedException, ExecutionException {
                 log.info("receiving message from server.........");
                 WorkerServer.this.executionManager.waitForFutures(); // in case of fault, repartition is needed
