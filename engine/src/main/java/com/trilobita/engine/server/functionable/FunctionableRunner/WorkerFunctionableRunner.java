@@ -11,6 +11,7 @@ import com.trilobita.commons.Mail;
 import com.trilobita.commons.Mail.MailType;
 import com.trilobita.core.messaging.MessageConsumer;
 import com.trilobita.core.messaging.MessageConsumer.MessageHandler;
+import com.trilobita.core.messaging.MessageProducer;
 import com.trilobita.engine.server.functionable.Functionable;
 
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +29,7 @@ public class WorkerFunctionableRunner extends FunctionableRunner {
     private MessageConsumer initFunctionablesConsumer;
     private MessageHandler functionalMessageHandler;
     private Map<String, Computable<?>> incomingFunctionableValues = new HashMap<>();
+    public boolean finishedRegisterFunctionables = false;
 
     private WorkerFunctionableRunner(Integer serverId) throws ExecutionException, InterruptedException {
         this.functionalMessageHandler = new MessageHandler() {
@@ -43,9 +45,10 @@ public class WorkerFunctionableRunner extends FunctionableRunner {
                     @Override
                     public void handleMessage(UUID key, Mail value, int partition, long offset)
                             throws InterruptedException {
+                        log.info("Received INIT_FUNCTIONAL FUNCTIONAL message from master.");
+
                         int totalNumFunc = POSITIVE_INF; // a very large number
                         if (value.getMailType() == MailType.FUNCTIONAL) {
-                            log.info("Received INIT_FUNCTIONAL FUNCTIONAL message from master.");
                             Functionable<?> functionable = (Functionable<?>) value.getMessage().getContent();
                             functionable.setServerId(serverId);
                             WorkerFunctionableRunner.this.registerFunctionable(functionable);
@@ -66,9 +69,11 @@ public class WorkerFunctionableRunner extends FunctionableRunner {
                         }
                     }
                 });
+        this.initFunctionablesConsumer.start();
     }
 
-    public synchronized static WorkerFunctionableRunner getInstance(Integer serverId) throws ExecutionException, InterruptedException {
+    public synchronized static WorkerFunctionableRunner getInstance(Integer serverId)
+            throws ExecutionException, InterruptedException {
         if (instance == null) {
             instance = new WorkerFunctionableRunner(serverId);
         }
@@ -76,12 +81,13 @@ public class WorkerFunctionableRunner extends FunctionableRunner {
     }
 
     public void finishRegisterFunctionables() {
-         try {
-                this.initFunctionablesConsumer.stop();
-                startConsumers();
-            } catch (ExecutionException | InterruptedException e) {
-                e.printStackTrace();
-            }
+        try {
+            this.initFunctionablesConsumer.stop();
+            startConsumers();
+            this.finishedRegisterFunctionables = false;
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -130,6 +136,8 @@ public class WorkerFunctionableRunner extends FunctionableRunner {
     public void start() {
         try {
             this.initFunctionablesConsumer.start();
+            log.info("initFunctionablesConsumer started");
+
         } catch (ExecutionException | InterruptedException e) {
             e.printStackTrace();
         }

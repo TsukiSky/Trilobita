@@ -35,8 +35,6 @@ public class WorkerServer<T> extends AbstractServer<T> {
     private final MessageConsumer confirmStartConsumer;
     private final WorkerFunctionableRunner functionableRunner;
 
-
-
     public WorkerServer(int serverId, int parallelism, PartitionStrategy partitionStrategy) throws ExecutionException, InterruptedException {
         super(serverId, partitionStrategy);
         this.executionManager = new ExecutionManager<>(parallelism, this);
@@ -56,7 +54,7 @@ public class WorkerServer<T> extends AbstractServer<T> {
                     @Override
                     public void handleMessage(UUID key, Mail mail, int partition, long offset)
                             throws InterruptedException, ExecutionException {
-                        log.info("receiving message from server.........");
+                        log.info("partitionMessageConsumer receiving message from server.........");
                         WorkerServer.this.executionManager.waitForFutures(); // in case of fault, repartition is needed
                         Map<String, Object> res = (Map<String, Object>) mail.getMessage().getContent();
                         setVertexGroup((VertexGroup<T>) res.get("PARTITION"));
@@ -72,7 +70,7 @@ public class WorkerServer<T> extends AbstractServer<T> {
                         message.setContent(WorkerServer.this.getServerId());
                         Mail mailToConfirmReceive = new Mail();
                         mailToConfirmReceive.setMessage(message);
-                        MessageProducer.createAndProduce(null, mailToConfirmReceive, "CONFIRM_RECEIVE");
+                        // MessageProducer.createAndProduce(null, mailToConfirmReceive, "CONFIRM_RECEIVE");
                     }
                 });
 

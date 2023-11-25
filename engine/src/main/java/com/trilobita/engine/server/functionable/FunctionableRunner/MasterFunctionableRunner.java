@@ -17,11 +17,14 @@ import com.trilobita.commons.Mail.MailType;
 import com.trilobita.core.messaging.MessageProducer;
 import com.trilobita.engine.server.functionable.Functionable;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * An FunctionableRunner is a singleton in one worker.
  * It is used to register, initiate, and run functionable instances added by the
  * user.
  */
+@Slf4j
 public class MasterFunctionableRunner extends FunctionableRunner {
     private static MasterFunctionableRunner instance = null;
     private Map<String, List<Computable<?>>> functionalValues = new HashMap<>();
@@ -121,6 +124,7 @@ public class MasterFunctionableRunner extends FunctionableRunner {
 
     // send functionable instances to all workers
     public void broadcastFunctionables() {
+        log.info("master broadcasting Functionables");
         if (this.getFunctionables() != null) {
             for (Functionable<?> functionable : this.getFunctionables()) {
                 Mail mail = new Mail(-1, new Message(functionable), Mail.MailType.FUNCTIONAL);

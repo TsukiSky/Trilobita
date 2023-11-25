@@ -54,4 +54,9 @@ public class ShortestPathValue implements Computable<Double>, Serializable {
     public int compareValue(ShortestPathValue other) {
         return Double.compare(this.value, other.getValue());
     }
+
+    @Override
+    public int compareTo(Double arg0) {
+        return this.value.compareTo(arg0);
+    }
 }

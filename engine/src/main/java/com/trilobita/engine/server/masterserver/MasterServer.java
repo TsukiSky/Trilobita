@@ -347,6 +347,7 @@ public class MasterServer<T> extends AbstractServer<T> {
     public void setFunctionables(String[] classNames, String[] topicNames) {
         if (classNames != null && topicNames != null && classNames.length == topicNames.length) {
             this.masterFunctionableRunner.registerFunctionables(classNames, topicNames);
+            log.info("masterFunctionableRunner finished registerFunctionables");
         }
     }
 
