@@ -1,8 +1,9 @@
-package com.trilobita.engine.server.masterserver.partitioner;
+package com.trilobita.engine.server.masterserver.partition;
 
 import com.trilobita.core.graph.Graph;
 import com.trilobita.core.graph.VertexGroup;
 import com.trilobita.core.graph.vertex.Vertex;
+import com.trilobita.engine.server.masterserver.partition.strategy.PartitionStrategy;
 import lombok.Data;
 
 import java.util.HashMap;

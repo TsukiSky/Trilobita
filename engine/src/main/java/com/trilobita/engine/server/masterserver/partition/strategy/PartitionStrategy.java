@@ -1,4 +1,4 @@
-package com.trilobita.engine.server.masterserver.partitioner;
+package com.trilobita.engine.server.masterserver.partition.strategy;
 
 import java.util.List;
 

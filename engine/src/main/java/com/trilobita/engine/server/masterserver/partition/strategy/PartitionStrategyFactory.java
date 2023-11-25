@@ -1,5 +1,7 @@
-package com.trilobita.engine.server.masterserver.partitioner;
+package com.trilobita.engine.server.masterserver.partition.strategy;
 
+import com.trilobita.engine.server.masterserver.partition.strategy.instance.HashPartitionStrategy;
+import com.trilobita.engine.server.masterserver.partition.strategy.instance.IndexPartitionStrategy;
 import lombok.Data;
 
 

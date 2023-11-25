@@ -2,8 +2,8 @@ package com.trilobita.runtime.environment;
 
 import com.trilobita.core.graph.Graph;
 import com.trilobita.engine.server.masterserver.MasterServer;
-import com.trilobita.engine.server.masterserver.partitioner.Partitioner;
-import com.trilobita.engine.server.masterserver.partitioner.PartitionStrategy;
+import com.trilobita.engine.server.masterserver.partition.Partitioner;
+import com.trilobita.engine.server.masterserver.partition.strategy.PartitionStrategy;
 import com.trilobita.engine.server.workerserver.WorkerServer;
 import com.trilobita.runtime.configuration.Configuration;
 import com.trilobita.runtime.configuration.JCommandHandler;

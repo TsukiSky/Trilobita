@@ -1,14 +1,13 @@
 package com.trilobita.engine.server.workerserver;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.trilobita.commons.*;
 import com.trilobita.core.graph.VertexGroup;
 import com.trilobita.core.graph.vertex.Vertex;
 import com.trilobita.core.messaging.MessageConsumer;
 import com.trilobita.core.messaging.MessageProducer;
 import com.trilobita.engine.server.AbstractServer;
-import com.trilobita.engine.server.heartbeat.HeartbeatSender;
-import com.trilobita.engine.server.masterserver.partitioner.PartitionStrategy;
+import com.trilobita.engine.server.util.HeartbeatSender;
+import com.trilobita.engine.server.masterserver.partition.strategy.PartitionStrategy;
 import com.trilobita.engine.server.workerserver.execution.ExecutionManager;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -32,15 +31,13 @@ public class WorkerServer<T> extends AbstractServer<T> {
     private final HeartbeatSender heartbeatSender;
     private final MessageConsumer confirmStartConsumer;
 
-
-
     public WorkerServer(int serverId, int parallelism, PartitionStrategy partitionStrategy) {
         super(serverId, partitionStrategy);
         this.executionManager = new ExecutionManager<>(parallelism, this);
         this.outMailTable = new ConcurrentHashMap<>();
         this.confirmStartConsumer = new MessageConsumer("CONFIRM_START", this.getServerId(), new MessageConsumer.MessageHandler() {
             @Override
-            public void handleMessage(UUID key, Mail value, int partition, long offset) throws JsonProcessingException, InterruptedException, ExecutionException {
+            public void handleMessage(UUID key, Mail value, int partition, long offset) throws InterruptedException {
                 if (getVertexGroup() != null) {
                     WorkerServer.this.superstep(false);
                 }
@@ -105,16 +102,16 @@ public class WorkerServer<T> extends AbstractServer<T> {
         log.info("[Superstep] entering a new super step...");
         this.executionManager.execute();
 
-//        todo: check whether all vertices are shouldStop
-        boolean flag = true;
+        // todo: check whether all vertices are shouldStop
+        boolean stop = true;
         for (Vertex<T> v: this.vertexGroup.getVertices()){
-            if (!v.isShouldStop() && v.getStatus() == Vertex.VertexStatus.ACTIVE){
-                flag = false;
+            if (!v.isShouldStop() && v.getStatus() == Vertex.VertexStatus.ACTIVE) {
+                stop = false;
                 break;
             }
-
         }
-        sendCompleteSignal(doSnapshot, flag);
+        stop = false;
+        sendCompleteSignal(doSnapshot, stop);
     }
 
     @Override
@@ -129,19 +126,18 @@ public class WorkerServer<T> extends AbstractServer<T> {
     /**
      * Send a complete signal to the master server
      */
-    public void sendCompleteSignal(boolean doSnapshot, boolean finish) {
+    public void sendCompleteSignal(boolean doSnapshot, boolean complete) {
         log.info("[Superstep] super step {} completed", superstep);
         if (doSnapshot) {
             log.info("[Graph] {}", this.vertexGroup);
-            MessageProducer.produceFinishSignal(this.vertexGroup.getVertexValues(), finish, this.serverId);
+            MessageProducer.produceFinishSignal(this.vertexGroup.getVertexValues(), complete);
         } else {
-            MessageProducer.produceFinishSignal(new HashMap<>(), finish, this.serverId);
+            MessageProducer.produceFinishSignal(new HashMap<>(), complete);
         }
     }
 
     /**
      * Distribute mail to vertex
-     *
      * @param mail mail to be distributed
      */
     public void distributeMailToVertex(Mail mail) {

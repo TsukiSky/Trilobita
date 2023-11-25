@@ -1,4 +1,4 @@
-package com.trilobita.engine.server.heartbeat;
+package com.trilobita.engine.server.util;
 
 import com.trilobita.core.messaging.MessageProducer;
 import lombok.extern.slf4j.Slf4j;

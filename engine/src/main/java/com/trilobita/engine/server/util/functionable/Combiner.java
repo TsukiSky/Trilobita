@@ -1,4 +1,4 @@
-package com.trilobita.engine.server.functionable;
+package com.trilobita.engine.server.util.functionable;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;

@@ -1,4 +1,4 @@
-package com.trilobita.engine.server.functionable.examples;
+package com.trilobita.engine.server.util.functionable.examples;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,7 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.trilobita.commons.*;
-import com.trilobita.engine.server.functionable.Combiner;
+import com.trilobita.engine.server.util.functionable.Combiner;
 
 /*
  * Sum all messages sent to the same vertex.

@@ -1,15 +1,12 @@
-package com.trilobita.engine.server.masterserver.util;
+package com.trilobita.engine.server.masterserver.execution.synchronize;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.trilobita.commons.Computable;
 import com.trilobita.core.graph.Graph;
-import com.trilobita.core.graph.vertex.Vertex;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
 
 /**
  * The snapshot of the graph

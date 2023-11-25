@@ -1,4 +1,4 @@
-package com.trilobita.engine.util;
+package com.trilobita.runtime.util;
 
 /**
  * Utility class

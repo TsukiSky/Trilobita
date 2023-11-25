@@ -1,4 +1,6 @@
-package com.trilobita.engine.server.masterserver.partitioner;
+package com.trilobita.engine.server.masterserver.partition.strategy.instance;
+
+import com.trilobita.engine.server.masterserver.partition.strategy.PartitionStrategy;
 
 import java.io.Serializable;
 import java.util.ArrayList;

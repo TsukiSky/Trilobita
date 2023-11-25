@@ -7,7 +7,7 @@ This project is developed using Java 17.
 
 Trilobita is a powerful tool for processing large-scale graphs in a distributed computing environment. It allows you to analyze, manipulate, and extract valuable insights from complex graph data efficiently. Some key features of Trilobita include:
 
-- **Distributed Computing:** Trilobita leverages the principles of Google Pregel to distribute graph computations across a cluster of machines, enabling parallel processing and scalability.
+- **Distributed Computing:** Trilobita leverages the principles of Google Pregel to distribute graph computations across a trilobitaCluster of machines, enabling parallel processing and scalability.
 - **Flexibility:** The system provides a flexible and extensible framework for defining and executing custom graph algorithms.
 - **Fault Tolerance:** Trilobita is designed with fault tolerance in mind, ensuring the reliability of graph processing tasks.
 - **Ease of Use:** The user-friendly interface and comprehensive documentation make it easy to get started with Trilobita.

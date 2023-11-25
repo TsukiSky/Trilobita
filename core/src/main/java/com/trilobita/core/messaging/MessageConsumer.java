@@ -54,6 +54,10 @@ public class MessageConsumer {
         consumerProperties.put(ConsumerConfig.GROUP_ID_CONFIG, "group-kafka-trilobita-"+ serverId + "-" + UUID.randomUUID()); // Master topic probably is subscribed by multiple workers.
         consumerProperties.put(ConsumerConfig.GROUP_INSTANCE_ID_CONFIG, ("consumer-kafka-trilobita-" + topic)); // one worker has multiple consumer (group instance) differentiated by topic.
         consumerProperties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
+        // set heartbeat interval to 2s, session timeout to 6s
+        consumerProperties.put(ConsumerConfig.HEARTBEAT_INTERVAL_MS_CONFIG, 2000);
+        consumerProperties.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, 6000);
+
         this.messageHandler = messageHandler;
         this.topic = topic;
     }
@@ -75,8 +79,13 @@ public class MessageConsumer {
     public void start() throws ExecutionException, InterruptedException {
         Set<String> existing = messageAdmin.getTopics();
         if (!existing.contains(topic)) {
-            messageAdmin.createIfNotExist(topic);
-            log.info("existing topic: {} do not contain {}! Creating, and then subscribe...", existing, topic);
+            try {
+                messageAdmin.createIfNotExist(topic);
+                log.info("existing topic: {} do not contain {}! Creating, and then subscribe...", existing, topic);
+            } catch (ExecutionException | InterruptedException e) {
+                log.error("[MessageConsumer]", e);
+            }
+
         }
         if (runFlag) {
             log.info("already listening to topic: {}!", topic);

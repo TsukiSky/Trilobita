@@ -1,4 +1,4 @@
-package com.trilobita.engine.server.functionable;
+package com.trilobita.engine.server.util.functionable;
 
 
 import com.trilobita.core.graph.VertexGroup;

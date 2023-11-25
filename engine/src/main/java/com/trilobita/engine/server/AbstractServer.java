@@ -3,7 +3,7 @@ package com.trilobita.engine.server;
 import com.trilobita.commons.Mail;
 import com.trilobita.core.graph.VertexGroup;
 import com.trilobita.core.messaging.MessageConsumer;
-import com.trilobita.engine.server.masterserver.partitioner.PartitionStrategy;
+import com.trilobita.engine.server.masterserver.partition.strategy.PartitionStrategy;
 import com.trilobita.exception.TrilobitaException;
 import lombok.Getter;
 import lombok.Setter;

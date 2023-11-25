@@ -2,9 +2,9 @@ package pagerank;
 
 import com.trilobita.core.graph.Graph;
 import com.trilobita.core.graph.vertex.Vertex;
-import com.trilobita.engine.server.masterserver.partitioner.Partitioner;
-import com.trilobita.engine.server.masterserver.partitioner.PartitionStrategy;
-import com.trilobita.engine.server.masterserver.partitioner.PartitionStrategyFactory;
+import com.trilobita.engine.server.masterserver.partition.Partitioner;
+import com.trilobita.engine.server.masterserver.partition.strategy.PartitionStrategy;
+import com.trilobita.engine.server.masterserver.partition.strategy.PartitionStrategyFactory;
 import com.trilobita.runtime.environment.TrilobitaEnvironment;
 import pagerank.vertex.PageRankValue;
 import pagerank.vertex.PageRankVertex;
