@@ -41,15 +41,20 @@ public class ExecutionManager<T> {
         while (!server.getInMailQueue().isEmpty()) {
             Mail mail = this.server.getInMailQueue().poll();
             if (mail != null) {
-                futures.add(this.executorService.submit(() -> { server.distributeMailToVertex(mail);
+                futures.add(this.executorService.submit(() -> {
+                    server.distributeMailToVertex(mail);
                 }));
             }
         }
 
-        // inform functionable instances of functionables values 
+        log.info("[ExecutionManager] futures added server.distributeMailToVertex");
+
+        // inform functionable instances of functionables values
         futures.add(this.executorService.submit(() -> {
             server.getFunctionableRunner().distributeValues();
         }));
+
+        log.info("[ExecutionManager] futures added server.getFunctionableRunner().distributeValues()");
 
         List<Vertex<T>> vertices = this.server.getVertexGroup().getVertices();
         int activeVertexCount = 0;
@@ -70,20 +75,29 @@ public class ExecutionManager<T> {
             }
         }
 
-        //TODO: Set all the vertices inactive
-        if (server.getInMailQueue().isEmpty()){
+        log.info("[ExecutionManager] futures added vertex.step()");
+
+        // TODO: Set all the vertices inactive
+        if (server.getInMailQueue().isEmpty()) {
             for (Vertex<T> vertex : vertices) {
                 vertex.setStatus(Vertex.VertexStatus.INACTIVE);
             }
         }
 
-
         computeLatch.await(); // block until all computing tasks are finished
+
+        log.info("[ExecutionManager] futures added vertex.setStatus INACTIVE");
 
         // execute functionables
         CountDownLatch functionableLatch = new CountDownLatch(1);
-        server.getFunctionableRunner().runFunctionableTasks(this.server.getVertexGroup());
+        futures.add(executorService.submit(() -> {
+            server.getFunctionableRunner().runFunctionableTasks(this.server);
+            functionableLatch.countDown();
+        }));
+
         functionableLatch.await(); // block until all functionable tasks are finished (future?)
+
+        log.info("[ExecutionManager] finished runFunctionableTasks");
 
         CountDownLatch mailingLatch = new CountDownLatch(server.getOutMailQueue().size());
         // send the mail to the other servers
@@ -96,5 +110,6 @@ public class ExecutionManager<T> {
             }));
         }
         mailingLatch.await(); // block until all mailing tasks are finished
+        log.info("[ExecutionManager] finished mailing out");
     }
 }

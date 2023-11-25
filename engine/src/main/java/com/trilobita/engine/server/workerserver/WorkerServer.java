@@ -7,9 +7,9 @@ import com.trilobita.core.graph.vertex.Vertex;
 import com.trilobita.core.messaging.MessageConsumer;
 import com.trilobita.core.messaging.MessageProducer;
 import com.trilobita.engine.server.AbstractServer;
-import com.trilobita.engine.server.functionable.FunctionableRunner.WorkerFunctionableRunner;
 import com.trilobita.engine.server.heartbeat.HeartbeatSender;
 import com.trilobita.engine.server.masterserver.partitioner.PartitionStrategy;
+import com.trilobita.engine.server.util.functionable.FunctionableRunner.WorkerFunctionableRunner;
 import com.trilobita.engine.server.workerserver.execution.ExecutionManager;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -70,7 +70,9 @@ public class WorkerServer<T> extends AbstractServer<T> {
                         message.setContent(WorkerServer.this.getServerId());
                         Mail mailToConfirmReceive = new Mail();
                         mailToConfirmReceive.setMessage(message);
-                        // MessageProducer.createAndProduce(null, mailToConfirmReceive, "CONFIRM_RECEIVE");
+                        // TODO: wait for functionables to regitser themselves
+
+                        MessageProducer.createAndProduce(null, mailToConfirmReceive, "CONFIRM_RECEIVE");
                     }
                 });
 
@@ -102,7 +104,6 @@ public class WorkerServer<T> extends AbstractServer<T> {
         confirmStartConsumer.start();
         getMessageConsumer().start();
         heartbeatSender.start();
-        this.functionableRunner.start();
     }
 
     /**

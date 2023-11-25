@@ -1,6 +1,5 @@
-package com.trilobita.engine.server.functionable.FunctionableRunner;
+package com.trilobita.engine.server.util.functionable.FunctionableRunner;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
@@ -15,7 +14,8 @@ import com.trilobita.commons.Mail;
 import com.trilobita.commons.Message;
 import com.trilobita.commons.Mail.MailType;
 import com.trilobita.core.messaging.MessageProducer;
-import com.trilobita.engine.server.functionable.Functionable;
+import com.trilobita.engine.server.util.functionable.Functionable;
+import com.trilobita.engine.server.util.functionable.examples.ExampleFunctionable;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -40,20 +40,23 @@ public class MasterFunctionableRunner extends FunctionableRunner {
      * To run all functionable tasks and broadcast to worker
      */
     public void runFunctionableTasks(LinkedBlockingQueue<Mail> inMailQueue) {
-        clusterIncomingMails(inMailQueue);
+        log.info("Started runFunctionableTasks...");
+        LinkedBlockingQueue<Mail> newInMailQueue =  clusterIncomingMails(inMailQueue);
+        log.info("Received functionalValues: {}", functionalValues);
         for (Map.Entry<String, List<Computable<?>>> entry : functionalValues.entrySet()) {
             String instanceName = entry.getKey();
             List<Computable<?>> values = entry.getValue();
             Functionable<?> functionable = this.findFunctionableByName(instanceName);
             if (functionable != null) {
                 functionable.execute(values);
+                log.info("Executed {}",values);
                 functionable.sendMail(functionable.getNewFunctionableValue(), true);
+                log.info("Sent Mails.");
+                values.clear(); // resetFunctionableValues
             } else {
                 System.out.println("No matching functionable found.");
             }
         }
-        this.resetFunctionableValues();
-
     }
 
     /**
@@ -62,21 +65,21 @@ public class MasterFunctionableRunner extends FunctionableRunner {
      * 
      * @param inMailQueue
      */
-    private void clusterIncomingMails(LinkedBlockingQueue<Mail> inMailQueue) {
+    private LinkedBlockingQueue<Mail> clusterIncomingMails(LinkedBlockingQueue<Mail> inMailQueue) {
         LinkedBlockingQueue<Mail> newInMailQueue = new LinkedBlockingQueue<Mail>();
         while (!inMailQueue.isEmpty()) {
             Mail mail = inMailQueue.poll();
             if (mail != null) {
                 if (mail.getMailType() == MailType.FUNCTIONAL) {
                     // put values in functinalValue by insName
-                    Pair<String, Computable<?>> pair = (Pair<String, Computable<?>>) mail.getMessage().getContent();
-                    this.addToFunctionalValues(pair.getKey(), pair.getValue());
+                    ExampleFunctionable class_value = (ExampleFunctionable) mail.getMessage().getContent();
+                    this.addToFunctionalValues(class_value.className, class_value.initValue);
                 } else {
                     newInMailQueue.add(mail);
                 }
             }
         }
-        inMailQueue = newInMailQueue;
+        return newInMailQueue;
     }
 
     /**
@@ -86,10 +89,14 @@ public class MasterFunctionableRunner extends FunctionableRunner {
      *                  Functionable)
      * @param topicName the topic that the functionable is attached to
      */
-    public void registerFunctionable(String className, String topicName) {
+    public void registerFunctionable(String className, String topicName, Computable<?> initValue) {
         try {
-            Functionable<?> functionable = initFunctionableInstance(className, topicName);
+            Functionable<?> functionable = initFunctionableInstance(className, topicName, initValue);
             this.registerFunctionable(functionable, topicName);
+            // create topic if not exist
+            if (topicName != null){
+                MessageProducer.createAndProduce(null, new Mail(new Message(functionable),MailType.START_SIGNAL), topicName);
+            }
         } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
                 | NoSuchMethodException | SecurityException | ClassNotFoundException e) {
             e.printStackTrace();
@@ -103,22 +110,9 @@ public class MasterFunctionableRunner extends FunctionableRunner {
      *                   abstract Functionable)
      * @param topicNames the topics that the functionables are attached to
      */
-    public void registerFunctionables(String[] classNames, String[] topicNames) {
-        assert classNames.length == topicNames.length;
-        for (int i = 0; i < classNames.length; i++) {
-            this.registerFunctionable(classNames[i], topicNames[i]);
-        }
-    }
-
-    /**
-     * No consumers
-     * 
-     * @param classNames the class names of the functionable classes (not the
-     *                   abstract Functionable)
-     */
-    public void registerFunctionables(String[] classNames) {
-        for (int i = 0; i < classNames.length; i++) {
-            this.registerFunctionable(classNames[i], null);
+    public void registerFunctionables(ExampleFunctionable[] functionables) {
+        for (int i = 0; i < functionables.length; i++) {
+            this.registerFunctionable(functionables[i].className, functionables[i].topic, functionables[i].initValue);
         }
     }
 
@@ -137,14 +131,15 @@ public class MasterFunctionableRunner extends FunctionableRunner {
 
     }
 
-    private static Functionable<?> initFunctionableInstance(String className, String topic)
+    private static Functionable<?> initFunctionableInstance(String className, String topic, Computable<?> initValue)
             throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException,
             NoSuchMethodException, SecurityException, ClassNotFoundException {
+
         Class<?> cls = Class.forName(className);
-        Constructor<?> constructor = cls.getConstructor(String.class);
         Functionable<?> functionable = topic == null
-                ? (Functionable<?>) constructor.newInstance()
-                : (Functionable<?>) constructor.newInstance(topic);
+                ? (Functionable<?>) cls.getConstructor(Computable.class).newInstance(initValue)
+                : (Functionable<?>) cls.getConstructor(Computable.class, String.class)
+                        .newInstance(initValue, topic);
         return functionable;
     }
 
@@ -153,12 +148,5 @@ public class MasterFunctionableRunner extends FunctionableRunner {
         this.functionalValues.putIfAbsent(insName, new ArrayList<>());
         // Add the value to the list associated with the key
         this.functionalValues.get(insName).add(value);
-    }
-
-    private void resetFunctionableValues() {
-        for (Map.Entry<String, List<Computable<?>>> entry : functionalValues.entrySet()) {
-            List<Computable<?>> values = entry.getValue();
-            values.clear();
-        }
     }
 }

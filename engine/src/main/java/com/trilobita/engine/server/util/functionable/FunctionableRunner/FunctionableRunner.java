@@ -1,7 +1,9 @@
-package com.trilobita.engine.server.functionable.FunctionableRunner;
+package com.trilobita.engine.server.util.functionable.FunctionableRunner;
 
+import java.util.ArrayList;
 import java.util.List;
-import com.trilobita.engine.server.functionable.Functionable;
+
+import com.trilobita.engine.server.util.functionable.Functionable;
 
 import lombok.Data;
 
@@ -12,12 +14,12 @@ import lombok.Data;
  */
 @Data
 public abstract class FunctionableRunner {
-    private List<Functionable<?>> functionables; // functionable, topic
+    private List<Functionable<?>> functionables = new ArrayList<>(); // functionable, topic
 
     public Functionable<?> findFunctionableByName(String name) {
         if (this.functionables != null) {
             for (Functionable<?> functionable : this.functionables) {
-                if (functionable.instanceName == name) {
+                if (functionable.instanceName.equals(name)) {
                     return functionable;
                 }
             }
@@ -29,9 +31,6 @@ public abstract class FunctionableRunner {
         if (functionable.getClass() == Functionable.class) {
             System.out.println("The functionable class is abstract.");
         } else {
-            if (topicName != null) {
-                functionable.setTopic(topicName);
-            }
             this.getFunctionables().add(functionable);
         }
     }

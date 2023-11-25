@@ -3,8 +3,10 @@ package pagerank;
 import com.trilobita.core.graph.Graph;
 import com.trilobita.core.graph.vertex.Vertex;
 import com.trilobita.engine.server.masterserver.partitioner.Partitioner;
-import com.trilobita.engine.server.functionable.examples.aggregators.EdgeSumAggregator;
-import com.trilobita.engine.server.functionable.examples.combiners.MaxCombiner;
+import com.trilobita.engine.server.util.functionable.examples.ExampleFunctionable;
+import com.trilobita.engine.server.util.functionable.examples.aggregators.EdgeSumAggregator;
+import com.trilobita.engine.server.util.functionable.examples.aggregators.MinValueAggregator;
+import com.trilobita.engine.server.util.functionable.examples.combiners.MaxCombiner;
 import com.trilobita.engine.server.masterserver.partitioner.PartitionStrategy;
 import com.trilobita.engine.server.masterserver.partitioner.PartitionStrategyFactory;
 import com.trilobita.runtime.environment.TrilobitaEnvironment;
@@ -16,7 +18,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 public class PageRankMasterRunner {
-    public static Graph createVertices(){
+    public static Graph createVertices() {
         List<PageRankVertex> vertices = new ArrayList<>();
         PageRankVertex vertex0 = new PageRankVertex(0);
         vertex0.setStatus(Vertex.VertexStatus.ACTIVE);
@@ -77,6 +79,7 @@ public class PageRankMasterRunner {
         Graph<PageRankValue> graph = new Graph(vertices);
         return graph;
     }
+
     public static void main(String[] args) throws ExecutionException, InterruptedException {
         TrilobitaEnvironment<PageRankValue> trilobitaEnvironment = new TrilobitaEnvironment<>();
         trilobitaEnvironment.initConfig();
@@ -84,9 +87,11 @@ public class PageRankMasterRunner {
         PartitionStrategyFactory partitionStrategyFactory = new PartitionStrategyFactory();
         PartitionStrategy partitionStrategy = partitionStrategyFactory.getPartitionStrategy("hashPartitionStrategy",(int) trilobitaEnvironment.getConfiguration().get("numOfWorker"),trilobitaEnvironment.getGraph().getSize());
         trilobitaEnvironment.setPartitioner(new Partitioner<>(partitionStrategy));
-        String[] functionableNames = {EdgeSumAggregator.class.getName(),MaxCombiner.class.getName()};
-        String[] functionableTopics = {"EDGE_SUM_AGG",null};
-        trilobitaEnvironment.createMasterServer(2, 10,functionableNames,functionableTopics);
+        ExampleFunctionable[] funcs = {
+            new ExampleFunctionable(MinValueAggregator.class.getName(), "MIN_VAL_AGG", new PageRankValue(0.0)),
+                    new ExampleFunctionable(MaxCombiner.class.getName(), null, new PageRankValue(Double.NEGATIVE_INFINITY))
+        };
+        trilobitaEnvironment.createMasterServer(0, 10,funcs);
         trilobitaEnvironment.startMasterServer();
     }
 }

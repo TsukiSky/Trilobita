@@ -3,6 +3,7 @@ package com.trilobita.runtime.environment;
 import com.trilobita.core.graph.Graph;
 import com.trilobita.engine.server.masterserver.MasterServer;
 import com.trilobita.engine.server.masterserver.partitioner.Partitioner;
+import com.trilobita.engine.server.util.functionable.examples.ExampleFunctionable;
 import com.trilobita.engine.server.masterserver.partitioner.PartitionStrategy;
 import com.trilobita.engine.server.workerserver.WorkerServer;
 import com.trilobita.runtime.configuration.Configuration;
@@ -52,15 +53,15 @@ public class TrilobitaEnvironment<T> {
     }
 
     public void createMasterServer(int id, int snapshotFrequency) throws ExecutionException, InterruptedException {
-        this.createMasterServer(id, snapshotFrequency, null, null);
+        this.createMasterServer(id, snapshotFrequency, null);
     }
 
-    public void createMasterServer(int id, int snapshotFrequency, String[] classNames, String[] topicNames)
+    public void createMasterServer(int id, int snapshotFrequency, ExampleFunctionable[] functinables)
             throws ExecutionException, InterruptedException {
         this.masterServer = new MasterServer<>(this.partitioner, (int) this.configuration.get("numOfWorker"), id,
                 (int) this.configuration.get("numOfReplica"), snapshotFrequency);
         this.masterServer.setGraph(this.graph);
-        this.masterServer.setFunctionables(classNames, topicNames);
+        this.masterServer.setFunctionables(functinables);
     }
 
     public void join(String clusterName) {

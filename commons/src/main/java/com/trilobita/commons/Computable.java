@@ -1,6 +1,8 @@
 package com.trilobita.commons;
 
-public interface Computable<T> extends Comparable<T> {
+import java.io.Serializable;
+
+public interface Computable<T> extends Comparable<T>, Serializable{
     public Computable<T> add(Computable<T> computable);
 
     public Computable<T> minus(Computable<T> computable);

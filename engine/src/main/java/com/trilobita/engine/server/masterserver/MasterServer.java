@@ -7,11 +7,13 @@ import com.trilobita.core.graph.VertexGroup;
 import com.trilobita.core.messaging.MessageConsumer;
 import com.trilobita.core.messaging.MessageProducer;
 import com.trilobita.engine.server.AbstractServer;
-import com.trilobita.engine.server.functionable.FunctionableRunner.MasterFunctionableRunner;
 import com.trilobita.engine.server.heartbeat.HeartbeatChecker;
 import com.trilobita.engine.server.heartbeat.HeartbeatSender;
 import com.trilobita.engine.server.masterserver.partitioner.Partitioner;
 import com.trilobita.engine.server.masterserver.util.Snapshot;
+import com.trilobita.engine.server.util.functionable.FunctionableRunner.MasterFunctionableRunner;
+import com.trilobita.engine.server.util.functionable.examples.ExampleFunctionable;
+
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
@@ -59,55 +61,57 @@ public class MasterServer<T> extends AbstractServer<T> {
             this.aliveWorkerIds.add(i + 1);
             this.confirmMessage.put(i + 1, false);
             this.finished.put(i + 1, false);
-            this.nFinishedWorker.put(i+1, false);
+            this.nFinishedWorker.put(i + 1, false);
         }
         this.masterIds = new ArrayList<>();
         for (int i = 0; i < nReplica; i++) {
             this.masterIds.add(i + 1);
         }
-        this.confirmReceiveConsumer = new MessageConsumer("CONFIRM_RECEIVE", this.getServerId(), new MessageConsumer.MessageHandler() {
-            @Override
-            public void handleMessage(UUID key, Mail value, int partition, long offset) throws JsonProcessingException, InterruptedException, ExecutionException {
-                if (!isWorking) {
-                    return;
-                }
+        this.confirmReceiveConsumer = new MessageConsumer("CONFIRM_RECEIVE", this.getServerId(),
+                new MessageConsumer.MessageHandler() {
+                    @Override
+                    public void handleMessage(UUID key, Mail value, int partition, long offset)
+                            throws JsonProcessingException, InterruptedException, ExecutionException {
+                        if (!isWorking) {
+                            return;
+                        }
 
-                int workerId = (int) value.getMessage().getContent();
-                confirmMessage.put(workerId, true);
+                        int workerId = (int) value.getMessage().getContent();
+                        confirmMessage.put(workerId, true);
 
-//               check if all are true, set all to false and send confirm start signal
-                boolean flag = true;
-                Set<Map.Entry<Integer, Boolean>> set = confirmMessage.entrySet();
-                for (Map.Entry<Integer, Boolean> entry: set){
-                    if (!entry.getValue()){
-                        flag = false;
-                        break;
+                        // check if all are true, set all to false and send confirm start signal
+                        boolean flag = true;
+                        Set<Map.Entry<Integer, Boolean>> set = confirmMessage.entrySet();
+                        for (Map.Entry<Integer, Boolean> entry : set) {
+                            if (!entry.getValue()) {
+                                flag = false;
+                                break;
+                            }
+                        }
+
+                        if (!flag) {
+                            log.info("received confirm receive message from worker {}", workerId);
+                        }
+
+                        if (flag) {
+                            // send start message to all workers
+                            for (Map.Entry<Integer, Boolean> entry : set) {
+                                entry.setValue(false);
+                            }
+                            MessageProducer.createAndProduce(null, new Mail(), "CONFIRM_START");
+                            workerHeartbeatChecker.setIsProcessing(false);
+                        }
                     }
-                }
-
-                if (!flag){
-                    log.info("received confirm receive message from worker {}", workerId);
-                }
-
-                if (flag) {
-//                 send start message to all workers
-                    for (Map.Entry<Integer, Boolean> entry: set){
-                       entry.setValue(false);
-                    }
-                    MessageProducer.createAndProduce(null, new Mail(), "CONFIRM_START");
-                    workerHeartbeatChecker.setIsProcessing(false);
-                }
-            }
-        });
+                });
 
         this.workerHeartbeatChecker = new HeartbeatChecker(this.aliveWorkerIds, true, this.getServerId(),
                 new HeartbeatChecker.FaultHandler() {
                     @Override
                     public void handleFault(List<Integer> errList) {
-//                        if (!MasterServer.this.isWorking) {
-//                            return;
-//                        }
-                        for (int id: errList){
+                        // if (!MasterServer.this.isWorking) {
+                        // return;
+                        // }
+                        for (int id : errList) {
                             log.info("[Fault] detected server {} is down, start repartitioning...", id);
                             aliveWorkerIds.remove((Integer) id);
                             confirmMessage.remove(id);
@@ -144,10 +148,11 @@ public class MasterServer<T> extends AbstractServer<T> {
                             return;
                         }
                         Map<String, Object> map = (Map<String, Object>) value.getMessage().getContent();
-                        HashMap<Integer, Computable<T>> vertexValues = (HashMap<Integer, Computable<T>>) map.get("VERTEX_VALUES");
+                        HashMap<Integer, Computable<T>> vertexValues = (HashMap<Integer, Computable<T>>) map
+                                .get("VERTEX_VALUES");
                         int workerId = (int) map.get("ID");
 
-                        if (vertexValues.size()>0) {
+                        if (vertexValues.size() > 0) {
                             // update the graph
                             boolean finish = (boolean) map.get("FINISH");
                             graph.updateVertexValues(vertexValues);
@@ -158,21 +163,22 @@ public class MasterServer<T> extends AbstractServer<T> {
                         log.info("[Superstep] finished workers: {}", nFinishedWorker);
 
                         boolean finishSuperstep = true;
-                        for (int id: aliveWorkerIds){
-                            if (!nFinishedWorker.get(id)){
+                        for (int id : aliveWorkerIds) {
+                            if (!nFinishedWorker.get(id)) {
                                 finishSuperstep = false;
                                 break;
                             }
                         }
 
                         // aggregate functional values and send to workers
-                        MasterServer.this.masterFunctionableRunner.runFunctionableTasks(MasterServer.this.getInMailQueue());
-
+                        MasterServer.this.masterFunctionableRunner
+                                .runFunctionableTasks(MasterServer.this.getInMailQueue());
+                        log.info("[Functionable] finished runFunctionableTasks");
                         if (finishSuperstep) {
                             // start a new superstep
                             if (MasterServer.this.isDoingSnapshot()) {
                                 Set<Map.Entry<Integer, Boolean>> s = nFinishedWorker.entrySet();
-                                for (Map.Entry<Integer, Boolean> entry: s) {
+                                for (Map.Entry<Integer, Boolean> entry : s) {
                                     entry.setValue(false);
                                 }
 
@@ -181,13 +187,13 @@ public class MasterServer<T> extends AbstractServer<T> {
                                 // check whether all workers have finished
                                 boolean flag = true;
                                 Set<Map.Entry<Integer, Boolean>> set = finished.entrySet();
-                                for (Map.Entry<Integer, Boolean> entry: set) {
-                                    if (!entry.getValue()){
+                                for (Map.Entry<Integer, Boolean> entry : set) {
+                                    if (!entry.getValue()) {
                                         flag = false;
                                         break;
                                     }
                                 }
-                                if (flag){
+                                if (flag) {
                                     log.info("[Complete] the work has complete, the final graph is: {}", graph);
                                     return;
                                 }
@@ -203,8 +209,8 @@ public class MasterServer<T> extends AbstractServer<T> {
                     @Override
                     public void handleMessage(UUID key, Mail value, int partition, long offset) {
                         int id = (int) value.getMessage().getContent();
-//                        log.info("heart beat from : {}", id);
-                        if (!aliveWorkerIds.contains(id)){
+                        // log.info("heart beat from : {}", id);
+                        if (!aliveWorkerIds.contains(id)) {
                             aliveWorkerIds.add(id);
                             confirmMessage.put(id, false);
                             finished.put(id, false);
@@ -238,6 +244,7 @@ public class MasterServer<T> extends AbstractServer<T> {
             }
         });
         this.masterFunctionableRunner = MasterFunctionableRunner.getInstance();
+        this.messageConsumer.start();
 
         this.graphConsumer.start();
         this.confirmReceiveConsumer.start();
@@ -269,7 +276,7 @@ public class MasterServer<T> extends AbstractServer<T> {
      */
     public void superstep() {
         this.superstep += 1;
-        for (int id: aliveWorkerIds){
+        for (int id : aliveWorkerIds) {
             this.nFinishedWorker.put(id, false);
         }
         MessageProducer.produceStartSignal(isDoingSnapshot());
@@ -283,7 +290,7 @@ public class MasterServer<T> extends AbstractServer<T> {
             throw new Error("graph is not set!");
         }
 
-        for (int id: aliveWorkerIds){
+        for (int id : aliveWorkerIds) {
             this.nFinishedWorker.put(id, false);
             this.finished.put(id, false);
             this.confirmMessage.put(id, false);
@@ -344,9 +351,9 @@ public class MasterServer<T> extends AbstractServer<T> {
      * @param topicNames a list of topic names attached with respective
      *                   functionables; null if no global communication
      */
-    public void setFunctionables(String[] classNames, String[] topicNames) {
-        if (classNames != null && topicNames != null && classNames.length == topicNames.length) {
-            this.masterFunctionableRunner.registerFunctionables(classNames, topicNames);
+    public void setFunctionables(ExampleFunctionable[] functionables) {
+        if (functionables != null) {
+            this.masterFunctionableRunner.registerFunctionables(functionables);
             log.info("masterFunctionableRunner finished registerFunctionables");
         }
     }

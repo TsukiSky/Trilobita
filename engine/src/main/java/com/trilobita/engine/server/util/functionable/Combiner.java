@@ -1,44 +1,54 @@
-package com.trilobita.engine.server.functionable;
+package com.trilobita.engine.server.util.functionable;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
+import lombok.extern.slf4j.Slf4j;
 
 import com.trilobita.commons.Computable;
 import com.trilobita.commons.Mail;
+import com.trilobita.engine.server.AbstractServer;
 
 /*
  * Combine outcoming messages from a workerserver to another workerserver.
  */
+@Slf4j
 public abstract class Combiner<T> extends Functionable<T> {
+
+    public Combiner(Computable<T> initValue) {
+        super(initValue);
+        this.functionableType = FunctionableType.COMBINER;
+    }
 
     private Map<Integer, CopyOnWriteArrayList<Mail>> vertexMailMap = new HashMap<Integer, CopyOnWriteArrayList<Mail>>();
 
     @Override
-    public void execute(Object object) {
-        LinkedBlockingQueue<Mail> outMailQueue = (LinkedBlockingQueue<Mail>) object;
-        this.combine(outMailQueue);
+    public void execute(AbstractServer<?> server) {
+        LinkedBlockingQueue<Mail> outMailQueue = server.getOutMailQueue();
+        server.outMailQueue.addAll(this.combine(outMailQueue));
+        log.info("server.outMailQueue = {}", server.outMailQueue);
     }
 
     @Override
-    public void execute(List<Computable<T>> computables) {
+    public void execute(List<Computable<?>> computables) {
         return;
     }
 
     // main method for combine
-    public void combine(LinkedBlockingQueue<Mail> outMailQueue) {
+    public LinkedBlockingQueue<Mail> combine(LinkedBlockingQueue<Mail> outMailQueue) {
         LinkedBlockingQueue<Mail> combinedOutMailQueue = new LinkedBlockingQueue<>();
         while (!outMailQueue.isEmpty()) {
             Mail mail = outMailQueue.poll();
             int receiverId = mail.getToVertexId();
-            this.addToVertexMailMap(receiverId,mail);
+            this.addToVertexMailMap(receiverId, mail);
         }
         for (Map.Entry<Integer, CopyOnWriteArrayList<Mail>> map : vertexMailMap.entrySet()) {
-            Mail combinedMail = this.combineMails(map.getKey(),map.getValue());
+            Mail combinedMail = this.combineMails(map.getKey(), map.getValue());
             combinedOutMailQueue.add(combinedMail);
         }
+        return combinedOutMailQueue;
     }
 
     // combine mails

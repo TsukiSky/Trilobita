@@ -1,4 +1,4 @@
-package com.trilobita.engine.server.functionable.examples.aggregators;
+package com.trilobita.engine.server.util.functionable.examples.aggregators;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,38 +6,41 @@ import java.util.List;
 import com.trilobita.commons.Computable;
 import com.trilobita.core.graph.VertexGroup;
 import com.trilobita.core.graph.vertex.Vertex;
-import com.trilobita.engine.server.functionable.Aggregator;
+import com.trilobita.engine.server.util.functionable.Aggregator;
+
+import lombok.extern.slf4j.Slf4j;
 
 /*
  * Sum total number of edges in the graph.
  * Applied to the out-degree of each vertex yields
  */
+@Slf4j
 public class EdgeSumAggregator extends Aggregator<Integer> {
+        Computable<Integer> initAggregatedValue;
 
-        public EdgeSumAggregator(Computable<Integer> initAggregatedValue) {
-                super(initAggregatedValue);
+        public EdgeSumAggregator(Computable<Integer> initAggregatedValue, String topic) {
+                super(initAggregatedValue, topic);
+                this.initAggregatedValue = initAggregatedValue;
         }
 
         private static EdgeSumAggregator instance;
 
-        public static synchronized EdgeSumAggregator getInstance() {
+        public static synchronized EdgeSumAggregator getInstance(Computable<Integer> initAggregatedValue,
+                        String topic) {
                 if (instance == null) {
-                        Computable<Integer> init = null;
-                        init.setValue(0);
-                        instance = new EdgeSumAggregator(init);
+                        instance = new EdgeSumAggregator(initAggregatedValue, topic);
                 }
                 return instance;
         }
 
         @Override
         public Computable<Integer> aggregate(VertexGroup vertexGroup) {
-                List<Computable<Integer>> computables = new ArrayList<Computable<Integer>>();
+                List<Computable<?>> computables = new ArrayList<>();
                 List<Vertex<?>> vertices = vertexGroup.getVertices();
                 for (Vertex<?> vertex : vertices) {
-                        Computable<Integer> com = null;
                         Integer numEdges = vertex.getEdges().size();
-                        com.setValue(numEdges);
-                        computables.add(com);
+                        this.getNewFunctionableValue().setValue(numEdges);
+                        computables.add(this.getNewFunctionableValue());
                 }
                 return this.reduce(computables);
         }
@@ -48,11 +51,12 @@ public class EdgeSumAggregator extends Aggregator<Integer> {
         }
 
         @Override
-        public Computable<Integer> reduce(List<Computable<Integer>> computables) {
+        public Computable<Integer> reduce(List<Computable<?>> computables) {
                 Computable<Integer> total_edges = this.initAggregatedValue;
                 for (Computable<?> edge : computables) {
                         total_edges.add((Computable<Integer>) edge);
                 }
+                log.info("Total edges calculated by {}: {}", this.getServerId(), total_edges.getValue());
                 return total_edges;
         }
 }

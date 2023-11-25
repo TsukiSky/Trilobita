@@ -1,4 +1,4 @@
-package com.trilobita.engine.server.functionable.FunctionableRunner;
+package com.trilobita.engine.server.util.functionable.FunctionableRunner;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,9 +11,11 @@ import com.trilobita.commons.Mail;
 import com.trilobita.commons.Mail.MailType;
 import com.trilobita.core.messaging.MessageConsumer;
 import com.trilobita.core.messaging.MessageConsumer.MessageHandler;
-import com.trilobita.core.messaging.MessageProducer;
-import com.trilobita.engine.server.functionable.Functionable;
+import com.trilobita.engine.server.AbstractServer;
+import com.trilobita.engine.server.util.functionable.Functionable;
+import com.trilobita.engine.server.workerserver.WorkerServer;
 
+import ch.qos.logback.core.util.AggregationType;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -36,6 +38,7 @@ public class WorkerFunctionableRunner extends FunctionableRunner {
             @Override
             public void handleMessage(UUID key, Mail value, int partition, long offset)
                     throws JsonProcessingException, InterruptedException, ExecutionException {
+                log.info("[Functionable] Received Functionable message {}", value.getMessage().getContent());
                 Map<String, Computable<?>> map = (Map) value.getMessage().getContent();
                 incomingFunctionableValues.putAll(map);
             }
@@ -70,6 +73,7 @@ public class WorkerFunctionableRunner extends FunctionableRunner {
                     }
                 });
         this.initFunctionablesConsumer.start();
+        log.info("initFunctionablesConsumer started");
     }
 
     public synchronized static WorkerFunctionableRunner getInstance(Integer serverId)
@@ -82,7 +86,6 @@ public class WorkerFunctionableRunner extends FunctionableRunner {
 
     public void finishRegisterFunctionables() {
         try {
-            this.initFunctionablesConsumer.stop();
             startConsumers();
             this.finishedRegisterFunctionables = false;
         } catch (ExecutionException | InterruptedException e) {
@@ -102,17 +105,24 @@ public class WorkerFunctionableRunner extends FunctionableRunner {
                 functionable.setLastFunctionableValue(lastValue);
             }
         }
+        log.info("[Functionable] Finished distributeValues");
     }
 
     /**
      * To run all functionable tasks in worker and send to master
      */
-    public void runFunctionableTasks(Object object) {
+    public void runFunctionableTasks(AbstractServer<?> server) {
+        log.info("runFunctionableTasks started");
         if (this.getFunctionables() != null) {
             for (Functionable<?> functionable : this.getFunctionables()) {
-                functionable.execute(object);
+                log.info("Functionable {} is executing...", functionable.instanceName);
+                // TODO: add context
+                functionable.execute(server);
+                log.info("Finished functionable.execute(object);");
                 functionable.sendMail(functionable.getNewFunctionableValue(), false);
+                log.info("Finished functionable.sendMail;");
             }
+            log.info("Finished all functionable tasks;");
         }
     }
 
@@ -128,18 +138,9 @@ public class WorkerFunctionableRunner extends FunctionableRunner {
                 MessageConsumer consumer = functionable.getWorkerMessageConsumer();
                 if (consumer != null) {
                     consumer.start();
+                    log.info("Started {}'s consumer", functionable.getInstanceName());
                 }
             }
-        }
-    }
-
-    public void start() {
-        try {
-            this.initFunctionablesConsumer.start();
-            log.info("initFunctionablesConsumer started");
-
-        } catch (ExecutionException | InterruptedException e) {
-            e.printStackTrace();
         }
     }
 }

@@ -1,9 +1,10 @@
-package com.trilobita.engine.server.functionable;
+package com.trilobita.engine.server.util.functionable;
 
 import java.util.List;
 
 import com.trilobita.commons.Computable;
 import com.trilobita.core.graph.VertexGroup;
+import com.trilobita.engine.server.AbstractServer;
 
 /*
  * Monitor and communicate vertices metadata on a workerserver.
@@ -17,22 +18,21 @@ import com.trilobita.core.graph.VertexGroup;
  */
 
 public abstract class Aggregator<T> extends Functionable<T> {
-    public Computable<T> initAggregatedValue;
+
     // how the aggregated value is initialized from the first input value
-    public Aggregator(Computable<T> initAggregatedValue) {
-        super();
-        this.initAggregatedValue = initAggregatedValue;
-        this.setNewFunctionableValue(initAggregatedValue);
+    public Aggregator(Computable<T> initAggregatedValue, String topicName) {
+        super(initAggregatedValue,topicName);
+        this.functionableType = FunctionableType.AGGREGATOR;
     }
 
     @Override
-    public void execute(Object object) {
-        VertexGroup<?> vertexGroup = (VertexGroup<?>) object;
+    public void execute(AbstractServer<?> server) {
+        VertexGroup<?> vertexGroup = server.getVertexGroup();
         this.setNewFunctionableValue(this.aggregate(vertexGroup));
     }
 
     @Override
-    public void execute(List<Computable<T>> computables) {
+    public void execute(List<Computable<?>> computables) {
         this.setNewFunctionableValue(this.reduce(computables));
     }
 
@@ -40,7 +40,7 @@ public abstract class Aggregator<T> extends Functionable<T> {
     // Make use of reduce function
     public abstract Computable<T> aggregate(VertexGroup<?> vertexGroup);
 
-    public abstract Computable<T> reduce(List<Computable<T>> computables);
+    public abstract Computable<T> reduce(List<Computable<?>> computables);
 
     public abstract void stop();
 

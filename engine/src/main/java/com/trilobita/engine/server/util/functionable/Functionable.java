@@ -1,4 +1,4 @@
-package com.trilobita.engine.server.functionable;
+package com.trilobita.engine.server.util.functionable;
 
 import java.io.Serializable;
 import java.util.List;
@@ -7,6 +7,7 @@ import com.trilobita.commons.Mail;
 import com.trilobita.core.messaging.MessageConsumer;
 import com.trilobita.core.messaging.MessageProducer;
 import com.trilobita.core.messaging.MessageConsumer.MessageHandler;
+import com.trilobita.engine.server.AbstractServer;
 
 import lombok.Data;
 
@@ -18,6 +19,7 @@ import lombok.Data;
 public abstract class Functionable<T> implements Serializable {
 
     public String instanceName;
+    public FunctionableType functionableType;
     private Computable<T> lastFunctionableValue; // returned by master for last superstep
     private Computable<T> newFunctionableValue; // this superstep
     private String topic = null;
@@ -25,12 +27,21 @@ public abstract class Functionable<T> implements Serializable {
     private MessageConsumer workerMessageConsumer = null;
     private Integer serverId;
 
-    public abstract void execute(Object object);
+    public abstract void execute(AbstractServer<?> server);
 
-    public abstract void execute(List<Computable<T>> computables);
+    public abstract void execute(List<Computable<?>> computables);
 
-    public Functionable() {
+    public Functionable(Computable<T> initValue) {
         this.instanceName = this.getClass().getName();
+        this.lastFunctionableValue = initValue;
+        this.newFunctionableValue = initValue;
+    }
+
+    public Functionable(Computable<T> initValue, String topic) {
+        this.instanceName = this.getClass().getName();
+        this.lastFunctionableValue = initValue;
+        this.newFunctionableValue = initValue;
+        this.topic = topic;
     }
 
     /**
@@ -60,4 +71,8 @@ public abstract class Functionable<T> implements Serializable {
         }
     }
 
+    public enum FunctionableType{
+        AGGREGATOR,
+        COMBINER,
+    }
 }
