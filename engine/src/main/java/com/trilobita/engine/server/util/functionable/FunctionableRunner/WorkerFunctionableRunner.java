@@ -13,9 +13,6 @@ import com.trilobita.core.messaging.MessageConsumer;
 import com.trilobita.core.messaging.MessageConsumer.MessageHandler;
 import com.trilobita.engine.server.AbstractServer;
 import com.trilobita.engine.server.util.functionable.Functionable;
-import com.trilobita.engine.server.workerserver.WorkerServer;
-
-import ch.qos.logback.core.util.AggregationType;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -27,7 +24,6 @@ import lombok.extern.slf4j.Slf4j;
 public class WorkerFunctionableRunner extends FunctionableRunner {
 
     private static WorkerFunctionableRunner instance = null;
-    private static int POSITIVE_INF = 10000;
     private MessageConsumer initFunctionablesConsumer;
     private MessageHandler functionalMessageHandler;
     private Map<String, Computable<?>> incomingFunctionableValues = new HashMap<>();
@@ -47,28 +43,18 @@ public class WorkerFunctionableRunner extends FunctionableRunner {
                 serverId, new MessageHandler() {
                     @Override
                     public void handleMessage(UUID key, Mail value, int partition, long offset)
-                            throws InterruptedException {
+                            throws InterruptedException, ExecutionException {
                         log.info("Received INIT_FUNCTIONAL FUNCTIONAL message from master.");
-
-                        int totalNumFunc = POSITIVE_INF; // a very large number
                         if (value.getMailType() == MailType.FUNCTIONAL) {
                             Functionable<?> functionable = (Functionable<?>) value.getMessage().getContent();
                             functionable.setServerId(serverId);
                             WorkerFunctionableRunner.this.registerFunctionable(functionable);
                             if (functionable.getTopic() != null) {
-                                functionable.registerConsumer(functionalMessageHandler);
-                            }
-                            if (totalNumFunc < POSITIVE_INF) {
-                                if (WorkerFunctionableRunner.this.getFunctionables().size() == totalNumFunc) {
-                                    WorkerFunctionableRunner.this.finishRegisterFunctionables();
-                                }
+                                functionable.registerAndStartConsumer(functionalMessageHandler);
                             }
                         } else if (value.getMailType() == MailType.FINISH_SIGNAL) {
-                            log.info("Received INIT_FUNCTIONAL FINISH_SIGNAL message from master.");
-                            totalNumFunc = (int) value.getMessage().getContent();
-                            if (WorkerFunctionableRunner.this.getFunctionables().size() == totalNumFunc) {
-                                WorkerFunctionableRunner.this.finishRegisterFunctionables();
-                            }
+                            log.info("Received all functionable instances from master.");
+                            // TODO: notify server?
                         }
                     }
                 });

@@ -1,29 +1,36 @@
 package pagerank;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.lang.reflect.Constructor;
 
-import com.trilobita.commons.Computable;
 import com.trilobita.commons.Mail;
-import com.trilobita.core.messaging.MessageProducer;
-import com.trilobita.engine.server.util.functionable.Functionable;
-import com.trilobita.engine.server.util.functionable.FunctionalMail;
-import com.trilobita.engine.server.util.functionable.examples.ExampleFunctionable;
-import com.trilobita.engine.server.util.functionable.examples.aggregators.EdgeSumAggregator;
-import com.trilobita.engine.server.util.functionable.examples.combiners.MaxCombiner;
-
-import pagerank.vertex.PageRankValue;
+import com.trilobita.engine.server.AbstractServer;
 
 public class Test {
 
-    
+    private class Server {
+        LinkedBlockingQueue<Integer> outMailQueue = new LinkedBlockingQueue<>();
+    }
+
+    public static void execute(Server server) {
+        LinkedBlockingQueue<Integer> outMailQueue = server.outMailQueue;
+        LinkedBlockingQueue<Integer> newOutMailQueue = new LinkedBlockingQueue<>();
+
+        while (!outMailQueue.isEmpty()) {
+            Integer i = outMailQueue.poll();
+            newOutMailQueue.add(i + 100);
+            System.out.println(i);
+        }
+        server.outMailQueue.addAll(newOutMailQueue);
+    }
 
     public static void main(String[] args) throws Exception {
+        Test.Server s1 = new Test().new Server();
+        s1.outMailQueue.add(1);
+        s1.outMailQueue.add(2);
+        s1.outMailQueue.add(3);
 
-
+        System.out.println(s1.outMailQueue);
+        execute(s1);
+        System.out.println(s1.outMailQueue);
     }
 }

@@ -2,6 +2,8 @@ package com.trilobita.engine.server.util.functionable;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+
 import com.trilobita.commons.Computable;
 import com.trilobita.commons.Mail;
 import com.trilobita.core.messaging.MessageConsumer;
@@ -10,12 +12,14 @@ import com.trilobita.core.messaging.MessageConsumer.MessageHandler;
 import com.trilobita.engine.server.AbstractServer;
 
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
 /*
  * An abstract class for easy adding or removing functional blocks, 
  * We provide the implementation of Combiner and Aggregator, as discussed in Pregel.
  */
 @Data
+@Slf4j
 public abstract class Functionable<T> implements Serializable {
 
     public String instanceName;
@@ -49,12 +53,16 @@ public abstract class Functionable<T> implements Serializable {
      * 
      * @param topic                topic that the consumer consumes
      * @param workerMessageHandler MessageHandler that handles message on the worker
+     * @throws InterruptedException
+     * @throws ExecutionException
      */
-    public void registerConsumer(MessageHandler workerMessageHandler) {
+    public void registerAndStartConsumer(MessageHandler workerMessageHandler) throws ExecutionException, InterruptedException {
         assert this.topic != null;
         this.setTopic(this.topic);
         this.setWorkerMessageConsumer(
                 new MessageConsumer(this.topic, this.serverId, workerMessageHandler));
+        this.workerMessageConsumer.start();
+        log.info("Started {}'s consumer", this.getInstanceName());
     }
 
     /**
