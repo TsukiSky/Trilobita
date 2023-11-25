@@ -7,16 +7,16 @@ import com.trilobita.commons.Computable;
 public class ExampleFunctionable implements Serializable{
     public String className;
     public String topic;
-    public Computable<?> initValue;
+    public Computable<?> value;
 
-    public ExampleFunctionable(String className, String topic,Computable<?> initValue){
+    public ExampleFunctionable(String className, String topic,Computable<?> value){
         this.className = className;
         this.topic = topic;
-        this.initValue = initValue;
+        this.value = value;
     }
 
-        public ExampleFunctionable(String className, Computable<?> initValue){
+        public ExampleFunctionable(String className, Computable<?> value){
         this.className = className;
-        this.initValue = initValue;
+        this.value = value;
     }
 }

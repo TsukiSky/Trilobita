@@ -50,11 +50,8 @@ public abstract class Functionable<T> implements Serializable {
 
     /**
      * Register a consumer to the functionable. Else the default is null.
-     * 
-     * @param topic                topic that the consumer consumes
+     *
      * @param workerMessageHandler MessageHandler that handles message on the worker
-     * @throws InterruptedException
-     * @throws ExecutionException
      */
     public void registerAndStartConsumer(MessageHandler workerMessageHandler) throws ExecutionException, InterruptedException {
         assert this.topic != null;
@@ -68,13 +65,15 @@ public abstract class Functionable<T> implements Serializable {
     /**
      * Send mail to master/workers if needed.
      * (this.workerMessageConsumer == null) means that no need to communicate
-     * 
-     * @param mail
+     *
+     * @param funcValue the calculated functionable value tro be sent
+     * @param serverIsMaster to decide which topic to sent to
      */
-    public void sendMail(Computable<?> computable, boolean serverIsMaster) {
-        if (this.workerMessageConsumer != null) {
-            Mail mail = new FunctionalMail(this.instanceName, computable);
+    public void sendMail(Computable<?> funcValue, boolean serverIsMaster) {
+        if (this.topic != null) {
+            Mail mail = new FunctionalMail(this.instanceName, funcValue);
             String topic = serverIsMaster ? this.topic : MASTER_TOPIC;
+            log.info("Send mail to {} topic.", topic);
             MessageProducer.createAndProduce(null, mail, topic);
         }
     }

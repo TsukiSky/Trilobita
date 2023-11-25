@@ -1,7 +1,7 @@
 package com.trilobita.engine.server.masterserver;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.trilobita.commons.*;
+import com.trilobita.commons.Computable;
+import com.trilobita.commons.Mail;
 import com.trilobita.core.graph.Graph;
 import com.trilobita.core.graph.VertexGroup;
 import com.trilobita.core.messaging.MessageConsumer;
@@ -13,11 +13,11 @@ import com.trilobita.engine.server.masterserver.partitioner.Partitioner;
 import com.trilobita.engine.server.masterserver.util.Snapshot;
 import com.trilobita.engine.server.util.functionable.FunctionableRunner.MasterFunctionableRunner;
 import com.trilobita.engine.server.util.functionable.examples.ExampleFunctionable;
-
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Master Server is the master of a server cluster, coordinate the start and the
@@ -71,7 +71,7 @@ public class MasterServer<T> extends AbstractServer<T> {
                 new MessageConsumer.MessageHandler() {
                     @Override
                     public void handleMessage(UUID key, Mail value, int partition, long offset)
-                            throws JsonProcessingException, InterruptedException, ExecutionException {
+                            throws InterruptedException, ExecutionException {
                         if (!isWorking) {
                             return;
                         }
@@ -346,10 +346,8 @@ public class MasterServer<T> extends AbstractServer<T> {
 
     /**
      * Register functionables to masterFunctionableRunner
-     * 
-     * @param classNames a list of class names of functionables
-     * @param topicNames a list of topic names attached with respective
-     *                   functionables; null if no global communication
+     *
+     * @param functionables functionable sets
      */
     public void setFunctionables(ExampleFunctionable[] functionables) {
         if (functionables != null) {

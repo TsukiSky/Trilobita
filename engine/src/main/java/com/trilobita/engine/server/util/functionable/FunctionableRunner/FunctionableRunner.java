@@ -27,19 +27,7 @@ public abstract class FunctionableRunner {
         return null;
     }
 
-    public void registerFunctionable(Functionable<?> functionable, String topicName) {
-        if (functionable.getClass() == Functionable.class) {
-            System.out.println("The functionable class is abstract.");
-        } else {
-            this.getFunctionables().add(functionable);
-        }
-    }
-
     public void registerFunctionable(Functionable<?> functionable) {
-        if (functionable.getClass() == Functionable.class) {
-            System.out.println("The functionable class is abstract.");
-        } else {
-            this.getFunctionables().add(functionable);
-        }
+        this.getFunctionables().add(functionable);
     }
 }

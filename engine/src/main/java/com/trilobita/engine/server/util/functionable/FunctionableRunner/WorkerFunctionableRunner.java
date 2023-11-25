@@ -1,11 +1,8 @@
 package com.trilobita.engine.server.util.functionable.FunctionableRunner;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.trilobita.commons.Computable;
 import com.trilobita.commons.Mail;
 import com.trilobita.commons.Mail.MailType;
@@ -13,6 +10,7 @@ import com.trilobita.core.messaging.MessageConsumer;
 import com.trilobita.core.messaging.MessageConsumer.MessageHandler;
 import com.trilobita.engine.server.AbstractServer;
 import com.trilobita.engine.server.util.functionable.Functionable;
+import com.trilobita.engine.server.util.functionable.examples.ExampleFunctionable;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -25,20 +23,9 @@ public class WorkerFunctionableRunner extends FunctionableRunner {
 
     private static WorkerFunctionableRunner instance = null;
     private MessageConsumer initFunctionablesConsumer;
-    private MessageHandler functionalMessageHandler;
-    private Map<String, Computable<?>> incomingFunctionableValues = new HashMap<>();
-    public boolean finishedRegisterFunctionables = false;
+    private List<ExampleFunctionable> incomingFunctionableValues = new ArrayList<>();
 
     private WorkerFunctionableRunner(Integer serverId) throws ExecutionException, InterruptedException {
-        this.functionalMessageHandler = new MessageHandler() {
-            @Override
-            public void handleMessage(UUID key, Mail value, int partition, long offset)
-                    throws JsonProcessingException, InterruptedException, ExecutionException {
-                log.info("[Functionable] Received Functionable message {}", value.getMessage().getContent());
-                Map<String, Computable<?>> map = (Map) value.getMessage().getContent();
-                incomingFunctionableValues.putAll(map);
-            }
-        };
         this.initFunctionablesConsumer = new MessageConsumer("INIT_FUNCTIONAL",
                 serverId, new MessageHandler() {
                     @Override
@@ -50,7 +37,14 @@ public class WorkerFunctionableRunner extends FunctionableRunner {
                             functionable.setServerId(serverId);
                             WorkerFunctionableRunner.this.registerFunctionable(functionable);
                             if (functionable.getTopic() != null) {
-                                functionable.registerAndStartConsumer(functionalMessageHandler);
+                                functionable.registerAndStartConsumer(new MessageHandler() {
+                                    @Override
+                                    public void handleMessage(UUID key, Mail value, int partition, long offset) throws InterruptedException, ExecutionException {
+                                        log.info("[Functionable] Received Functionable message {}", value.getMessage().getContent());
+                                        ExampleFunctionable exampleFunctionable = (ExampleFunctionable) value.getMessage().getContent();
+                                        incomingFunctionableValues.add(exampleFunctionable);
+                                    }
+                                });
                             }
                         } else if (value.getMailType() == MailType.FINISH_SIGNAL) {
                             log.info("Received all functionable instances from master.");
@@ -70,23 +64,15 @@ public class WorkerFunctionableRunner extends FunctionableRunner {
         return instance;
     }
 
-    public void finishRegisterFunctionables() {
-        try {
-            startConsumers();
-            this.finishedRegisterFunctionables = false;
-        } catch (ExecutionException | InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-
     /**
      * Distribute functional values processed by master from last superstep
      */
     public void distributeValues() {
-        for (Map.Entry<String, Computable<?>> map : this.incomingFunctionableValues.entrySet()) {
-            String insName = map.getKey();
-            Computable lastValue = map.getValue();
-            Functionable<?> functionable = this.findFunctionableByName(insName);
+        log.info("this.incomingFunctionableValues {}", this.incomingFunctionableValues);
+        for (ExampleFunctionable functionableSet: this.incomingFunctionableValues) {
+            String insName = functionableSet.className;
+            Computable<?> lastValue = functionableSet.value;
+            Functionable functionable = this.findFunctionableByName(insName);
             if (functionable != null) {
                 functionable.setLastFunctionableValue(lastValue);
             }
@@ -109,24 +95,6 @@ public class WorkerFunctionableRunner extends FunctionableRunner {
                 log.info("Finished functionable.sendMail;");
             }
             log.info("Finished all functionable tasks;");
-        }
-    }
-
-    /**
-     * Start all consumers for the functionables
-     * 
-     * @throws ExecutionException
-     * @throws InterruptedException
-     */
-    public void startConsumers() throws ExecutionException, InterruptedException {
-        if (this.getFunctionables() != null) {
-            for (Functionable<?> functionable : this.getFunctionables()) {
-                MessageConsumer consumer = functionable.getWorkerMessageConsumer();
-                if (consumer != null) {
-                    consumer.start();
-                    log.info("Started {}'s consumer", functionable.getInstanceName());
-                }
-            }
         }
     }
 }
