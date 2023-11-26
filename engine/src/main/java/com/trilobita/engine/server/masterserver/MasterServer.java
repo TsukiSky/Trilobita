@@ -29,17 +29,18 @@ public class MasterServer<T> extends AbstractServer<T> {
     List<Integer> masterIds = new ArrayList<>();            // the alive master servers' ids
     public boolean isPrimary;
 
-    public MasterServer(Partitioner<T> graphPartitioner, int nWorker, int id, int nReplica, int snapshotFrequency) {
+    public MasterServer(Partitioner<T> graphPartitioner, int nWorker, int id, int nReplica, int snapshotFrequency) throws ExecutionException, InterruptedException {
         super(id, graphPartitioner.getPartitionStrategy()); // the standard server id of master is 0
-        this.executionManager = new ExecutionManager<>(this, snapshotFrequency);
-        this.heartbeatManager = new HeartbeatManager(this, this.workerIds, this.masterIds);
-        this.graphPartitioner = graphPartitioner;
         for (int i = 0; i < nWorker; i++) {
             this.workerIds.add(i + 1);
         }
         for (int i = 0; i < nReplica; i++) {
             this.masterIds.add(i + 1);
         }
+        this.executionManager = new ExecutionManager<>(this, snapshotFrequency);
+        this.heartbeatManager = new HeartbeatManager(this, this.workerIds, this.masterIds);
+        this.graphPartitioner = graphPartitioner;
+        this.heartbeatManager.listen();
     }
 
     @Override
@@ -47,7 +48,6 @@ public class MasterServer<T> extends AbstractServer<T> {
         isPrimary = true;
         try {
             this.executionManager.listen();
-            this.heartbeatManager.listen();
             this.executionManager.partitionGraph(workerIds);
         } catch (ExecutionException | InterruptedException  e) {
             throw new RuntimeException(e);
