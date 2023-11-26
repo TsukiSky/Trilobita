@@ -14,7 +14,7 @@ import java.io.Serializable;
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, property = "@class")
 public class PageRankVertex extends Vertex<Double> implements Serializable {
     private final double weight = 0.85;
-    private final double epsilon = 0.0001;
+    private final double epsilon = 0.000001;
 
     public PageRankVertex(int id) {
         super(id, new PageRankValue(0.0));

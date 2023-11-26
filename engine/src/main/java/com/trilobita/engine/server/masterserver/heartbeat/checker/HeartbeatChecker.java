@@ -39,7 +39,6 @@ public class HeartbeatChecker {
         if (isWorkerChecker) {
             // check the heartbeats of the workers
             List<Integer> errors = new ArrayList<>();
-            log.info("{}",heartbeats);
             heartbeats.forEach((id, heartbeat) -> {
                 if (!heartbeat) {
                     // heartbeat is not detected
@@ -48,9 +47,9 @@ public class HeartbeatChecker {
                 heartbeats.put(id, false);  // reset the heartbeat
             });
             if (errors.size() > 0) {
-                log.info("found errr");
                 isHandlingFault = true;
                 faultHandler.handleFault(errors);
+                isHandlingFault = false;
             }
         } else {
             // check the heartbeat of the master

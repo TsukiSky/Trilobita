@@ -5,6 +5,7 @@ import com.trilobita.commons.Mail;
 import com.trilobita.core.messaging.MessageConsumer;
 import com.trilobita.engine.server.masterserver.MasterServer;
 import com.trilobita.engine.server.masterserver.heartbeat.checker.HeartbeatChecker;
+import com.trilobita.engine.server.util.HeartbeatSender;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -21,10 +22,11 @@ public class HeartbeatManager {
     MasterServer<?> masterServer;
     List<Integer> workerIds;
     List<Integer> masterIds;
-    MessageConsumer workerHeatBeatConsumer;
-    HeartbeatChecker masterHeartbeatChecker;
-    MessageConsumer masterHeatBeatConsumer;
-    HeartbeatChecker workerHeartbeatChecker;
+    MessageConsumer workerHeartBeatConsumer;
+    HeartbeatChecker masterHeartBeatChecker;
+    MessageConsumer masterHeartBeatConsumer;
+    HeartbeatChecker workerHeartBeatChecker;
+    HeartbeatSender heartbeatSender;
     MessageConsumer stopSignalConsumer;
 
     @Getter
@@ -34,8 +36,13 @@ public class HeartbeatManager {
         this.masterServer = masterServer;
         this.workerIds = workerIds;
         this.masterIds = masterIds;
+        initializeHeartbeatSender();
         initializeHeartbeatChecker();
         initializeHeartbeatConsumer();
+    }
+
+    public void initializeHeartbeatSender() {
+        this.heartbeatSender = new HeartbeatSender(this.masterServer.getServerId(), false);
     }
 
     /**
@@ -43,21 +50,22 @@ public class HeartbeatManager {
      */
     public void initializeHeartbeatChecker() {
         // create heartbeat checker for workers
-        workerHeartbeatChecker = new HeartbeatChecker(masterServer.getServerId(), workerIds, true, new HeartbeatChecker.FaultHandler() {
+        workerHeartBeatChecker = new HeartbeatChecker(masterServer.getServerId(), workerIds, true, new HeartbeatChecker.FaultHandler() {
             @Override
             public void handleFault(List<Integer> errors) {
                 isHandlingFault = true;
                 for (Integer id : errors){
                     log.info("[Fault] server {} is down, start repartitioning...", id);
-                    workerIds.remove(id);
-                    workerHeartbeatChecker.getHeartbeats().remove(id);
+                    masterServer.getWorkerIds().remove((Integer) id);
+                    workerHeartBeatChecker.getHeartbeats().remove(id);
                 }
-                masterServer.getExecutionManager().partitionGraph(workerIds);
+                log.info("worker ids: {}", workerIds);
+                masterServer.getExecutionManager().partitionGraph(masterServer.getWorkerIds());
                 log.info("finished repartitioning...");
                 isHandlingFault = false;
             }
         });
-        masterHeartbeatChecker = new HeartbeatChecker(masterServer.getServerId(), masterIds, false, new HeartbeatChecker.FaultHandler() {
+        masterHeartBeatChecker = new HeartbeatChecker(masterServer.getServerId(), masterIds, false, new HeartbeatChecker.FaultHandler() {
             @Override
             public void handleFault(List<Integer> errors) {
                 if (masterServer.isPrimary) {
@@ -66,7 +74,6 @@ public class HeartbeatManager {
                 // if all id with greater id has died, become the master
                 log.info("[Fault] detected current master is down, trying to become master...");
                 masterServer.isPrimary = true;
-                masterServer.start();
                 masterServer.getExecutionManager().partitionGraph(workerIds);
                 isHandlingFault = false;
             }
@@ -78,30 +85,29 @@ public class HeartbeatManager {
      */
     public void initializeHeartbeatConsumer() {
         // create heartbeat checker for workers
-        workerHeatBeatConsumer = new MessageConsumer("HEARTBEAT_WORKER", masterServer.getServerId(), new MessageConsumer.MessageHandler() {
+        workerHeartBeatConsumer = new MessageConsumer("HEARTBEAT_WORKER", masterServer.getServerId(), new MessageConsumer.MessageHandler() {
             @Override
             public void handleMessage(UUID key, Mail value, int partition, long offset) {
                 int senderId = (int) value.getMessage().getContent();
                 if (!workerIds.contains(senderId)) {
-                    // new worker joins, repartition the graph
                     workerIds.add(senderId);
-                    workerHeartbeatChecker.getHeartbeats().put(senderId, true);
+                    workerHeartBeatChecker.getHeartbeats().put(senderId, true);
                     masterServer.getExecutionManager().partitionGraph(workerIds);
                 } else {
                     // update the heartbeat
-                    workerHeartbeatChecker.recordHeartbeatFrom(senderId);
+                    workerHeartBeatChecker.recordHeartbeatFrom(senderId);
                 }
             }
         });
         // create heartbeat checker for master and replicas
-        masterHeatBeatConsumer = new MessageConsumer("HEARTBEAT_MASTER", masterServer.getServerId(), new MessageConsumer.MessageHandler() {
+        masterHeartBeatConsumer = new MessageConsumer("HEARTBEAT_MASTER", masterServer.getServerId(), new MessageConsumer.MessageHandler() {
             @Override
             public void handleMessage(UUID key, Mail value, int partition, long offset) {
                 int senderId = (int) value.getMessage().getContent();
                 if (senderId > masterServer.getServerId()) {
                     masterServer.isPrimary = false; // the server with a larger id is the primary master server
                 }
-                masterHeartbeatChecker.recordHeartbeatFrom(senderId);
+                masterHeartBeatChecker.recordHeartbeatFrom(senderId);
             }
         });
         this.stopSignalConsumer = new MessageConsumer("STOP", this.masterServer.getServerId(), new MessageConsumer.MessageHandler() {
@@ -119,57 +125,59 @@ public class HeartbeatManager {
         startMonitorWorkerHeartbeat();
         startMonitorMasterAndReplicaHeartbeat();
         stopSignalConsumer.start();
+        this.heartbeatSender.start();
     }
 
     public void stop() throws InterruptedException {
         stopMonitorWorkerHeartbeat();
         stopMonitorMasterAndReplicaHeartbeat();
         stopSignalConsumer.stop();
+        this.heartbeatSender.stop();
     }
 
     /**
      * Start monitoring the heartbeat of the workers
      */
     public void startMonitorWorkerHeartbeat() throws ExecutionException, InterruptedException {
-        this.workerHeartbeatChecker.start();
-        this.workerHeatBeatConsumer.start();
+        this.workerHeartBeatChecker.start();
+        this.workerHeartBeatConsumer.start();
     }
 
     public void stopMonitorWorkerHeartbeat() throws InterruptedException {
-        this.workerHeartbeatChecker.stop();
-        this.workerHeatBeatConsumer.stop();
+        this.workerHeartBeatChecker.stop();
+        this.workerHeartBeatConsumer.stop();
     }
 
     /**
      * Start monitoring the heartbeat of the master and replicas
      */
     public void startMonitorMasterAndReplicaHeartbeat() throws ExecutionException, InterruptedException {
-        this.masterHeartbeatChecker.start();
-        this.masterHeatBeatConsumer.start();
+        this.masterHeartBeatChecker.start();
+        this.masterHeartBeatConsumer.start();
     }
 
     public void stopMonitorMasterAndReplicaHeartbeat() throws InterruptedException {
-        this.masterHeartbeatChecker.stop();
-        this.masterHeatBeatConsumer.stop();
+        this.masterHeartBeatChecker.stop();
+        this.masterHeartBeatConsumer.stop();
     }
 
     public void removeWorker(int id) {
         workerIds.remove(id);
-        workerHeartbeatChecker.getHeartbeats().remove(id);
+        workerHeartBeatChecker.getHeartbeats().remove(id);
     }
 
     public void addWorker(int id) {
         workerIds.add(id);
-        workerHeartbeatChecker.getHeartbeats().put(id, true);
+        workerHeartBeatChecker.getHeartbeats().put(id, true);
     }
 
     public void removeMaster(int id) {
         masterIds.remove(id);
-        masterHeartbeatChecker.getHeartbeats().remove(id);
+        masterHeartBeatChecker.getHeartbeats().remove(id);
     }
 
     public void addMaster(int id) {
         masterIds.add(id);
-        masterHeartbeatChecker.getHeartbeats().put(id, true);
+        masterHeartBeatChecker.getHeartbeats().put(id, true);
     }
 }

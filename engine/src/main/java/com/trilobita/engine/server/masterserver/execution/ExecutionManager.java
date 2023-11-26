@@ -59,6 +59,7 @@ public class ExecutionManager<T> {
                 int senderId = (int) value.getMessage().getContent();
                 log.info("[Confirm] received a confirm message from worker {}", senderId);
                 nConfirmWorker += 1;
+                log.info("nconfirmworker: {}, alive workers: {}", nConfirmWorker, masterServer.getWorkerIds());
                 if (nConfirmWorker == masterServer.getWorkerIds().size()) {
                     // send start message to all workers
                     MessageProducer.createAndProduce(null, new Mail(), "CONFIRM_START");
@@ -136,7 +137,6 @@ public class ExecutionManager<T> {
         nFinishWorker = 0;
         nCompleteWorker = 0;
         nConfirmWorker = 0;
-        log.info("alive worker ids: {}", aliveWorkerIds);
         Map<Integer, VertexGroup<T>> vertexGroups = this.masterServer.getGraphPartitioner().partition(this.masterServer.getGraph(), aliveWorkerIds);
         vertexGroups.forEach((workerId, vertexGroup) -> {
             Map<String, Object> objectMap = new HashMap<>();
