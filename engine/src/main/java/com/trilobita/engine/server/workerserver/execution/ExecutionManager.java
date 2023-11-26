@@ -86,4 +86,9 @@ public class ExecutionManager<T> {
         }
         mailingLatch.await(); // block until all mailing tasks are finished
     }
+
+    public void stop() throws InterruptedException {
+        this.executorService.shutdown();
+        this.executorService.awaitTermination(1000, TimeUnit.MILLISECONDS);
+    }
 }

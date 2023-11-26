@@ -82,4 +82,9 @@ public class HeartbeatChecker {
             log.info("Heartbeat checking service is already running.");
         }
     }
+
+    public void stop() throws InterruptedException {
+        heartbeatExecutor.shutdown();
+        heartbeatExecutor.awaitTermination(1000, TimeUnit.MICROSECONDS);
+    }
 }

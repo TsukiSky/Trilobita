@@ -1,5 +1,6 @@
 package com.trilobita.engine.server.workerserver;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.trilobita.commons.*;
 import com.trilobita.core.graph.VertexGroup;
 import com.trilobita.core.graph.vertex.Vertex;
@@ -30,6 +31,7 @@ public class WorkerServer<T> extends AbstractServer<T> {
     private final MessageConsumer startMessageConsumer;
     private final HeartbeatSender heartbeatSender;
     private final MessageConsumer confirmStartConsumer;
+    private final MessageConsumer stopSignalConsumer;
 
     public WorkerServer(int serverId, int parallelism, PartitionStrategy partitionStrategy) {
         super(serverId, partitionStrategy);
@@ -77,7 +79,13 @@ public class WorkerServer<T> extends AbstractServer<T> {
                 }
             }
         });
-
+        this.stopSignalConsumer = new MessageConsumer("STOP", this.getServerId(), new MessageConsumer.MessageHandler() {
+            @Override
+            public void handleMessage(UUID key, Mail value, int partition, long offset) throws JsonProcessingException, InterruptedException, ExecutionException {
+                log.info("should stop");
+                shutdown();
+            }
+        });
         this.heartbeatSender = new HeartbeatSender(this.getServerId(), true);
     }
 
@@ -92,6 +100,7 @@ public class WorkerServer<T> extends AbstractServer<T> {
         confirmStartConsumer.start();
         getMessageConsumer().start();
         heartbeatSender.start();
+        stopSignalConsumer.start();
     }
 
     /**
@@ -110,7 +119,6 @@ public class WorkerServer<T> extends AbstractServer<T> {
                 break;
             }
         }
-        stop = false;
         sendCompleteSignal(doSnapshot, stop);
     }
 
@@ -120,7 +128,14 @@ public class WorkerServer<T> extends AbstractServer<T> {
     }
 
     @Override
-    public void shutdown() {
+    public void shutdown() throws InterruptedException {
+        startMessageConsumer.stop();
+        partitionMessageConsumer.stop();
+        confirmStartConsumer.stop();
+        getMessageConsumer().stop();
+        heartbeatSender.stop();
+        stopSignalConsumer.stop();
+        executionManager.stop();
     }
 
     /**
@@ -130,7 +145,7 @@ public class WorkerServer<T> extends AbstractServer<T> {
         log.info("[Superstep] super step {} completed", superstep);
         if (doSnapshot) {
             log.info("[Graph] {}", this.vertexGroup);
-            MessageProducer.produceFinishSignal(this.vertexGroup.getVertexValues(), complete);
+            MessageProducer.produceFinishSignal(this.vertexGroup.getVertexValues(), true);
         } else {
             MessageProducer.produceFinishSignal(new HashMap<>(), complete);
         }

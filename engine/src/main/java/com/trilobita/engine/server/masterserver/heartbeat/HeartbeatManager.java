@@ -1,5 +1,6 @@
 package com.trilobita.engine.server.masterserver.heartbeat;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.trilobita.commons.Mail;
 import com.trilobita.core.messaging.MessageConsumer;
 import com.trilobita.engine.server.masterserver.MasterServer;
@@ -24,6 +25,8 @@ public class HeartbeatManager {
     HeartbeatChecker masterHeartbeatChecker;
     MessageConsumer masterHeatBeatConsumer;
     HeartbeatChecker workerHeartbeatChecker;
+    MessageConsumer stopSignalConsumer;
+
     @Getter
     Boolean isHandlingFault = false;
 
@@ -60,7 +63,6 @@ public class HeartbeatManager {
                 if (masterServer.isPrimary) {
                     return;
                 }
-                isHandlingFault = true;
                 // if all id with greater id has died, become the master
                 log.info("[Fault] detected current master is down, trying to become master...");
                 masterServer.isPrimary = true;
@@ -101,6 +103,12 @@ public class HeartbeatManager {
                 masterHeartbeatChecker.recordHeartbeatFrom(senderId);
             }
         });
+        this.stopSignalConsumer = new MessageConsumer("STOP", this.masterServer.getServerId(), new MessageConsumer.MessageHandler() {
+            @Override
+            public void handleMessage(UUID key, Mail value, int partition, long offset) throws JsonProcessingException, InterruptedException, ExecutionException {
+                masterServer.shutdown();
+            }
+        });
     }
 
     /**
@@ -109,6 +117,13 @@ public class HeartbeatManager {
     public void listen() throws ExecutionException, InterruptedException {
         startMonitorWorkerHeartbeat();
         startMonitorMasterAndReplicaHeartbeat();
+        stopSignalConsumer.start();
+    }
+
+    public void stop() throws InterruptedException {
+        stopMonitorWorkerHeartbeat();
+        stopMonitorMasterAndReplicaHeartbeat();
+        stopSignalConsumer.stop();
     }
 
     /**
@@ -119,7 +134,9 @@ public class HeartbeatManager {
         this.workerHeatBeatConsumer.start();
     }
 
-    public void stopMonitorWorkerHeartbeat() {
+    public void stopMonitorWorkerHeartbeat() throws InterruptedException {
+        this.workerHeartbeatChecker.stop();
+        this.workerHeatBeatConsumer.stop();
     }
 
     /**
@@ -130,8 +147,9 @@ public class HeartbeatManager {
         this.masterHeatBeatConsumer.start();
     }
 
-    public void stopMonitorMasterAndReplicaHeartbeat() {
-
+    public void stopMonitorMasterAndReplicaHeartbeat() throws InterruptedException {
+        this.masterHeartbeatChecker.stop();
+        this.masterHeatBeatConsumer.stop();
     }
 
     public void removeWorker(int id) {

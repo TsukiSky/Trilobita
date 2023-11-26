@@ -1,6 +1,8 @@
 package com.trilobita.engine.server.masterserver;
 
+import com.trilobita.commons.Mail;
 import com.trilobita.core.graph.Graph;
+import com.trilobita.core.messaging.MessageProducer;
 import com.trilobita.engine.server.AbstractServer;
 import com.trilobita.engine.server.masterserver.execution.ExecutionManager;
 import com.trilobita.engine.server.masterserver.heartbeat.HeartbeatManager;
@@ -59,7 +61,11 @@ public class MasterServer<T> extends AbstractServer<T> {
     }
 
     @Override
-    public void shutdown() {
+    public void shutdown() throws InterruptedException {
+        //  todo: send message to all replica and workers (the same topic)
+        MessageProducer.createAndProduce(null, new Mail(), "STOP");
+        this.executionManager.stop();
+        this.heartbeatManager.stop();
     }
 
     /**

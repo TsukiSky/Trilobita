@@ -68,4 +68,8 @@ public class Synchronizer<T> {
     public void listen() throws ExecutionException, InterruptedException {
         graphConsumer.start();
     }
+
+    public void stop() throws InterruptedException {
+        graphConsumer.stop();
+    }
 }

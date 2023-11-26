@@ -46,7 +46,7 @@ public abstract class AbstractServer<T> {
 
     public abstract void start() throws TrilobitaException, InterruptedException, ExecutionException;
     public abstract void pause();
-    public abstract void shutdown();
+    public abstract void shutdown() throws InterruptedException;
 
     /**
      * find the server id of a vertex

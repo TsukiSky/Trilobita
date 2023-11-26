@@ -1,5 +1,6 @@
 package com.trilobita.engine.server.masterserver.execution;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.trilobita.commons.Computable;
 import com.trilobita.commons.Mail;
 import com.trilobita.core.graph.VertexGroup;
@@ -38,6 +39,12 @@ public class ExecutionManager<T> {
         this.confirmStartConsumer.start();
         this.completeSignalConsumer.start();
         this.synchronizer.listen();
+    }
+
+    public void stop() throws InterruptedException {
+        this.confirmStartConsumer.stop();
+        this.completeSignalConsumer.stop();
+        this.synchronizer.stop();
     }
 
 
@@ -90,6 +97,7 @@ public class ExecutionManager<T> {
                     // check whether all workers have finished
                     if (nCompleteWorker == masterServer.getWorkerIds().size()) {
                         log.info("[Complete] the work has complete, the final graph is: {}", masterServer.getGraph());
+                        masterServer.shutdown();
                     } else {
                         // start a new superstep
                         Thread.sleep(300);
@@ -98,6 +106,8 @@ public class ExecutionManager<T> {
                 }
             }
         });
+
+
     }
 
     /**
