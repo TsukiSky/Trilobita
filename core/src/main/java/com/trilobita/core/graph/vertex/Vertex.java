@@ -30,6 +30,7 @@ public abstract class Vertex<T> implements Serializable {
         this.edges = new ArrayList<>();
         this.status = VertexStatus.INACTIVE;
         this.stepFinished = false;
+        this.shouldStop = false;
         this.incomingQueue = new LinkedBlockingQueue<>();
     }
 

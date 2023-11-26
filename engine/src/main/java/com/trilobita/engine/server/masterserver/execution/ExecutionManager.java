@@ -53,8 +53,8 @@ public class ExecutionManager<T> {
         this.confirmStartConsumer = new MessageConsumer("CONFIRM_RECEIVE", masterServer.getServerId(), new MessageConsumer.MessageHandler() {
             @Override
             public void handleMessage(UUID key, Mail value, int partition, long offset) {
-                if (!masterServer.isPrimary) {
-                    return; // only the primary master can handle the confirming receive message
+                if (!masterServer.isPrimary){
+                    return;
                 }
                 int senderId = (int) value.getMessage().getContent();
                 log.info("[Confirm] received a confirm message from worker {}", senderId);
@@ -70,7 +70,10 @@ public class ExecutionManager<T> {
         this.completeSignalConsumer = new MessageConsumer(Mail.MailType.FINISH_SIGNAL.ordinal(), masterServer.getServerId(), new MessageConsumer.MessageHandler() {
             @Override
             public void handleMessage(UUID key, Mail value, int partition, long offset) throws InterruptedException {
-                if (Boolean.FALSE.equals(masterServer.isPrimary) || Boolean.TRUE.equals(masterServer.getHeartbeatManager().getIsHandlingFault())) {
+                if (!masterServer.isPrimary){
+                    return;
+                }
+                if (Boolean.TRUE.equals(masterServer.getHeartbeatManager().getIsHandlingFault())) {
                     return;
                 }
                 // extract the content
@@ -124,6 +127,9 @@ public class ExecutionManager<T> {
      * partition the graph and send the partitioned graph to the workers
      */
     public void partitionGraph(List<Integer> aliveWorkerIds) {
+        if (!this.masterServer.isPrimary) {
+            return;
+        }
         if (this.masterServer.getGraph() == null) {
             throw new Error("graph is not set!");
         }

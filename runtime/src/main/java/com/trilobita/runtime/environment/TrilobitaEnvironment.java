@@ -50,8 +50,8 @@ public class TrilobitaEnvironment<T> {
         this.inputParser = inputParser;
     }
 
-    public void createMasterServer(int id, int snapshotFrequency) throws ExecutionException, InterruptedException {
-        this.masterServer = new MasterServer<>(this.partitioner, (int) this.configuration.get("numOfWorker"), id, (int) this.configuration.get("numOfReplica"), snapshotFrequency);
+    public void createMasterServer(int id, int snapshotFrequency, boolean isPrimary) throws ExecutionException, InterruptedException {
+        this.masterServer = new MasterServer<>(this.partitioner, (int) this.configuration.get("numOfWorker"), id, (int) this.configuration.get("numOfReplica"), snapshotFrequency, isPrimary);
         this.masterServer.setGraph(this.graph);
     }
 

@@ -25,13 +25,14 @@ public class MasterServer<T> extends AbstractServer<T> {
     Partitioner<T> graphPartitioner;                        // the partitioner of the graph
     ExecutionManager<T> executionManager;                   // the superstep coordinator
     HeartbeatManager heartbeatManager;                      // the heartbeat manager
+    int snapshotFrequency;
     @Setter
     List<Integer> workerIds = new ArrayList<>();            // the alive working servers' ids
     @Setter
     List<Integer> masterIds = new ArrayList<>();            // the alive master servers' ids
     public boolean isPrimary;
 
-    public MasterServer(Partitioner<T> graphPartitioner, int nWorker, int id, int nReplica, int snapshotFrequency) throws ExecutionException, InterruptedException {
+    public MasterServer(Partitioner<T> graphPartitioner, int nWorker, int id, int nReplica, int snapshotFrequency, boolean isPrimary) throws ExecutionException, InterruptedException {
         super(id, graphPartitioner.getPartitionStrategy()); // the standard server id of master is 0
         for (int i = 0; i < nWorker; i++) {
             this.workerIds.add(i + 1);
@@ -39,17 +40,18 @@ public class MasterServer<T> extends AbstractServer<T> {
         for (int i = 0; i < nReplica; i++) {
             this.masterIds.add(i + 1);
         }
+        this.graphPartitioner = graphPartitioner;
+        this.snapshotFrequency = snapshotFrequency;
+        this.isPrimary = isPrimary;
         this.executionManager = new ExecutionManager<>(this, snapshotFrequency);
         this.heartbeatManager = new HeartbeatManager(this, this.workerIds, this.masterIds);
-        this.graphPartitioner = graphPartitioner;
-        this.heartbeatManager.listen();
     }
 
     @Override
     public void start() {
-        isPrimary = true;
         try {
             this.executionManager.listen();
+            this.heartbeatManager.listen();
             this.executionManager.partitionGraph(workerIds);
         } catch (ExecutionException | InterruptedException  e) {
             throw new RuntimeException(e);
@@ -57,7 +59,8 @@ public class MasterServer<T> extends AbstractServer<T> {
     }
 
     @Override
-    public void pause() {
+    public void pause() throws InterruptedException {
+        this.executionManager.stop();
     }
 
     @Override

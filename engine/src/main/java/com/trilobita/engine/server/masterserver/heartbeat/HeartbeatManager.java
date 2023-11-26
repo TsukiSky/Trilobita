@@ -66,6 +66,7 @@ public class HeartbeatManager {
                 // if all id with greater id has died, become the master
                 log.info("[Fault] detected current master is down, trying to become master...");
                 masterServer.isPrimary = true;
+                masterServer.start();
                 masterServer.getExecutionManager().partitionGraph(workerIds);
                 isHandlingFault = false;
             }

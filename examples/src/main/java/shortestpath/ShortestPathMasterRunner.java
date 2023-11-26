@@ -74,7 +74,7 @@ public class ShortestPathMasterRunner {
         PartitionStrategyFactory partitionStrategyFactory = new PartitionStrategyFactory();
         PartitionStrategy partitionStrategy = partitionStrategyFactory.getPartitionStrategy("hashPartitionStrategy",(int) trilobitaEnvironment.getConfiguration().get("numOfWorker"),trilobitaEnvironment.getGraph().getSize());
         trilobitaEnvironment.setPartitioner(new Partitioner<>(partitionStrategy));
-        trilobitaEnvironment.createMasterServer(2,10);
+        trilobitaEnvironment.createMasterServer(2,10, true);
         trilobitaEnvironment.startMasterServer();
     }
 }

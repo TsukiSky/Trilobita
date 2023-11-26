@@ -82,7 +82,7 @@ public class WorkerServer<T> extends AbstractServer<T> {
         this.stopSignalConsumer = new MessageConsumer("STOP", this.getServerId(), new MessageConsumer.MessageHandler() {
             @Override
             public void handleMessage(UUID key, Mail value, int partition, long offset) throws JsonProcessingException, InterruptedException, ExecutionException {
-                log.info("should stop");
+                log.info("[Complete] shutdown all the services");
                 shutdown();
             }
         });
@@ -114,6 +114,7 @@ public class WorkerServer<T> extends AbstractServer<T> {
         // todo: check whether all vertices are shouldStop
         boolean stop = true;
         for (Vertex<T> v: this.vertexGroup.getVertices()){
+            log.info("should stop: {}, status: {}", v.isShouldStop(), v.getStatus());
             if (!v.isShouldStop() && v.getStatus() == Vertex.VertexStatus.ACTIVE) {
                 stop = false;
                 break;
@@ -145,7 +146,7 @@ public class WorkerServer<T> extends AbstractServer<T> {
         log.info("[Superstep] super step {} completed", superstep);
         if (doSnapshot) {
             log.info("[Graph] {}", this.vertexGroup);
-            MessageProducer.produceFinishSignal(this.vertexGroup.getVertexValues(), true);
+            MessageProducer.produceFinishSignal(this.vertexGroup.getVertexValues(), complete);
         } else {
             MessageProducer.produceFinishSignal(new HashMap<>(), complete);
         }

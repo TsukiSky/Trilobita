@@ -61,7 +61,7 @@ public class TrilobitaCluster<T> {
                         PartitionStrategy partitionStrategy = (PartitionStrategy) content.get("PARTITION_STRATEGY");
                         trilobitaEnvironment.loadGraph(graph);
                         trilobitaEnvironment.setPartitioner(new Partitioner<>(partitionStrategy));
-                        trilobitaEnvironment.createMasterServer(machineId, 10);
+                        trilobitaEnvironment.createMasterServer(machineId, 10, false);
                     case START_SIGNAL:
                         log.info("[START SIGNAL] Starting the cluster");
                         break;
@@ -108,7 +108,7 @@ public class TrilobitaCluster<T> {
         trilobitaEnvironment.initConfig();
         if (isMaster) {
             // initialize the master server
-            trilobitaEnvironment.createMasterServer(machineId, 10);
+            trilobitaEnvironment.createMasterServer(machineId, 10, false);
         } else {
             // initialize the worker server
             trilobitaEnvironment.createWorkerServer(machineId);
@@ -137,7 +137,7 @@ public class TrilobitaCluster<T> {
             Thread.sleep(3000);
             trilobitaEnvironment.loadGraph(graph);
             trilobitaEnvironment.setPartitioner(new Partitioner<>(partitionStrategy));
-            trilobitaEnvironment.createMasterServer(machineId, 10);
+            trilobitaEnvironment.createMasterServer(machineId, 10, false);
             trilobitaEnvironment.startMasterServer();
         } else {
             trilobitaEnvironment.createWorkerServer(machineId);
