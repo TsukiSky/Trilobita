@@ -50,4 +50,9 @@ public class PageRankValue implements Computable<Double>, Serializable {
     public void setValue(Double value) {
         this.value = value;
     }
+
+    @Override
+    public int compareTo(Double arg0) {
+        return this.value.compareTo(arg0);
+    }
 }

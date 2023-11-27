@@ -3,12 +3,10 @@ package com.trilobita.deserializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.trilobita.commons.Mail;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.common.errors.SerializationException;
 import org.apache.kafka.common.header.Headers;
 import org.apache.kafka.common.serialization.Deserializer;
 import org.springframework.util.SerializationUtils;
 
-import java.io.IOException;
 import java.util.Map;
 
 @Slf4j

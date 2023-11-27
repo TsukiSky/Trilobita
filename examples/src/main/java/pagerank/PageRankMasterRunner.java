@@ -2,6 +2,13 @@ package pagerank;
 
 import com.trilobita.core.graph.Graph;
 import com.trilobita.core.graph.vertex.Vertex;
+import com.trilobita.engine.server.masterserver.partitioner.Partitioner;
+import com.trilobita.engine.server.util.functionable.examples.ExampleFunctionable;
+import com.trilobita.engine.server.util.functionable.examples.aggregators.EdgeSumAggregator;
+import com.trilobita.engine.server.util.functionable.examples.aggregators.MinValueAggregator;
+import com.trilobita.engine.server.util.functionable.examples.combiners.MaxCombiner;
+import com.trilobita.engine.server.masterserver.partitioner.PartitionStrategy;
+import com.trilobita.engine.server.masterserver.partitioner.PartitionStrategyFactory;
 import com.trilobita.engine.server.masterserver.partition.Partitioner;
 import com.trilobita.engine.server.masterserver.partition.strategy.PartitionStrategy;
 import com.trilobita.engine.server.masterserver.partition.strategy.PartitionStrategyFactory;
@@ -75,6 +82,7 @@ public class PageRankMasterRunner {
         Graph<PageRankValue> graph = new Graph(vertices);
         return graph;
     }
+
     public static void main(String[] args) throws ExecutionException, InterruptedException {
         TrilobitaEnvironment<PageRankValue> trilobitaEnvironment = new TrilobitaEnvironment<>();
         trilobitaEnvironment.initConfig();
@@ -83,6 +91,11 @@ public class PageRankMasterRunner {
         PartitionStrategy partitionStrategy = partitionStrategyFactory.getPartitionStrategy("hashPartitionStrategy",(int) trilobitaEnvironment.getConfiguration().get("numOfWorker"),trilobitaEnvironment.getGraph().getSize());
         trilobitaEnvironment.setPartitioner(new Partitioner<>(partitionStrategy));
         trilobitaEnvironment.createMasterServer(2, 10, true);
+        ExampleFunctionable[] funcs = {
+            new ExampleFunctionable(MinValueAggregator.class.getName(), "MIN_VAL_AGG", new PageRankValue(0.0)),
+                    new ExampleFunctionable(MaxCombiner.class.getName(), null, new PageRankValue(Double.NEGATIVE_INFINITY))
+        };
+        trilobitaEnvironment.createMasterServer(0, 10,funcs);
         trilobitaEnvironment.startMasterServer();
     }
 }
