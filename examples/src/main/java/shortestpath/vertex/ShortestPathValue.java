@@ -3,10 +3,8 @@ package shortestpath.vertex;
 import com.trilobita.commons.Computable;
 import lombok.Data;
 
-import java.io.Serializable;
-
 @Data
-public class ShortestPathValue implements Computable<Double>, Serializable {
+public class ShortestPathValue implements Computable<Double> {
     private Double value;
     public ShortestPathValue(Double value) {
         this.value = value;
@@ -53,5 +51,10 @@ public class ShortestPathValue implements Computable<Double>, Serializable {
 
     public int compareValue(ShortestPathValue other) {
         return Double.compare(this.value, other.getValue());
+    }
+
+    @Override
+    public int compareTo(Double other) {
+        return this.value.compareTo(other);
     }
 }

@@ -32,7 +32,7 @@ public class Mail implements Serializable {
         this.mailType = mailType;
     }
 
-        public Mail(Message message, MailType mailType) {
+    public Mail(Message message, MailType mailType) {
         this.fromVertexId = -1;
         this.toVertexId = -1;
         this.message = message;
@@ -49,7 +49,6 @@ public class Mail implements Serializable {
         START_SIGNAL,
         HEARTBEAT,
         FUNCTIONAL,
-        BROADCAST,
         SUBMIT_JOB,
     }
 }

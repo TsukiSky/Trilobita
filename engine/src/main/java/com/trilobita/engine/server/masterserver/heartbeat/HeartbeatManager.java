@@ -1,6 +1,5 @@
 package com.trilobita.engine.server.masterserver.heartbeat;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.trilobita.commons.Mail;
 import com.trilobita.core.messaging.MessageConsumer;
 import com.trilobita.engine.server.masterserver.MasterServer;
@@ -112,7 +111,7 @@ public class HeartbeatManager {
         });
         this.stopSignalConsumer = new MessageConsumer("STOP", this.masterServer.getServerId(), new MessageConsumer.MessageHandler() {
             @Override
-            public void handleMessage(UUID key, Mail value, int partition, long offset) throws JsonProcessingException, InterruptedException, ExecutionException {
+            public void handleMessage(UUID key, Mail value, int partition, long offset) throws InterruptedException, ExecutionException {
                 masterServer.shutdown();
             }
         });

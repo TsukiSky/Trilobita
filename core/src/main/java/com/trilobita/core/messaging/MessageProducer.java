@@ -12,7 +12,6 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
@@ -145,26 +144,4 @@ public class MessageProducer {
         MessageProducer.createAndProduce(null, mail, "SERVER_" + serverId + "_MESSAGE");
     }
 
-    /**
-     * Produce a functional message to the master to the topic.
-     *
-     * @param message the message to be sent
-     */
-    public static void produceFunctionalMessage(Message message) {
-        Mail mail = new Mail(-1, message, Mail.MailType.FUNCTIONAL);
-        MessageProducer.createAndProduce(null, mail, "MASTER_FUNCTIONAL");
-    }
-
-    /**
-     * Produce a broadcast message from the master to all workers to the topic.
-     *
-     * @param message the message to be sent
-     * @param receiverWorkers receiver worker ids
-     */
-    public static void produceBroadcastMessage(Message message, List<Integer> receiverWorkers) {
-        for (Integer serverId : receiverWorkers) {
-            Mail mail = new Mail(-1, message, Mail.MailType.BROADCAST);
-            MessageProducer.createAndProduce(null, mail,  "SERVER_" + serverId + "_BROADCAST");
-        }
-    }
 }

@@ -7,6 +7,8 @@ import com.trilobita.engine.server.AbstractServer;
 import com.trilobita.engine.server.masterserver.execution.ExecutionManager;
 import com.trilobita.engine.server.masterserver.heartbeat.HeartbeatManager;
 import com.trilobita.engine.server.masterserver.partition.Partitioner;
+import com.trilobita.engine.server.util.functionable.FunctionableRunner.MasterFunctionableRunner;
+import com.trilobita.engine.server.util.functionable.examples.ExampleFunctionable;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +33,7 @@ public class MasterServer<T> extends AbstractServer<T> {
     @Setter
     List<Integer> masterIds = new ArrayList<>();            // the alive master servers' ids
     public boolean isPrimary;
+    MasterFunctionableRunner masterFunctionableRunner;
 
     public MasterServer(Partitioner<T> graphPartitioner, int nWorker, int id, int nReplica, int snapshotFrequency, boolean isPrimary) throws ExecutionException, InterruptedException {
         super(id, graphPartitioner.getPartitionStrategy()); // the standard server id of master is 0
@@ -45,6 +48,7 @@ public class MasterServer<T> extends AbstractServer<T> {
         this.isPrimary = isPrimary;
         this.executionManager = new ExecutionManager<>(this, snapshotFrequency);
         this.heartbeatManager = new HeartbeatManager(this, this.workerIds, this.masterIds);
+        this.masterFunctionableRunner = MasterFunctionableRunner.getInstance();
     }
 
     @Override
@@ -52,7 +56,9 @@ public class MasterServer<T> extends AbstractServer<T> {
         try {
             this.executionManager.listen();
             this.heartbeatManager.listen();
+            this.messageConsumer.start();
             this.executionManager.partitionGraph(workerIds);
+            this.sendfunctionables();
         } catch (ExecutionException | InterruptedException  e) {
             throw new RuntimeException(e);
         }
@@ -78,4 +84,25 @@ public class MasterServer<T> extends AbstractServer<T> {
     public void setGraph(Graph<T> graph) {
         this.graph = graph;
     }
+
+    /**
+     * Register functionables to masterFunctionableRunner
+     *
+     * @param functionables functionable sets
+     */
+    public void setFunctionables(ExampleFunctionable[] functionables) {
+        if (functionables != null) {
+            this.masterFunctionableRunner.registerFunctionables(functionables);
+            log.info("masterFunctionableRunner finished registerFunctionables");
+        }
+    }
+
+    /**
+     * Send regitsered functionable instances to all working servers to their
+     * message topics.
+     */
+    private void sendfunctionables() {
+        this.masterFunctionableRunner.broadcastFunctionables();
+    }
+
 }

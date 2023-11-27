@@ -1,6 +1,5 @@
 package com.trilobita.engine.server.workerserver;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.trilobita.commons.*;
 import com.trilobita.core.graph.VertexGroup;
 import com.trilobita.core.graph.vertex.Vertex;
@@ -9,6 +8,7 @@ import com.trilobita.core.messaging.MessageProducer;
 import com.trilobita.engine.server.AbstractServer;
 import com.trilobita.engine.server.util.HeartbeatSender;
 import com.trilobita.engine.server.masterserver.partition.strategy.PartitionStrategy;
+import com.trilobita.engine.server.util.functionable.FunctionableRunner.WorkerFunctionableRunner;
 import com.trilobita.engine.server.workerserver.execution.ExecutionManager;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -32,8 +32,9 @@ public class WorkerServer<T> extends AbstractServer<T> {
     private final HeartbeatSender heartbeatSender;
     private final MessageConsumer confirmStartConsumer;
     private final MessageConsumer stopSignalConsumer;
+    private final WorkerFunctionableRunner functionableRunner;
 
-    public WorkerServer(int serverId, int parallelism, PartitionStrategy partitionStrategy) {
+    public WorkerServer(int serverId, int parallelism, PartitionStrategy partitionStrategy) throws ExecutionException, InterruptedException {
         super(serverId, partitionStrategy);
         this.executionManager = new ExecutionManager<>(parallelism, this);
         this.outMailTable = new ConcurrentHashMap<>();
@@ -65,6 +66,7 @@ public class WorkerServer<T> extends AbstractServer<T> {
                 message.setContent(WorkerServer.this.getServerId());
                 Mail mailToConfirmReceive = new Mail();
                 mailToConfirmReceive.setMessage(message);
+                // TODO: wait for functionables to register themselves
                 MessageProducer.createAndProduce(null, mailToConfirmReceive,"CONFIRM_RECEIVE");
             }
         });
@@ -81,12 +83,13 @@ public class WorkerServer<T> extends AbstractServer<T> {
         });
         this.stopSignalConsumer = new MessageConsumer("STOP", this.getServerId(), new MessageConsumer.MessageHandler() {
             @Override
-            public void handleMessage(UUID key, Mail value, int partition, long offset) throws JsonProcessingException, InterruptedException, ExecutionException {
+            public void handleMessage(UUID key, Mail value, int partition, long offset) throws InterruptedException {
                 log.info("[Complete] shutdown all the services");
                 shutdown();
             }
         });
         this.heartbeatSender = new HeartbeatSender(this.getServerId(), true);
+        this.functionableRunner = WorkerFunctionableRunner.getInstance(serverId);
     }
 
     /**

@@ -77,9 +77,6 @@ public class TrilobitaCluster<T> {
                     case FUNCTIONAL:
                         log.info("[FUNCTIONAL] Functional message from the cluster");
                         break;
-                    case BROADCAST:
-                        log.info("[BROADCAST] Broadcast message from the cluster");
-                        break;
                     case NORMAL:
                         log.info("[NORMAL] Normal message from the cluster");
                         break;

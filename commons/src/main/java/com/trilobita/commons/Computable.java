@@ -1,12 +1,8 @@
 package com.trilobita.commons;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.io.Serializable;
 
-public interface Computable<T> {
+public interface Computable<T> extends Comparable<T>, Serializable{
     public Computable<T> add(Computable<T> computable);
     public  Computable<T> minus(Computable<T> computable);
     public Computable<T> multiply(Computable<T> computable);

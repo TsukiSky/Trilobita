@@ -1,6 +1,5 @@
 package com.trilobita.engine.server.masterserver.execution;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.trilobita.commons.Computable;
 import com.trilobita.commons.Mail;
 import com.trilobita.core.graph.VertexGroup;
@@ -10,7 +9,10 @@ import com.trilobita.engine.server.masterserver.MasterServer;
 import com.trilobita.engine.server.masterserver.execution.synchronize.Synchronizer;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 @Slf4j
@@ -92,6 +94,11 @@ public class ExecutionManager<T> {
                     masterServer.getGraph().updateVertexValues(vertexValues);
                     log.info("[Graph] the updated graph is : {}", masterServer.getGraph());
                 }
+
+                // aggregate functional values and send to workers
+                masterServer.getMasterFunctionableRunner()
+                        .runFunctionableTasks(masterServer.getInMailQueue());
+                log.info("[Functionable] finished runFunctionableTasks");
 
                 if (nFinishWorker == masterServer.getWorkerIds().size()) {
                     // check if the master needs to do a snapshot

@@ -3,10 +3,8 @@ package pagerank.vertex;
 import com.trilobita.commons.Computable;
 import lombok.Data;
 
-import java.io.Serializable;
-
 @Data
-public class PageRankValue implements Computable<Double>, Serializable {
+public class PageRankValue implements Computable<Double> {
     private Double value;
     public PageRankValue(Double value) {
         this.value = value;
@@ -49,5 +47,10 @@ public class PageRankValue implements Computable<Double>, Serializable {
     @Override
     public void setValue(Double value) {
         this.value = value;
+    }
+
+    @Override
+    public int compareTo(Double other) {
+        return this.value.compareTo(other);
     }
 }
