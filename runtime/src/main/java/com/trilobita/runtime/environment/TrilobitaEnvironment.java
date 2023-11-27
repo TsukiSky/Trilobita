@@ -4,7 +4,6 @@ import com.trilobita.core.graph.Graph;
 import com.trilobita.engine.server.masterserver.MasterServer;
 import com.trilobita.engine.server.masterserver.partition.Partitioner;
 import com.trilobita.engine.server.masterserver.partition.strategy.PartitionStrategy;
-import com.trilobita.engine.server.util.functionable.examples.ExampleFunctionable;
 import com.trilobita.engine.server.workerserver.WorkerServer;
 import com.trilobita.runtime.configuration.Configuration;
 import com.trilobita.runtime.configuration.JCommandHandler;
@@ -21,7 +20,7 @@ public class TrilobitaEnvironment<T> {
     private InputParse inputParser;
     @Getter
     private final Configuration configuration = new Configuration();
-    private final JCommandHandler jCommandHandler = new JCommandHandler(); // Command-line handler for Trilobita
+    private final JCommandHandler jCommandHandler = new JCommandHandler();  // Command-line handler for Trilobita
     @Getter
     private Graph<T> graph;
     public PartitionStrategy partitionStrategy;
@@ -51,21 +50,10 @@ public class TrilobitaEnvironment<T> {
         this.inputParser = inputParser;
     }
 
-    public void createMasterServer(int id, int snapshotFrequencyy, boolean isPrimary, ExampleFunctionable[] functinables)
-            throws ExecutionException, InterruptedException {
+    public void createMasterServer(int id, int snapshotFrequency, boolean isPrimary) throws ExecutionException, InterruptedException {
         this.masterServer = new MasterServer<>(this.partitioner, (int) this.configuration.get("numOfWorker"), id, (int) this.configuration.get("numOfReplica"), snapshotFrequency, isPrimary);
         this.masterServer.setGraph(this.graph);
-        this.masterServer.setFunctionables(functinables);
     }
-
-    public void createMasterServer(int id, int snapshotFrequency, boolean isPrimary) throws ExecutionException, InterruptedException {
-        this.createMasterServer(id, snapshotFrequency, isPrimary, null);
-    }
-
-    public void createMasterServer(int id, int snapshotFrequency) throws ExecutionException, InterruptedException {
-        this.createMasterServer(id, snapshotFrequency, null, null);
-    }
-
 
     public void join(String clusterName) {
 

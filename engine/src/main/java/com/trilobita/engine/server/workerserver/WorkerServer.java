@@ -9,7 +9,6 @@ import com.trilobita.core.messaging.MessageProducer;
 import com.trilobita.engine.server.AbstractServer;
 import com.trilobita.engine.server.util.HeartbeatSender;
 import com.trilobita.engine.server.masterserver.partition.strategy.PartitionStrategy;
-import com.trilobita.engine.server.util.functionable.FunctionableRunner.WorkerFunctionableRunner;
 import com.trilobita.engine.server.workerserver.execution.ExecutionManager;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +32,6 @@ public class WorkerServer<T> extends AbstractServer<T> {
     private final HeartbeatSender heartbeatSender;
     private final MessageConsumer confirmStartConsumer;
     private final MessageConsumer stopSignalConsumer;
-    private final WorkerFunctionableRunner functionableRunner;
 
     public WorkerServer(int serverId, int parallelism, PartitionStrategy partitionStrategy) {
         super(serverId, partitionStrategy);
@@ -67,7 +65,6 @@ public class WorkerServer<T> extends AbstractServer<T> {
                 message.setContent(WorkerServer.this.getServerId());
                 Mail mailToConfirmReceive = new Mail();
                 mailToConfirmReceive.setMessage(message);
-                // TODO: wait for functionables to regitser themselves
                 MessageProducer.createAndProduce(null, mailToConfirmReceive,"CONFIRM_RECEIVE");
             }
         });
@@ -90,7 +87,6 @@ public class WorkerServer<T> extends AbstractServer<T> {
             }
         });
         this.heartbeatSender = new HeartbeatSender(this.getServerId(), true);
-        this.functionableRunner = WorkerFunctionableRunner.getInstance(serverId);
     }
 
     /**

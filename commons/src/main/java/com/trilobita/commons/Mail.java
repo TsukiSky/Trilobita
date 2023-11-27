@@ -32,14 +32,7 @@ public class Mail implements Serializable {
         this.mailType = mailType;
     }
 
-    public Mail(int fromServerId, int fromVertexId, int toVertexId, Message message, MailType mailType) {
-        this.fromVertexId = fromVertexId;
-        this.toVertexId = toVertexId;
-        this.message = message;
-        this.mailType = mailType;
-    }
-
-    public Mail(Message message, MailType mailType) {
+        public Mail(Message message, MailType mailType) {
         this.fromVertexId = -1;
         this.toVertexId = -1;
         this.message = message;

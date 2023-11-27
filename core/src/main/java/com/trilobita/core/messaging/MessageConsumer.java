@@ -2,8 +2,6 @@ package com.trilobita.core.messaging;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.trilobita.commons.Mail;
-import com.trilobita.commons.Mail.MailType;
-
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.*;
 
@@ -110,7 +108,6 @@ public class MessageConsumer {
                             log.info("Consumer Record: Topic: {}, key: {}, value: {}, partition: {}, offset: {}",
                                     topic, consumerRecord.key(), value, partition, offset
                             );
-
                         }
 //                        if (value != null){
                         messageHandler.handleMessage(UUID.fromString(consumerRecord.key()), value, partition, offset);

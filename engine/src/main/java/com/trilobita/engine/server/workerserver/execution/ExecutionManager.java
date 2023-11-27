@@ -45,15 +45,6 @@ public class ExecutionManager<T> {
             }
         }
 
-        log.info("[ExecutionManager] futures added server.distributeMailToVertex");
-
-        // inform functionable instances of functionables values
-        futures.add(this.executorService.submit(() -> {
-            server.getFunctionableRunner().distributeValues();
-        }));
-
-        log.info("[ExecutionManager] futures added server.getFunctionableRunner().distributeValues()");
-
         List<Vertex<T>> vertices = this.server.getVertexGroup().getVertices();
         int activeVertexCount = 0;
         for (Vertex<T> vertex : vertices) {
@@ -81,17 +72,6 @@ public class ExecutionManager<T> {
             }
         }
 
-        // execute functionables
-        CountDownLatch functionableLatch = new CountDownLatch(1);
-        futures.add(executorService.submit(() -> {
-            server.getFunctionableRunner().runFunctionableTasks(this.server);
-            functionableLatch.countDown();
-        }));
-
-        functionableLatch.await(); // block until all functionable tasks are finished (future?)
-
-        log.info("[ExecutionManager] finished runFunctionableTasks");
-
         CountDownLatch mailingLatch = new CountDownLatch(server.getOutMailQueue().size());
         // send the mail to the other servers
         while (!this.server.getOutMailQueue().isEmpty()) {
@@ -103,7 +83,6 @@ public class ExecutionManager<T> {
             }));
         }
         mailingLatch.await(); // block until all mailing tasks are finished
-        log.info("[ExecutionManager] finished mailing out");
     }
 
     public void stop() throws InterruptedException {

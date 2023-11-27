@@ -28,6 +28,7 @@ public abstract class AbstractServer<T> {
     public final MessageConsumer messageConsumer;
     @Setter
     public PartitionStrategy partitionStrategy;
+    public Context context;
     public Integer superstep = 0;
 
     public AbstractServer(int serverId, PartitionStrategy partitionStrategy) {
