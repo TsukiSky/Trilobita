@@ -56,8 +56,8 @@ public class MasterServer<T> extends AbstractServer<T> {
     @Override
     public void start() {
         try {
-//            Metrics.Superstep.initialize();
-//            Monitor.start();
+            Monitor.start();
+            Metrics.setMasterStartTime();
             this.executionManager.listen();
             this.heartbeatManager.listen();
             this.messageConsumer.start();
@@ -76,8 +76,9 @@ public class MasterServer<T> extends AbstractServer<T> {
     @Override
     public void shutdown() throws InterruptedException {
         //  todo: send message to all replica and workers (the same topic)
-//        Monitor.stop();
-//        Monitor.store("/data/performance");
+        Monitor.stop();
+        Metrics.computeMasterDuration();
+        Monitor.masterStore("data/performance/master"+this.serverId);
         MessageProducer.createAndProduce(null, new Mail(), "STOP");
         this.executionManager.stop();
         this.heartbeatManager.stop();

@@ -5,6 +5,8 @@ import com.trilobita.commons.Mail;
 import com.trilobita.core.graph.VertexGroup;
 import com.trilobita.core.messaging.MessageConsumer;
 import com.trilobita.core.messaging.MessageProducer;
+import com.trilobita.engine.monitor.Monitor;
+import com.trilobita.engine.monitor.metrics.Metrics;
 import com.trilobita.engine.server.masterserver.MasterServer;
 import com.trilobita.engine.server.masterserver.execution.synchronize.Synchronizer;
 import lombok.extern.slf4j.Slf4j;
@@ -101,6 +103,8 @@ public class ExecutionManager<T> {
                 log.info("[Functionable] finished runFunctionableTasks");
 
                 if (nFinishWorker == masterServer.getWorkerIds().size()) {
+                    Metrics.Superstep.computeMasterDuration();
+                    Monitor.stopAndStartNewSuperstepMaster();
                     // check if the master needs to do a snapshot
                     if (isDoingSnapshot()) {
                         synchronizer.snapshotAndSync(masterServer.getGraph());
@@ -112,6 +116,7 @@ public class ExecutionManager<T> {
                     } else {
                         // start a new superstep
                         Thread.sleep(300);
+                        Metrics.Superstep.setMasterSuperStepStartTime();
                         superstep();
                     }
                 }

@@ -54,6 +54,7 @@ public class WorkerServer<T> extends AbstractServer<T> {
             public void handleMessage(UUID key, Mail mail, int partition, long offset) throws InterruptedException, ExecutionException {
                 log.info("receiving message from server.........");
                 Monitor.start();
+                Metrics.setWorkerStartTime();
                 WorkerServer.this.executionManager.waitForFutures(); // in case of fault, repartition is needed
                 Map<String, Object> res = (Map<String, Object>) mail.getMessage().getContent();
                 setVertexGroup((VertexGroup<T>) res.get("PARTITION"));
@@ -139,6 +140,8 @@ public class WorkerServer<T> extends AbstractServer<T> {
 
     @Override
     public void shutdown() throws InterruptedException {
+        Monitor.stop();
+        Metrics.computeWorkerDuration();
         Monitor.store("data/performance/worker"+this.getServerId());
         startMessageConsumer.stop();
         partitionMessageConsumer.stop();
