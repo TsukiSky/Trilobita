@@ -3,6 +3,7 @@ package com.trilobita.engine.server.workerserver.execution;
 import com.trilobita.commons.*;
 import com.trilobita.core.graph.vertex.Vertex;
 import com.trilobita.core.messaging.MessageProducer;
+import com.trilobita.engine.monitor.metrics.Metrics;
 import com.trilobita.engine.server.workerserver.WorkerServer;
 import lombok.extern.slf4j.Slf4j;
 
@@ -38,12 +39,20 @@ public class ExecutionManager<T> {
     public void execute() throws InterruptedException {
         futures.clear();
         // distribute the mail to the vertices
+        Metrics.Superstep.setDistributionStartTime();
+
+        CountDownLatch distributeLatch = new CountDownLatch(server.getInMailQueue().size());
         while (!server.getInMailQueue().isEmpty()) {
             Mail mail = this.server.getInMailQueue().poll();
             if (mail != null) {
-                futures.add(this.executorService.submit(() -> server.distributeMailToVertex(mail)));
+                futures.add(this.executorService.submit(() -> {
+                    server.distributeMailToVertex(mail);
+                    distributeLatch.countDown();
+                }));
             }
         }
+        distributeLatch.await();
+        Metrics.Superstep.computeDistributionDuration();
 
         log.info("[ExecutionManager] futures added server.distributeMailToVertex");
 
@@ -62,6 +71,7 @@ public class ExecutionManager<T> {
             }
         }
 
+        Metrics.Superstep.setExecutionStartTime();
         CountDownLatch computeLatch = new CountDownLatch(activeVertexCount);
         // start the computation of the vertices
         for (Vertex<T> vertex : vertices) {
@@ -74,6 +84,7 @@ public class ExecutionManager<T> {
         }
 
         computeLatch.await(); // block until all computing tasks are finished
+        Metrics.Superstep.computeExecutionDuration();
 
         if (server.getOutMailQueue().isEmpty()){
             for (Vertex<T> vertex : vertices) {
@@ -81,6 +92,7 @@ public class ExecutionManager<T> {
             }
         }
         log.info("[ExecutionManager] futures added vertex.setStatus INACTIVE");
+
 
         // execute functionables
         CountDownLatch functionableLatch = new CountDownLatch(1);
@@ -93,9 +105,11 @@ public class ExecutionManager<T> {
 
         log.info("[ExecutionManager] finished runFunctionableTasks");
 
+        Metrics.Superstep.setMessagingStartTime();
         CountDownLatch mailingLatch = new CountDownLatch(server.getOutMailQueue().size());
         // send the mail to the other servers
         while (!this.server.getOutMailQueue().isEmpty()) {
+            Metrics.Superstep.incrementMessageNum(1);
             Mail mail = this.server.getOutMailQueue().poll();
             futures.add(executorService.submit(() -> {
                 int receiverId = this.server.findServerByVertexId(mail.getToVertexId());
@@ -104,6 +118,8 @@ public class ExecutionManager<T> {
             }));
         }
         mailingLatch.await(); // block until all mailing tasks are finished
+        Metrics.Superstep.computeMessagingDuration();
+
     }
 
     public void stop() throws InterruptedException {

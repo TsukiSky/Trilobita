@@ -65,7 +65,22 @@ public class Metrics {
             Superstep.messageNum.set(0);
         }
 
-        public static void initialize() {
+        public static void setSuperstepStartTime() {
+            startTime = System.nanoTime();
+        }
+        public static void setMessagingStartTime(){
+            messagingStartTime = System.nanoTime();
+        }
+        public static void setDistributionStartTime(){
+            distributionStartTime = System.nanoTime();
+        }
+        public static void setExecutionStartTime(){
+
+            executionStartTime = System.nanoTime();
+        }
+
+        public static void
+        initialize() {
             Superstep.messageNum = new AtomicInteger(0);
             Superstep.vertexNum = new AtomicInteger(0);
             Superstep.edgeNum = new AtomicInteger(0);
@@ -78,6 +93,27 @@ public class Metrics {
             Superstep.vertexNum.set(vertexNum);
             Superstep.edgeNum.set(edgeNum);
         }
+
+        public static void computeDistributionDuration(){
+            distributionEndTime = System.nanoTime();
+            distributionDuration = distributionEndTime - distributionStartTime;
+        }
+
+        public static void computeExecutionDuration(){
+            executionEndTime = System.nanoTime();
+            executionDuration = executionEndTime - executionStartTime;
+        }
+
+        public static void computeMessagingDuration(){
+            messagingEndTime = System.nanoTime();
+            messagingDuration = messagingEndTime - messagingStartTime;
+        }
+
+        public static void computeSuperstepDuration() {
+            endTime = System.nanoTime();
+            duration = endTime - startTime;
+        }
+
     }
 
     /**
@@ -90,7 +126,7 @@ public class Metrics {
         public static DescriptiveStatistics totalDurations = new DescriptiveStatistics();
         public static DescriptiveStatistics distributionDurations = new DescriptiveStatistics();
         public static DescriptiveStatistics executionDurations = new DescriptiveStatistics();
-        public static DescriptiveStatistics waitingDurations = new DescriptiveStatistics();
+        public static DescriptiveStatistics messagingDurations = new DescriptiveStatistics();
         public static DescriptiveStatistics messageNums = new DescriptiveStatistics();
 
         /**
@@ -100,8 +136,10 @@ public class Metrics {
             totalDurations.addValue(Superstep.duration);
             distributionDurations.addValue(Superstep.distributionDuration);
             executionDurations.addValue(Superstep.executionDuration);
-            waitingDurations.addValue(Superstep.messagingDuration);
+            messagingDurations.addValue(Superstep.messagingDuration);
             messageNums.addValue(Superstep.messageNum.intValue());
         }
     }
+
+
 }
