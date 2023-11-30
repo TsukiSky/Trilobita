@@ -17,8 +17,8 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 public class PageRankMasterRunner {
-    public static Graph createVertices(){
-        List<PageRankVertex> vertices = new ArrayList<>();
+    public static Graph<Double> createVertices(){
+        List<Vertex<Double>> vertices = new ArrayList<>();
         PageRankVertex vertex0 = new PageRankVertex(0);
         vertex0.setStatus(Vertex.VertexStatus.ACTIVE);
         vertices.add(vertex0);
@@ -75,11 +75,10 @@ public class PageRankMasterRunner {
         vertex0.addEdge(vertex9);
         vertex9.addEdge(vertex6);
 
-        Graph<PageRankValue> graph = new Graph(vertices);
-        return graph;
+        return new Graph<>(vertices);
     }
     public static void main(String[] args) throws ExecutionException, InterruptedException {
-        TrilobitaEnvironment<PageRankValue> trilobitaEnvironment = new TrilobitaEnvironment<>();
+        TrilobitaEnvironment<Double> trilobitaEnvironment = new TrilobitaEnvironment<>();
         trilobitaEnvironment.initConfig();
         trilobitaEnvironment.loadGraph(PageRankMasterRunner.createVertices());
         PartitionStrategyFactory partitionStrategyFactory = new PartitionStrategyFactory();
