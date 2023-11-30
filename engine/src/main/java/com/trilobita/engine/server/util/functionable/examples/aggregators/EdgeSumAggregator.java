@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class EdgeSumAggregator extends Aggregator<Integer> {
+        Integer initAggregatedValue = 0;
         public EdgeSumAggregator(Computable<Integer> initLastValue, Computable<Integer> initNewValue, String topic) {
                 super(initLastValue, initNewValue, topic);
         }
@@ -34,7 +35,7 @@ public class EdgeSumAggregator extends Aggregator<Integer> {
 
         @Override
         public Computable<Integer> reduce(List<Computable<?>> computables) {
-                Integer total_edges = this.getLastFunctionableValue().getValue();
+                Integer total_edges = initAggregatedValue;
                 for (Computable<?> edge : computables) {
                         Integer num_edges = (Integer) edge.getValue();
                         total_edges += num_edges;

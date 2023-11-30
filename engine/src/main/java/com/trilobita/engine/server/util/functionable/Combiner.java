@@ -27,18 +27,17 @@ public abstract class Combiner<T> extends Functionable<T> {
     @Override
     public void execute(AbstractServer<?> server) {
         LinkedBlockingQueue<Mail> outMailQueue = server.getOutMailQueue();
-        log.info("outMailQueue before: {}",outMailQueue);
+//        log.info("outMailQueue before combination: {}",outMailQueue);
         while (!outMailQueue.isEmpty()) {
             Mail mail = server.getOutMailQueue().poll();
             int receiverId = mail.getToVertexId();
             this.addToVertexMailMap(receiverId, mail);
         }
-        log.info("vertexMailMap: {}",vertexMailMap);
         for (Map.Entry<Integer, CopyOnWriteArrayList<Mail>> map : vertexMailMap.entrySet()) {
             Mail combinedMail = this.combineMails(map.getKey(), map.getValue());
             server.getOutMailQueue().add(combinedMail);
         }
-        log.info("outMailQueue after: {}", server.getOutMailQueue());
+//        log.info("outMailQueue after combination: {}", server.getOutMailQueue());
     }
 
     @Override

@@ -38,21 +38,20 @@ public class MasterFunctionableRunner extends FunctionableRunner {
      * To run all functionable tasks and broadcast to worker
      */
     public void runFunctionableTasks(LinkedBlockingQueue<Mail> inMailQueue) {
-        log.info("Started runFunctionableTasks...");
         clusterIncomingMails(inMailQueue);
-        log.info("Received functionalValues: {}", functionalValues);
+        log.info("Received functional values: {}", functionalValues);
         for (Map.Entry<String, List<Computable<?>>> entry : functionalValues.entrySet()) {
             String instanceName = entry.getKey();
             List<Computable<?>> values = entry.getValue();
-            Functionable<?> functionable = this.findFunctionableByName(instanceName);
-            if (functionable != null) {
-                functionable.execute(values);
-                log.info("Executed {}",values);
-                functionable.sendMail(functionable.getNewFunctionableValue(), true);
-                log.info("Sent Mails.");
-                values.clear(); // resetFunctionableValues
-            } else {
-               log.info("No matching functionable found.");
+            if (!values.isEmpty()) {
+                Functionable<?> functionable = this.findFunctionableByName(instanceName);
+                if (functionable != null) {
+                    functionable.execute(values);
+                    functionable.sendMail(functionable.getNewFunctionableValue(), true);
+                    values.clear(); // resetFunctionableValues
+                } else {
+                    log.info("No matching functionable found.");
+                }
             }
         }
     }
@@ -111,7 +110,6 @@ public class MasterFunctionableRunner extends FunctionableRunner {
 
     // send functionable instances to all workers
     public void broadcastFunctionables() {
-        log.info("master broadcasting Functionables");
         if (this.getFunctionables() != null) {
             for (Functionable<?> functionable : this.getFunctionables()) {
                 Mail mail = new Mail(-1, new Message(functionable), Mail.MailType.FUNCTIONAL);

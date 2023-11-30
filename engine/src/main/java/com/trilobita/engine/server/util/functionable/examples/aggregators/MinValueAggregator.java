@@ -18,6 +18,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class MinValueAggregator extends Aggregator<Double> {
 
+        Double initAggregatedValue = Double.POSITIVE_INFINITY;
+
         public MinValueAggregator(Computable<Double> initLastValue, Computable<Double> initNewValue, String topic) {
                 super(initLastValue, initNewValue, topic);
         }
@@ -31,14 +33,14 @@ public class MinValueAggregator extends Aggregator<Double> {
                         computables.add(vertex.getValue());
                 }
                 Computable<Double> min_value = this.reduce(computables);
-                log.info("Min vertex value calculated by {}: {}", this.getServerId(), min_value.getValue());
+                log.info("[MinValueAggregator] Min vertex vale calculated by {}: {}", this.getServerId(), min_value.getValue());
                 return min_value;
         }
 
 
         @Override
         public Computable<Double> reduce(List<Computable<?>> computables) {
-                Double min_value = this.getLastFunctionableValue().getValue();
+                Double min_value = initAggregatedValue;
                 for (Computable<?> computable : computables) {
                         Double value = (Double) computable.getValue();
                         if (min_value > value) {

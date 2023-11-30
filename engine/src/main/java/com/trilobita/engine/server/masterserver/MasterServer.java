@@ -62,7 +62,6 @@ public class MasterServer<T> extends AbstractServer<T> {
             Metrics.setMasterStartTime();
             this.executionManager.listen();
             this.heartbeatManager.listen();
-            this.messageConsumer.start();
             this.executionManager.partitionGraph(workerIds);
             this.sendfunctionables();
         } catch (ExecutionException | InterruptedException  e) {
@@ -84,7 +83,6 @@ public class MasterServer<T> extends AbstractServer<T> {
         MessageProducer.createAndProduce(null, new Mail(), "STOP");
         this.executionManager.stop();
         this.heartbeatManager.stop();
-        this.messageConsumer.stop();
     }
 
     /**
@@ -108,7 +106,6 @@ public class MasterServer<T> extends AbstractServer<T> {
     public void setFunctionables(ExampleFunctionable[] functionables) {
         if (functionables != null) {
             this.masterFunctionableRunner.registerFunctionables(functionables);
-            log.info("masterFunctionableRunner finished registerFunctionables");
         }
     }
 

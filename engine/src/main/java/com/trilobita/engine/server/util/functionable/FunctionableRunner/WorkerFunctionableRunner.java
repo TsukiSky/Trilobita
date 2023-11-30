@@ -31,7 +31,7 @@ public class WorkerFunctionableRunner extends FunctionableRunner {
                     @Override
                     public void handleMessage(UUID key, Mail value, int partition, long offset)
                             throws InterruptedException, ExecutionException {
-                        log.info("Received INIT_FUNCTIONAL FUNCTIONAL message from master.");
+//                        log.info("[Functionable] Received INIT_FUNCTIONAL message from master.");
                         if (value.getMailType() == MailType.FUNCTIONAL) {
                             Functionable<?> functionable = (Functionable<?>) value.getMessage().getContent();
                             functionable.setServerId(serverId);
@@ -53,7 +53,6 @@ public class WorkerFunctionableRunner extends FunctionableRunner {
                     }
                 });
         this.initFunctionablesConsumer.start();
-        log.info("initFunctionablesConsumer started");
     }
 
     public synchronized static WorkerFunctionableRunner getInstance(Integer serverId)
@@ -72,7 +71,6 @@ public class WorkerFunctionableRunner extends FunctionableRunner {
      * Distribute functional values processed by master from last superstep
      */
     public void distributeValues() {
-        log.info("this.incomingFunctionableValues {}", this.incomingFunctionableValues);
         for (ExampleFunctionable functionableSet: this.incomingFunctionableValues) {
             String insName = functionableSet.className;
             Computable<?> lastValue = functionableSet.initLastValue;
@@ -81,22 +79,19 @@ public class WorkerFunctionableRunner extends FunctionableRunner {
                 functionable.setLastFunctionableValue(lastValue);
             }
         }
-        log.info("[Functionable] Finished distributeValues");
+//        log.info("[Functionable] Finished distributeValues");
     }
 
     /**
      * To run all functionable tasks in worker and send to master
      */
     public void runFunctionableTasks(AbstractServer<?> server) {
-        log.info("runFunctionableTasks started");
         if (this.getFunctionables() != null) {
             for (Functionable<?> functionable : this.getFunctionables()) {
                 log.info("Functionable {} is executing...", functionable.instanceName);
                 // TODO: add context
                 functionable.execute(server);
-                log.info("Finished functionable.execute(object);");
                 functionable.sendMail(functionable.getNewFunctionableValue(), false);
-                log.info("Finished functionable.sendMail;");
             }
             log.info("Finished all functionable tasks;");
         }
