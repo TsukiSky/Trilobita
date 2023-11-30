@@ -1,18 +1,18 @@
 SuperStepDurations:
 SuperStep 1 : 0.0
-SuperStep 2 : 0.482723809
-SuperStep 3 : 0.492749673
-SuperStep 4 : 0.46702224
-SuperStep 5 : 0.323661166
-SuperStep 6 : 0.352572383
-SuperStep 7 : 0.35583467
-SuperStep 8 : 0.36198789
-SuperStep 9 : 0.33938697
-SuperStep 10 : 0.339823907
-SuperStep 11 : 0.353132033
+SuperStep 2 : 0.506640567
+SuperStep 3 : 0.50562631
+SuperStep 4 : 0.462988679
+SuperStep 5 : 0.340689748
+SuperStep 6 : 0.323753708
+SuperStep 7 : 0.353260195
+SuperStep 8 : 0.345763129
+SuperStep 9 : 0.32757802
+SuperStep 10 : 0.332181987
+SuperStep 11 : 0.346876144
 
 Graph - Vertex numbers: 8
 Graph - Edge numbers: 12
 
-SuperStepDurations - Sum: 3.868894741, Mean: 0.35171770372727273, Min: 0.0, Max: 0.492749673, Std Dev: 0.13238539603042676
-Master total operation time: 9.825607658
+SuperStepDurations - Sum: 3.845358487, Mean: 0.34957804427272726, Min: 0.0, Max: 0.506640567, Std Dev: 0.1362550595381793
+Master total operation time: 9.846052043

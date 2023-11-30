@@ -95,6 +95,8 @@ public class Monitor {
                 index+=1;
                 writer.write("SuperStep "+ index + " : " +value+ "\n");
             }
+            writer.write("\nWorker's vertex group - Vertex numbers: "+Metrics.Superstep.getVertexNum()+ "\n");
+            writer.write("Worker's vertex group - Edge numbers: "+Metrics.Superstep.getEdgeNum()+ "\n");
             writer.write("\nTotalDurations - Sum: "+ Metrics.Overall.totalDurations.getSum()/ 1_000_000_000.0  + ", Mean: " + Metrics.Overall.totalDurations.getMean()/ 1_000_000_000.0 + ", Min: " + Metrics.Overall.totalDurations.getMin()/ 1_000_000_000.0 + ", Max: " + Metrics.Overall.totalDurations.getMax()/ 1_000_000_000.0 + ", Std Dev: " + Metrics.Overall.totalDurations.getStandardDeviation()/ 1_000_000_000.0 + "\n");
             writer.write("DistributionDurations - Sum: "+Metrics.Overall.distributionDurations.getSum()/ 1_000_000_000.0 + ", Mean: " + Metrics.Overall.distributionDurations.getMean()/ 1_000_000_000.0 + ", Min: " + Metrics.Overall.distributionDurations.getMin()/ 1_000_000_000.0 + ", Max: " + Metrics.Overall.distributionDurations.getMax()/ 1_000_000_000.0 + ", Std Dev: " + Metrics.Overall.distributionDurations.getStandardDeviation()/ 1_000_000_000.0 + "\n");
             writer.write("ExecutionDurations - Sum: "+ Metrics.Overall.executionDurations.getSum()/ 1_000_000_000.0  + ", Mean: " + Metrics.Overall.executionDurations.getMean()/ 1_000_000_000.0 + ", Min: " + Metrics.Overall.executionDurations.getMin()/ 1_000_000_000.0 + ", Max: " + Metrics.Overall.executionDurations.getMax()/ 1_000_000_000.0 + ", Std Dev: " + Metrics.Overall.executionDurations.getStandardDeviation()/ 1_000_000_000.0 + "\n");

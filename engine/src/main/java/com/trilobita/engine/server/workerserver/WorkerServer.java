@@ -61,8 +61,11 @@ public class WorkerServer<T> extends AbstractServer<T> {
                 PartitionStrategy partitionStrategy = (PartitionStrategy) res.get("PARTITION_STRATEGY");
                 setPartitionStrategy(partitionStrategy);
                 // assign the server's hashmap to each vertex
+                Metrics.Superstep.initialize();
                 List<Vertex<T>> vertices = vertexGroup.getVertices();
                 for (Vertex<T> vertex : vertices) {
+                    Metrics.Superstep.incrementVertexNum(1);
+                    Metrics.Superstep.incrementEdgeNum(vertex.getEdges().size());
                     vertex.setServerQueue(getOutMailQueue());
                 }
                 log.info("[Partition] Vertex Group: {}", vertexGroup);
