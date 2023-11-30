@@ -1,4 +1,4 @@
-package shortestpath.vertex;
+package com.trilobita.examples.shortestpath.vertex;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.trilobita.commons.Computable;

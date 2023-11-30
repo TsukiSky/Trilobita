@@ -1,4 +1,4 @@
-package pagerank.vertex;
+package com.trilobita.examples.pagerank.vertex;
 
 import com.trilobita.commons.Computable;
 import lombok.Data;

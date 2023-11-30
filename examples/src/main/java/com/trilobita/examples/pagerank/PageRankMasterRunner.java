@@ -1,4 +1,4 @@
-package pagerank;
+package com.trilobita.examples.pagerank;
 
 import com.trilobita.core.graph.Graph;
 import com.trilobita.core.graph.vertex.Vertex;
@@ -8,9 +8,9 @@ import com.trilobita.engine.server.masterserver.partition.strategy.PartitionStra
 import com.trilobita.engine.server.util.functionable.examples.ExampleFunctionable;
 import com.trilobita.engine.server.util.functionable.examples.aggregators.MinValueAggregator;
 import com.trilobita.engine.server.util.functionable.examples.combiners.MaxCombiner;
+import com.trilobita.examples.pagerank.vertex.PageRankValue;
+import com.trilobita.examples.pagerank.vertex.PageRankVertex;
 import com.trilobita.runtime.environment.TrilobitaEnvironment;
-import pagerank.vertex.PageRankValue;
-import pagerank.vertex.PageRankVertex;
 
 import java.util.ArrayList;
 import java.util.List;
