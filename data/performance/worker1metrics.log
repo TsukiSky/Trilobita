@@ -1,54 +1,54 @@
 TotalDurations:
-SuperStep 1 : 0.141188405
-SuperStep 2 : 0.335778123
-SuperStep 3 : 0.1666702
-SuperStep 4 : 0.322800284
-SuperStep 5 : 0.159637449
-SuperStep 6 : 0.166126544
-SuperStep 7 : 0.139862928
-SuperStep 8 : 0.147717728
-SuperStep 9 : 0.159540159
-SuperStep 10 : 0.159700797
-SuperStep 11 : 0.142859463
+SuperStep 1 : 0.183559795
+SuperStep 2 : 0.32836885
+SuperStep 3 : 0.160203945
+SuperStep 4 : 0.310168935
+SuperStep 5 : 0.16995337
+SuperStep 6 : 0.15630476
+SuperStep 7 : 0.185983969
+SuperStep 8 : 0.189012003
+SuperStep 9 : 0.156692248
+SuperStep 10 : 0.166033583
+SuperStep 11 : 0.181769026
 
 DistributionDurations:
-SuperStep 1 : 2.5702E-5
-SuperStep 2 : 0.00102215
-SuperStep 3 : 1.2879E-4
-SuperStep 4 : 2.1791E-4
-SuperStep 5 : 1.2293E-5
-SuperStep 6 : 2.4864E-5
-SuperStep 7 : 1.2152E-5
-SuperStep 8 : 1.9417E-5
-SuperStep 9 : 1.1105E-5
-SuperStep 10 : 1.0895E-5
-SuperStep 11 : 1.4108E-5
+SuperStep 1 : 3.1918E-5
+SuperStep 2 : 0.001913622
+SuperStep 3 : 1.42549E-4
+SuperStep 4 : 1.67832E-4
+SuperStep 5 : 1.341E-5
+SuperStep 6 : 9.569E-6
+SuperStep 7 : 9.08E-6
+SuperStep 8 : 1.8648E-5
+SuperStep 9 : 1.1035E-5
+SuperStep 10 : 1.4736E-5
+SuperStep 11 : 1.3271E-5
 
 ExecutionDurations:
-SuperStep 1 : 1.2083E-5
-SuperStep 2 : 0.002413138
-SuperStep 3 : 3.34198E-4
-SuperStep 4 : 5.58812E-4
-SuperStep 5 : 4.01945E-4
-SuperStep 6 : 8.94E-6
-SuperStep 7 : 3.771E-6
-SuperStep 8 : 5.727E-6
-SuperStep 9 : 6.146E-6
-SuperStep 10 : 5.727E-6
-SuperStep 11 : 4.749E-6
+SuperStep 1 : 1.802E-5
+SuperStep 2 : 0.001819894
+SuperStep 3 : 1.90881E-4
+SuperStep 4 : 6.23486E-4
+SuperStep 5 : 2.72666E-4
+SuperStep 6 : 3.842E-6
+SuperStep 7 : 3.702E-6
+SuperStep 8 : 7.264E-6
+SuperStep 9 : 4.26E-6
+SuperStep 10 : 1.0896E-5
+SuperStep 11 : 5.657E-6
 
 MessagingDurations:
-SuperStep 1 : 1.0477E-5
-SuperStep 2 : 0.17764851
-SuperStep 3 : 1.1593E-5
-SuperStep 4 : 0.157658384
-SuperStep 5 : 1.0128E-5
-SuperStep 6 : 8.661E-6
-SuperStep 7 : 3.353E-6
-SuperStep 8 : 5.238E-6
-SuperStep 9 : 5.238E-6
-SuperStep 10 : 6.286E-6
-SuperStep 11 : 4.749E-6
+SuperStep 1 : 1.8159E-5
+SuperStep 2 : 0.163642235
+SuperStep 3 : 5.308E-6
+SuperStep 4 : 0.152136402
+SuperStep 5 : 7.543E-6
+SuperStep 6 : 4.819E-6
+SuperStep 7 : 1.0407E-5
+SuperStep 8 : 1.0407E-5
+SuperStep 9 : 8.661E-6
+SuperStep 10 : 1.0616E-5
+SuperStep 11 : 8.73E-6
 
 MessageNums:
 SuperStep 1 : 0.0
@@ -63,9 +63,9 @@ SuperStep 9 : 0.0
 SuperStep 10 : 0.0
 SuperStep 11 : 0.0
 
-TotalDurations - Sum: 2.04188208, Mean: 0.18562564363636364, Min: 0.139862928, Max: 0.335778123, Std Dev: 0.0717390826429126
-DistributionDurations - Sum: 0.001499386, Mean: 1.363078181818182E-4, Min: 1.0895E-5, Max: 0.00102215, Std Dev: 3.011444667071995E-4
-ExecutionDurations - Sum: 0.003755236, Mean: 3.4138509090909095E-4, Min: 3.771E-6, Max: 0.002413138, Std Dev: 7.160403918548806E-4
-MessagingDurations - Sum: 0.335372617, Mean: 0.030488419727272734, Min: 3.353E-6, Max: 0.17764851, Std Dev: 0.06796335673619928
+TotalDurations - Sum: 2.188050484, Mean: 0.19891368036363638, Min: 0.15630476, Max: 0.32836885, Std Dev: 0.060784609635717385
+DistributionDurations - Sum: 0.00234567, Mean: 2.1324272727272725E-4, Min: 9.08E-6, Max: 0.001913622, Std Dev: 5.667870213473648E-4
+ExecutionDurations - Sum: 0.002960568, Mean: 2.6914254545454546E-4, Min: 3.702E-6, Max: 0.001819894, Std Dev: 5.491166800932866E-4
+MessagingDurations - Sum: 0.315863287, Mean: 0.028714844272727268, Min: 4.819E-6, Max: 0.163642235, Std Dev: 0.06391736986939028
 MessageNums - Sum: 4.0, Mean: 0.36363636363636354, Min: 0.0, Max: 3.0, Std Dev: 0.9244162777371753
-Worker total operation time: 8.550614383
+Worker total operation time: 8.674036316

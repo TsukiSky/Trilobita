@@ -2,6 +2,8 @@ package com.trilobita.engine.server.masterserver;
 
 import com.trilobita.commons.Mail;
 import com.trilobita.core.graph.Graph;
+import com.trilobita.core.graph.vertex.Edge;
+import com.trilobita.core.graph.vertex.Vertex;
 import com.trilobita.core.messaging.MessageProducer;
 import com.trilobita.engine.monitor.Monitor;
 import com.trilobita.engine.monitor.metrics.Metrics;
@@ -91,6 +93,11 @@ public class MasterServer<T> extends AbstractServer<T> {
      */
     public void setGraph(Graph<T> graph) {
         this.graph = graph;
+        Metrics.Superstep.initialize();
+        for (Vertex<T> vertex : graph.getVertices()) {
+            Metrics.Superstep.incrementVertexNum(1);
+            Metrics.Superstep.incrementEdgeNum(vertex.getEdges().size());
+        }
     }
 
     /**

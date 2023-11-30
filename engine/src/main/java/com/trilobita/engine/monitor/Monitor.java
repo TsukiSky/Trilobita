@@ -114,6 +114,8 @@ public class Monitor {
                 index+=1;
                 writer.write("SuperStep "+ index + " : " + value/ 1_000_000_000.0 + "\n");
             }
+            writer.write("\nGraph - Vertex numbers: "+Metrics.Superstep.getVertexNum()+ "\n");
+            writer.write("Graph - Edge numbers: "+Metrics.Superstep.getEdgeNum()+ "\n");
             writer.write("\nSuperStepDurations - Sum: "+ Metrics.Overall.masterSuperStepDurations.getSum()/ 1_000_000_000.0  + ", Mean: " + Metrics.Overall.masterSuperStepDurations.getMean()/ 1_000_000_000.0 + ", Min: " + Metrics.Overall.masterSuperStepDurations.getMin()/ 1_000_000_000.0 + ", Max: " + Metrics.Overall.masterSuperStepDurations.getMax()/ 1_000_000_000.0 + ", Std Dev: " + Metrics.Overall.masterSuperStepDurations.getStandardDeviation()/ 1_000_000_000.0 + "\n");
             writer.write("Master total operation time: "+ Metrics.getMasterDurationTime()/ 1_000_000_000.0);
         }
