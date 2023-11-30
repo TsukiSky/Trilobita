@@ -1,13 +1,13 @@
-package shortestpath;
+package com.trilobita.examples.shortestpath;
 
 import com.trilobita.core.graph.Graph;
 import com.trilobita.core.graph.vertex.Vertex;
 import com.trilobita.engine.server.masterserver.partition.Partitioner;
 import com.trilobita.engine.server.masterserver.partition.strategy.PartitionStrategy;
 import com.trilobita.engine.server.masterserver.partition.strategy.PartitionStrategyFactory;
+import com.trilobita.examples.shortestpath.vertex.ShortestPathValue;
+import com.trilobita.examples.shortestpath.vertex.ShortestPathVertex;
 import com.trilobita.runtime.environment.TrilobitaEnvironment;
-import shortestpath.vertex.ShortestPathValue;
-import shortestpath.vertex.ShortestPathVertex;
 
 import java.util.ArrayList;
 import java.util.List;

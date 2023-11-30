@@ -1,4 +1,4 @@
-package pagerank;
+package com.trilobita.examples.pagerank;
 
 import com.trilobita.core.graph.Graph;
 import com.trilobita.core.graph.vertex.Vertex;
@@ -8,17 +8,17 @@ import com.trilobita.engine.server.masterserver.partition.strategy.PartitionStra
 import com.trilobita.engine.server.util.functionable.examples.ExampleFunctionable;
 import com.trilobita.engine.server.util.functionable.examples.aggregators.MinValueAggregator;
 import com.trilobita.engine.server.util.functionable.examples.combiners.MaxCombiner;
+import com.trilobita.examples.pagerank.vertex.PageRankValue;
+import com.trilobita.examples.pagerank.vertex.PageRankVertex;
 import com.trilobita.runtime.environment.TrilobitaEnvironment;
-import pagerank.vertex.PageRankValue;
-import pagerank.vertex.PageRankVertex;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 public class PageRankMasterRunner {
-    public static Graph createVertices(){
-        List<PageRankVertex> vertices = new ArrayList<>();
+    public static Graph<Double> createVertices(){
+        List<Vertex<Double>> vertices = new ArrayList<>();
         PageRankVertex vertex0 = new PageRankVertex(0);
         vertex0.setStatus(Vertex.VertexStatus.ACTIVE);
         vertices.add(vertex0);
@@ -75,11 +75,10 @@ public class PageRankMasterRunner {
         vertex0.addEdge(vertex9);
         vertex9.addEdge(vertex6);
 
-        Graph<PageRankValue> graph = new Graph(vertices);
-        return graph;
+        return new Graph<>(vertices);
     }
     public static void main(String[] args) throws ExecutionException, InterruptedException {
-        TrilobitaEnvironment<PageRankValue> trilobitaEnvironment = new TrilobitaEnvironment<>();
+        TrilobitaEnvironment<Double> trilobitaEnvironment = new TrilobitaEnvironment<>();
         trilobitaEnvironment.initConfig();
         trilobitaEnvironment.loadGraph(PageRankMasterRunner.createVertices());
         PartitionStrategyFactory partitionStrategyFactory = new PartitionStrategyFactory();

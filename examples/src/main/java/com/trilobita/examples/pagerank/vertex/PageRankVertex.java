@@ -1,4 +1,4 @@
-package pagerank.vertex;
+package com.trilobita.examples.pagerank.vertex;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.trilobita.commons.*;

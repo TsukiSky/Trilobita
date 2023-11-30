@@ -1,4 +1,4 @@
-package shortestpath.vertex;
+package com.trilobita.examples.shortestpath.vertex;
 
 import com.trilobita.commons.Computable;
 import lombok.Data;
