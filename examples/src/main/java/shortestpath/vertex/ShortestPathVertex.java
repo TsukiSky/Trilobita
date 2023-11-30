@@ -41,6 +41,7 @@ public class ShortestPathVertex extends Vertex<Double> implements Serializable {
 //        startSuperstep();
         if(source){
             this.sendMail();
+            this.source = false;
         }
         List<Double> allvalue = new ArrayList<>();
         while (!this.getIncomingQueue().isEmpty()) {
@@ -51,12 +52,12 @@ public class ShortestPathVertex extends Vertex<Double> implements Serializable {
         Double minvalue = Double.MAX_VALUE;
         if (!allvalue.isEmpty()) {
             minvalue = Collections.min(allvalue);
-            log.info("the min value received{}",minvalue);
+            log.info("the min value received is {}",minvalue);
         } else {
             log.info("the list is empty");
         }
         if (minvalue<this.getValue().getValue()){
-            log.info("We are here the min value received is{} and current value is {}",minvalue, this.getValue().getValue());
+            log.info("We are here the min value received is {} and current value is {} ",minvalue, this.getValue().getValue());
             this.getValue().setValue(minvalue);
             this.sendMail();
         }

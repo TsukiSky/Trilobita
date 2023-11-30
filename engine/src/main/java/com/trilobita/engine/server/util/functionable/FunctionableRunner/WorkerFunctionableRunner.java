@@ -64,6 +64,10 @@ public class WorkerFunctionableRunner extends FunctionableRunner {
         return instance;
     }
 
+    public void stop() throws InterruptedException {
+        this.initFunctionablesConsumer.stop();
+    }
+
     /**
      * Distribute functional values processed by master from last superstep
      */

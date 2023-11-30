@@ -5,6 +5,8 @@ import com.trilobita.core.graph.VertexGroup;
 import com.trilobita.core.graph.vertex.Vertex;
 import com.trilobita.core.messaging.MessageConsumer;
 import com.trilobita.core.messaging.MessageProducer;
+import com.trilobita.engine.monitor.Monitor;
+import com.trilobita.engine.monitor.metrics.Metrics;
 import com.trilobita.engine.server.AbstractServer;
 import com.trilobita.engine.server.util.HeartbeatSender;
 import com.trilobita.engine.server.masterserver.partition.strategy.PartitionStrategy;
@@ -51,6 +53,8 @@ public class WorkerServer<T> extends AbstractServer<T> {
             @SuppressWarnings("unchecked")
             public void handleMessage(UUID key, Mail mail, int partition, long offset) throws InterruptedException, ExecutionException {
                 log.info("receiving message from server.........");
+                Monitor.start();
+                Metrics.setWorkerStartTime();
                 WorkerServer.this.executionManager.waitForFutures(); // in case of fault, repartition is needed
                 Map<String, Object> res = (Map<String, Object>) mail.getMessage().getContent();
                 setVertexGroup((VertexGroup<T>) res.get("PARTITION"));
@@ -110,6 +114,7 @@ public class WorkerServer<T> extends AbstractServer<T> {
      * Execute the superstep
      */
     private void superstep(boolean doSnapshot) throws InterruptedException {
+        Metrics.Superstep.setSuperstepStartTime();
         superstep++;
         log.info("[Superstep] entering a new super step...");
         this.executionManager.execute();
@@ -124,6 +129,8 @@ public class WorkerServer<T> extends AbstractServer<T> {
             }
         }
         sendCompleteSignal(doSnapshot, stop);
+        Metrics.Superstep.computeSuperstepDuration();
+        Monitor.stopAndStartNewSuperstep();
     }
 
     @Override
@@ -133,6 +140,9 @@ public class WorkerServer<T> extends AbstractServer<T> {
 
     @Override
     public void shutdown() throws InterruptedException {
+        Monitor.stop();
+        Metrics.computeWorkerDuration();
+        Monitor.store("data/performance/worker"+this.getServerId());
         startMessageConsumer.stop();
         partitionMessageConsumer.stop();
         confirmStartConsumer.stop();
@@ -140,6 +150,7 @@ public class WorkerServer<T> extends AbstractServer<T> {
         heartbeatSender.stop();
         stopSignalConsumer.stop();
         executionManager.stop();
+        functionableRunner.stop();
     }
 
     /**
@@ -151,7 +162,7 @@ public class WorkerServer<T> extends AbstractServer<T> {
             log.info("[Graph] {}", this.vertexGroup);
             MessageProducer.produceFinishSignal(this.vertexGroup.getVertexValues(), complete);
         } else {
-            MessageProducer.produceFinishSignal(new HashMap<>(), complete);
+            MessageProducer.produceFinishSignal(new HashMap<>(), false);
         }
     }
 
