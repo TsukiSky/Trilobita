@@ -6,28 +6,28 @@ import com.trilobita.commons.*;
 import com.trilobita.engine.server.util.functionable.Combiner;
 
 /*
- * Sum all messages sent to the same vertex.
+ * Get the max of all messages sent to the same vertex.
  */
-public class MaxCombiner<T> extends Combiner<T> {
+public class MaxCombiner extends Combiner<java.lang.Double> {
 
-    public MaxCombiner(Computable<T> initValue) {
-        super(initValue);
+    public MaxCombiner(Computable<Double> initLastValue, Computable<Double> initNewValue) {
+        super(initLastValue, initNewValue);
     }
-
     @Override
     public Mail combineMails(Integer toVertexId, CopyOnWriteArrayList<Mail> mails) {
         Mail newMail = new Mail(toVertexId, null, Mail.MailType.NORMAL);
-        
+        Double min_value = this.getLastFunctionableValue().getValue();
+
+        Computable<Double> content;
         for (Mail mail : mails) {
-            Computable<T> content = (Computable<T>) mail.getMessage().getContent();
-            if (this.getNewFunctionableValue().compareTo(content.getValue()) < 0) {
-                this.getNewFunctionableValue().setValue(content.getValue());
+            content = (Computable<Double>) mail.getMessage().getContent();
+
+            if (min_value < content.getValue()) {
+                min_value = content.getValue();
             }
         }
+        this.getNewFunctionableValue().setValue(min_value);
         newMail.setMessage(new Message(this.getNewFunctionableValue()));
-
-        // reset
-        this.getNewFunctionableValue().setValue(this.getLastFunctionableValue().getValue());
         return newMail;
     }
 }

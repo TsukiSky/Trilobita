@@ -35,16 +35,16 @@ public abstract class Functionable<T> implements Serializable {
 
     public abstract void execute(List<Computable<?>> computables);
 
-    public Functionable(Computable<T> initValue) {
+    public Functionable(Computable<T> initLastValue, Computable<T> initNewValue) {
         this.instanceName = this.getClass().getName();
-        this.lastFunctionableValue = initValue;
-        this.newFunctionableValue = initValue;
+        this.lastFunctionableValue = initLastValue;
+        this.newFunctionableValue = initNewValue;
     }
 
-    public Functionable(Computable<T> initValue, String topic) {
+    public Functionable(Computable<T> initLastValue, Computable<T> initNewValue, String topic) {
         this.instanceName = this.getClass().getName();
-        this.lastFunctionableValue = initValue;
-        this.newFunctionableValue = initValue;
+        this.lastFunctionableValue = initLastValue;
+        this.newFunctionableValue = initNewValue;
         this.topic = topic;
     }
 

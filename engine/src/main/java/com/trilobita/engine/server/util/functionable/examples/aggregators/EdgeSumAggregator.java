@@ -16,21 +16,8 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class EdgeSumAggregator extends Aggregator<Integer> {
-        Computable<Integer> initAggregatedValue;
-
-        public EdgeSumAggregator(Computable<Integer> initAggregatedValue, String topic) {
-                super(initAggregatedValue, topic);
-                this.initAggregatedValue = initAggregatedValue;
-        }
-
-        private static EdgeSumAggregator instance;
-
-        public static synchronized EdgeSumAggregator getInstance(Computable<Integer> initAggregatedValue,
-                        String topic) {
-                if (instance == null) {
-                        instance = new EdgeSumAggregator(initAggregatedValue, topic);
-                }
-                return instance;
+        public EdgeSumAggregator(Computable<Integer> initLastValue, Computable<Integer> initNewValue, String topic) {
+                super(initLastValue, initNewValue, topic);
         }
 
         @Override
@@ -46,17 +33,13 @@ public class EdgeSumAggregator extends Aggregator<Integer> {
         }
 
         @Override
-        public void stop() {
-                instance = null;
-        }
-
-        @Override
         public Computable<Integer> reduce(List<Computable<?>> computables) {
-                Computable<Integer> total_edges = this.initAggregatedValue;
+                Integer total_edges = this.getLastFunctionableValue().getValue();
                 for (Computable<?> edge : computables) {
-                        total_edges.add((Computable<Integer>) edge);
+                        Integer num_edges = (Integer) edge.getValue();
+                        total_edges += num_edges;
                 }
-                log.info("Total edges calculated by {}: {}", this.getServerId(), total_edges.getValue());
-                return total_edges;
+                this.getNewFunctionableValue().setValue(total_edges);
+                return this.getNewFunctionableValue();
         }
 }

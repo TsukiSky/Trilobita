@@ -17,8 +17,8 @@ import com.trilobita.engine.server.AbstractServer;
 @Slf4j
 public abstract class Combiner<T> extends Functionable<T> {
 
-    public Combiner(Computable<T> initValue) {
-        super(initValue);
+    public Combiner(Computable<T> initLastValue, Computable<T> initNewValue) {
+        super(initLastValue, initNewValue);
         this.functionableType = FunctionableType.COMBINER;
     }
 
@@ -27,28 +27,23 @@ public abstract class Combiner<T> extends Functionable<T> {
     @Override
     public void execute(AbstractServer<?> server) {
         LinkedBlockingQueue<Mail> outMailQueue = server.getOutMailQueue();
-        server.outMailQueue.addAll(this.combine(outMailQueue));
-        log.info("server.outMailQueue = {}", server.outMailQueue);
+        log.info("outMailQueue before: {}",outMailQueue);
+        while (!outMailQueue.isEmpty()) {
+            Mail mail = server.getOutMailQueue().poll();
+            int receiverId = mail.getToVertexId();
+            this.addToVertexMailMap(receiverId, mail);
+        }
+        log.info("vertexMailMap: {}",vertexMailMap);
+        for (Map.Entry<Integer, CopyOnWriteArrayList<Mail>> map : vertexMailMap.entrySet()) {
+            Mail combinedMail = this.combineMails(map.getKey(), map.getValue());
+            server.getOutMailQueue().add(combinedMail);
+        }
+        log.info("outMailQueue after: {}", server.getOutMailQueue());
     }
 
     @Override
     public void execute(List<Computable<?>> computables) {
         return;
-    }
-
-    // main method for combine
-    public LinkedBlockingQueue<Mail> combine(LinkedBlockingQueue<Mail> outMailQueue) {
-        LinkedBlockingQueue<Mail> combinedOutMailQueue = new LinkedBlockingQueue<>();
-        while (!outMailQueue.isEmpty()) {
-            Mail mail = outMailQueue.poll();
-            int receiverId = mail.getToVertexId();
-            this.addToVertexMailMap(receiverId, mail);
-        }
-        for (Map.Entry<Integer, CopyOnWriteArrayList<Mail>> map : vertexMailMap.entrySet()) {
-            Mail combinedMail = this.combineMails(map.getKey(), map.getValue());
-            combinedOutMailQueue.add(combinedMail);
-        }
-        return combinedOutMailQueue;
     }
 
     // combine mails

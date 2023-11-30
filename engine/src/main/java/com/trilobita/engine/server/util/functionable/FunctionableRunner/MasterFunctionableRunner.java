@@ -71,7 +71,7 @@ public class MasterFunctionableRunner extends FunctionableRunner {
                 if (mail.getMailType() == MailType.FUNCTIONAL) {
                     // put values in functinalValue by insName
                     ExampleFunctionable class_value = (ExampleFunctionable) mail.getMessage().getContent();
-                    this.addToFunctionalValues(class_value.className, class_value.value);
+                    this.addToFunctionalValues(class_value.className, class_value.initLastValue);
                 } else {
                     newInMailQueue.add(mail);
                 }
@@ -86,9 +86,9 @@ public class MasterFunctionableRunner extends FunctionableRunner {
      *                  Functionable)
      * @param topicName the topic that the functionable is attached to
      */
-    public void registerFunctionable(String className, String topicName, Computable<?> initValue) {
+    public void registerFunctionable(String className, String topicName, Computable<?> initLastValue, Computable<?> initNewValue) {
         try {
-            Functionable<?> functionable = initFunctionableInstance(className, topicName, initValue);
+            Functionable<?> functionable = initFunctionableInstance(className, topicName, initLastValue,initNewValue);
             this.registerFunctionable(functionable);
             // create topic if not exist
             if (topicName != null){
@@ -105,7 +105,7 @@ public class MasterFunctionableRunner extends FunctionableRunner {
      */
     public void registerFunctionables(ExampleFunctionable[] functionables) {
         for (ExampleFunctionable functionable : functionables) {
-            this.registerFunctionable(functionable.className, functionable.topic, functionable.value);
+            this.registerFunctionable(functionable.className, functionable.topic, functionable.initLastValue, functionable.initNewValue);
         }
     }
 
@@ -124,15 +124,15 @@ public class MasterFunctionableRunner extends FunctionableRunner {
 
     }
 
-    private static Functionable<?> initFunctionableInstance(String className, String topic, Computable<?> initValue)
+    private static Functionable<?> initFunctionableInstance(String className, String topic, Computable<?> initLastValue, Computable<?> initNewValue)
             throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException,
             NoSuchMethodException, SecurityException, ClassNotFoundException {
 
         Class<?> cls = Class.forName(className);
         return topic == null
-                ? (Functionable<?>) cls.getConstructor(Computable.class).newInstance(initValue)
-                : (Functionable<?>) cls.getConstructor(Computable.class, String.class)
-                        .newInstance(initValue, topic);
+                ? (Functionable<?>) cls.getConstructor(Computable.class, Computable.class).newInstance(initLastValue,initNewValue)
+                : (Functionable<?>) cls.getConstructor(Computable.class, Computable.class, String.class)
+                        .newInstance(initLastValue,initNewValue, topic);
     }
 
     private void addToFunctionalValues(String insName, Computable<?> value) {

@@ -75,7 +75,7 @@ public class WorkerFunctionableRunner extends FunctionableRunner {
         log.info("this.incomingFunctionableValues {}", this.incomingFunctionableValues);
         for (ExampleFunctionable functionableSet: this.incomingFunctionableValues) {
             String insName = functionableSet.className;
-            Computable<?> lastValue = functionableSet.value;
+            Computable<?> lastValue = functionableSet.initLastValue;
             Functionable functionable = this.findFunctionableByName(insName);
             if (functionable != null) {
                 functionable.setLastFunctionableValue(lastValue);
