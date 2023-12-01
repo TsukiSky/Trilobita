@@ -1,4 +1,4 @@
-package com.trilobita.engine.server.util.functionable.FunctionableRunner;
+package com.trilobita.engine.server.util.functionable.functionableRunner;
 
 import java.util.ArrayList;
 import java.util.List;

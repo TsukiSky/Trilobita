@@ -1,15 +1,12 @@
-package com.trilobita.engine.server.util.functionable.examples.aggregators;
+package com.trilobita.engine.server.util.functionable.instance.aggregator;
 
 import java.util.List;
 
 import com.trilobita.commons.Computable;
-import com.trilobita.commons.Mail;
 import com.trilobita.core.graph.VertexGroup;
 import com.trilobita.core.graph.vertex.Vertex;
-import com.trilobita.core.messaging.MessageProducer;
 import com.trilobita.engine.server.util.functionable.Aggregator;
 
-import com.trilobita.engine.server.util.functionable.FunctionalMail;
 import lombok.extern.slf4j.Slf4j;
 
 /*

@@ -1,4 +1,4 @@
-package com.trilobita.engine.server.util.functionable.examples.aggregators;
+package com.trilobita.engine.server.util.functionable.instance.aggregator;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,29 +1,34 @@
-package com.trilobita.engine.server.util.functionable.examples.combiners;
+package com.trilobita.engine.server.util.functionable.instance.combiner;
 
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.trilobita.commons.*;
 import com.trilobita.engine.server.util.functionable.Combiner;
+import lombok.extern.slf4j.Slf4j;
 
 /*
- * Get the max of all messages sent to the same vertex.
+ * Get the min of all messages sent to the same vertex.
  */
-public class MaxCombiner extends Combiner<java.lang.Double> {
+@Slf4j
+public class MinCombiner extends Combiner<Double> {
 
-    public MaxCombiner(Computable<Double> initLastValue, Computable<Double> initNewValue) {
+    public MinCombiner(Computable<Double> initLastValue, Computable<Double> initNewValue) {
         super(initLastValue, initNewValue);
     }
+
     @Override
     public Mail combineMails(Integer toVertexId, CopyOnWriteArrayList<Mail> mails) {
-        Mail newMail = new Mail(toVertexId, null, Mail.MailType.NORMAL);
+
+        Mail newMail = new Mail(-1,toVertexId, null, Mail.MailType.NORMAL);
         Double min_value = this.getLastFunctionableValue().getValue();
 
         Computable<Double> content;
         for (Mail mail : mails) {
             content = (Computable<Double>) mail.getMessage().getContent();
 
-            if (min_value < content.getValue()) {
+            if (min_value > content.getValue()) {
                 min_value = content.getValue();
+                newMail.setFromVertexId(mail.getFromVertexId());
             }
         }
         this.getNewFunctionableValue().setValue(min_value);

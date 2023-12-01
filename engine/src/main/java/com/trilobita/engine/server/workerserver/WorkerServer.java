@@ -10,7 +10,7 @@ import com.trilobita.engine.monitor.metrics.Metrics;
 import com.trilobita.engine.server.AbstractServer;
 import com.trilobita.engine.server.util.HeartbeatSender;
 import com.trilobita.engine.server.masterserver.partition.strategy.PartitionStrategy;
-import com.trilobita.engine.server.util.functionable.FunctionableRunner.WorkerFunctionableRunner;
+import com.trilobita.engine.server.util.functionable.functionableRunner.WorkerFunctionableRunner;
 import com.trilobita.engine.server.workerserver.execution.ExecutionManager;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;

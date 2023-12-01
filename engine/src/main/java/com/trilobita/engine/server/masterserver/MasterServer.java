@@ -11,7 +11,7 @@ import com.trilobita.engine.server.masterserver.execution.ExecutionManager;
 import com.trilobita.engine.server.masterserver.heartbeat.HeartbeatManager;
 import com.trilobita.engine.server.masterserver.partition.Partitioner;
 import com.trilobita.engine.server.util.functionable.Functionable;
-import com.trilobita.engine.server.util.functionable.FunctionableRunner.MasterFunctionableRunner;
+import com.trilobita.engine.server.util.functionable.functionableRunner.MasterFunctionableRunner;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
