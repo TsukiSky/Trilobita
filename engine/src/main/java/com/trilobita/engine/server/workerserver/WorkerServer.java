@@ -13,6 +13,7 @@ import com.trilobita.engine.server.masterserver.partition.strategy.PartitionStra
 import com.trilobita.engine.server.util.functionable.functionableRunner.WorkerFunctionableRunner;
 import com.trilobita.engine.server.workerserver.execution.ExecutionManager;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
@@ -29,6 +30,8 @@ import java.util.concurrent.*;
 public class WorkerServer<T> extends AbstractServer<T> {
     private final ExecutionManager<T> executionManager;
     private final ConcurrentHashMap<Integer, CopyOnWriteArrayList<Mail>> outMailTable;
+    @Setter
+    private List<Mail> snapshotMails = new ArrayList<>();
     private final MessageConsumer partitionMessageConsumer;
     private final MessageConsumer startMessageConsumer;
     private final HeartbeatSender heartbeatSender;
@@ -120,6 +123,7 @@ public class WorkerServer<T> extends AbstractServer<T> {
         Metrics.Superstep.setSuperstepStartTime();
         superstep++;
         log.info("[Superstep] entering a new super step...");
+        this.executionManager.setDoSnapshot(doSnapshot);
         this.executionManager.execute();
 
         // todo: check whether all vertices are shouldStop
@@ -163,9 +167,9 @@ public class WorkerServer<T> extends AbstractServer<T> {
         log.info("[Superstep] super step {} completed", superstep);
         if (doSnapshot) {
             log.info("[Graph] {}", this.vertexGroup);
-            MessageProducer.produceFinishSignal(this.vertexGroup.getVertexValues(), complete);
+            MessageProducer.produceFinishSignal(this.vertexGroup.getVertexValues(), this.snapshotMails, complete);
         } else {
-            MessageProducer.produceFinishSignal(new HashMap<>(), false);
+            MessageProducer.produceFinishSignal(new HashMap<>(), new ArrayList<>(), false);
         }
     }
 

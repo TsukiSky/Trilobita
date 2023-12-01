@@ -5,6 +5,7 @@ import com.trilobita.core.graph.vertex.Vertex;
 import com.trilobita.core.messaging.MessageProducer;
 import com.trilobita.engine.monitor.metrics.Metrics;
 import com.trilobita.engine.server.workerserver.WorkerServer;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -21,6 +22,8 @@ public class ExecutionManager<T> {
     public final WorkerServer<T> server;
     private final ExecutorService executorService;
     private final List<Future<?>> futures = new ArrayList<>();
+    @Setter
+    private boolean doSnapshot = false;
 
     public ExecutionManager(int parallelism, WorkerServer<T> server) {
         this.server = server;
@@ -96,6 +99,10 @@ public class ExecutionManager<T> {
 
         Metrics.Superstep.setMessagingStartTime();
         CountDownLatch mailingLatch = new CountDownLatch(server.getOutMailQueue().size());
+        if (doSnapshot) {
+            // add incoming mails
+            server.setSnapshotMails(server.getOutMailQueue().stream().toList());
+        }
         // send the mail to the other servers
         while (!this.server.getOutMailQueue().isEmpty()) {
             Metrics.Superstep.incrementMessageNum(1);
@@ -108,7 +115,6 @@ public class ExecutionManager<T> {
         }
         mailingLatch.await(); // block until all mailing tasks are finished
         Metrics.Superstep.computeMessagingDuration();
-
     }
 
     public void stop() throws InterruptedException {

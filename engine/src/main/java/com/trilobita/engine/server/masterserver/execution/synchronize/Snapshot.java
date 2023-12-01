@@ -1,12 +1,16 @@
 package com.trilobita.engine.server.masterserver.execution.synchronize;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.trilobita.commons.Mail;
 import com.trilobita.core.graph.Graph;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
 
 /**
  * The snapshot of the graph
@@ -18,12 +22,14 @@ public class Snapshot<T> {
     private final int id;
     private final int superstep;
     private final Graph<T> graph;
+    private final Map<Integer, List<Mail>> mailTable;
     private final String snapshotDirectory = "data/snapshot/";
 
-    private Snapshot(int id, int superstep, Graph<T> graph) {
+    private Snapshot(int id, int superstep, Graph<T> graph, Map<Integer, List<Mail>> mailTable) {
         this.id = id;
         this.superstep = superstep;
         this.graph = graph;
+        this.mailTable = mailTable;
     }
 
     /**
@@ -55,7 +61,7 @@ public class Snapshot<T> {
      * @return the snapshot
      * @param <T> the type of the vertex value
      */
-    public static <T> Snapshot<T> createSnapshot(int snapshotId, int superstep, Graph<T> graph) {
-        return new Snapshot<>(snapshotId, superstep, graph);
+    public static <T> Snapshot<T> createSnapshot(int snapshotId, int superstep, Graph<T> graph, Map<Integer, List<Mail>> mailTable) {
+        return new Snapshot<>(snapshotId, superstep, graph, mailTable);
     }
 }

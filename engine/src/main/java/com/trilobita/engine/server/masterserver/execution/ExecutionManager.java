@@ -9,12 +9,10 @@ import com.trilobita.engine.monitor.Monitor;
 import com.trilobita.engine.monitor.metrics.Metrics;
 import com.trilobita.engine.server.masterserver.MasterServer;
 import com.trilobita.engine.server.masterserver.execution.synchronize.Synchronizer;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 @Slf4j
@@ -26,8 +24,10 @@ public class ExecutionManager<T> {
     private int nFinishWorker = 0;
     private int nCompleteWorker = 0;
     private int nConfirmWorker = 0;
+    @Getter
     private int superstep = 0;
     private final int snapshotFrequency;
+    public final Map<Integer, List<Mail>> snapshotMailTable = new HashMap<>();
 
     public ExecutionManager(MasterServer<T> masterServer, int snapshotFrequency) {
         this.masterServer = masterServer;
@@ -86,6 +86,7 @@ public class ExecutionManager<T> {
                 // extract the content
                 Map<String, Object> content = (Map<String, Object>) value.getMessage().getContent();
                 HashMap<Integer, Computable<T>> vertexValues = (HashMap<Integer, Computable<T>>) content.get("VERTEX_VALUES");
+                List<Mail> snapshotMails = (List<Mail>) content.get("SNAPSHOT_MAILS");
                 boolean complete = (boolean) content.get("COMPLETE");
                 if (complete) {
                     nCompleteWorker++;
@@ -97,6 +98,10 @@ public class ExecutionManager<T> {
                     // update the graph
                     masterServer.getGraph().updateVertexValues(vertexValues);
                     log.info("[Graph] the updated graph is : {}", masterServer.getGraph());
+                    for (Mail snapshotMail : snapshotMails) {
+                        snapshotMailTable.computeIfAbsent(snapshotMail.getToVertexId(), k -> new ArrayList<>());
+                        snapshotMailTable.get(snapshotMail.getToVertexId()).add(snapshotMail);
+                    }
                 }
 
                 if (nFinishWorker == masterServer.getWorkerIds().size()) {

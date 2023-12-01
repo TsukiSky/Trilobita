@@ -12,6 +12,5 @@ public class PageRankParserDemo {
         Graph<Double> graph = JsonParser.read("data/graph/PageRankGraph.json", PageRankVertex.class);
 
         JsonParser.store("data/graph", "TTTTT.json", graph);
-
     }
 }
