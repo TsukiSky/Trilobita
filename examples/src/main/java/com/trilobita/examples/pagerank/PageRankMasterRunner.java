@@ -11,11 +11,14 @@ import com.trilobita.engine.server.util.functionable.examples.combiners.MaxCombi
 import com.trilobita.examples.pagerank.vertex.PageRankValue;
 import com.trilobita.examples.pagerank.vertex.PageRankVertex;
 import com.trilobita.runtime.environment.TrilobitaEnvironment;
+import com.trilobita.runtime.parser.JsonParser;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+@Slf4j
 public class PageRankMasterRunner {
     public static Graph<Double> createVertices(){
         List<Vertex<Double>> vertices = new ArrayList<>();
@@ -77,10 +80,20 @@ public class PageRankMasterRunner {
 
         return new Graph<>(vertices);
     }
+
+    public static Graph<Double> createVerticesFromJson(){
+        try {
+            return JsonParser.read("data/graph/PageRankGraph.json", PageRankVertex.class);
+        } catch (Exception e     ) {
+            log.error("Failed to create graph from JSON", e);
+            return new Graph<>(new ArrayList<>());
+        }
+    }
+
     public static void main(String[] args) throws ExecutionException, InterruptedException {
         TrilobitaEnvironment<Double> trilobitaEnvironment = new TrilobitaEnvironment<>();
         trilobitaEnvironment.initConfig();
-        trilobitaEnvironment.loadGraph(PageRankMasterRunner.createVertices());
+        trilobitaEnvironment.loadGraph(PageRankMasterRunner.createVerticesFromJson());
         PartitionStrategyFactory partitionStrategyFactory = new PartitionStrategyFactory();
         PartitionStrategy partitionStrategy = partitionStrategyFactory.getPartitionStrategy("hashPartitionStrategy",(int) trilobitaEnvironment.getConfiguration().get("numOfWorker"),trilobitaEnvironment.getGraph().getSize());
         trilobitaEnvironment.setPartitioner(new Partitioner<>(partitionStrategy));
