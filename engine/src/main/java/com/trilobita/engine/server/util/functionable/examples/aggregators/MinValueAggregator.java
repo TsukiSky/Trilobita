@@ -1,8 +1,6 @@
 package com.trilobita.engine.server.util.functionable.examples.aggregators;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import com.trilobita.commons.Computable;
@@ -25,29 +23,27 @@ public class MinValueAggregator extends Aggregator<Double> {
         }
 
         @Override
-        public Computable<Double> aggregate(VertexGroup vertexGroup) {
+        public Double aggregate(VertexGroup vertexGroup) {
 
-                List<Computable<?>> computables = new ArrayList<>();
+                List<Double> values = new ArrayList<>();
                 List<Vertex<Double>> vertices = vertexGroup.getVertices();
                 for (Vertex<Double> vertex : vertices) {
-                        computables.add(vertex.getValue());
+                        values.add(vertex.getValue().getValue());
                 }
-                Computable<Double> min_value = this.reduce(computables);
-                log.info("[MinValueAggregator] Min vertex vale calculated by {}: {}", this.getServerId(), min_value.getValue());
+                Double min_value = this.reduce(values);
+                log.info("[MinValueAggregator] Min vertex vale calculated by {}: {}", this.getServerId(), min_value);
                 return min_value;
         }
 
 
         @Override
-        public Computable<Double> reduce(List<Computable<?>> computables) {
+        public Double reduce(List<Double> values) {
                 Double min_value = initAggregatedValue;
-                for (Computable<?> computable : computables) {
-                        Double value = (Double) computable.getValue();
+                for (Double value : values) {
                         if (min_value > value) {
                                 min_value = value;
                         }
                 }
-                this.getNewFunctionableValue().setValue(min_value);
-                return this.getNewFunctionableValue();
+                return min_value;
         }
 }

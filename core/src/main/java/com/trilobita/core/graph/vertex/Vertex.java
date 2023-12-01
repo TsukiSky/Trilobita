@@ -20,6 +20,7 @@ public abstract class Vertex<T> implements Serializable {
     private List<Edge> edges;
     private VertexStatus status;
     private Computable<T> value;
+    private Computable<T> valueLastSuperstep;
     private boolean stepFinished;
     private BlockingQueue<Mail> incomingQueue;
     private BlockingQueue<Mail> serverQueue;

@@ -10,7 +10,6 @@ import com.trilobita.core.messaging.MessageConsumer;
 import com.trilobita.core.messaging.MessageConsumer.MessageHandler;
 import com.trilobita.engine.server.AbstractServer;
 import com.trilobita.engine.server.util.functionable.Functionable;
-import com.trilobita.engine.server.util.functionable.examples.ExampleFunctionable;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -23,7 +22,7 @@ public class WorkerFunctionableRunner extends FunctionableRunner {
 
     private static WorkerFunctionableRunner instance = null;
     private MessageConsumer initFunctionablesConsumer;
-    private List<ExampleFunctionable> incomingFunctionableValues = new ArrayList<>();
+    private List<Functionable.FunctionableRepresenter> incomingFunctionableValues = new ArrayList<>();
 
     private WorkerFunctionableRunner(Integer serverId) throws ExecutionException, InterruptedException {
         this.initFunctionablesConsumer = new MessageConsumer("INIT_FUNCTIONAL",
@@ -41,8 +40,8 @@ public class WorkerFunctionableRunner extends FunctionableRunner {
                                     @Override
                                     public void handleMessage(UUID key, Mail value, int partition, long offset) throws InterruptedException, ExecutionException {
                                         log.info("[Functionable] Received Functionable message {}", value.getMessage().getContent());
-                                        ExampleFunctionable exampleFunctionable = (ExampleFunctionable) value.getMessage().getContent();
-                                        incomingFunctionableValues.add(exampleFunctionable);
+                                        Functionable.FunctionableRepresenter functionableRepresenter = (Functionable.FunctionableRepresenter) value.getMessage().getContent();
+                                        incomingFunctionableValues.add(functionableRepresenter);
                                     }
                                 });
                             }
@@ -71,7 +70,7 @@ public class WorkerFunctionableRunner extends FunctionableRunner {
      * Distribute functional values processed by master from last superstep
      */
     public void distributeValues() {
-        for (ExampleFunctionable functionableSet: this.incomingFunctionableValues) {
+        for (Functionable.FunctionableRepresenter functionableSet: this.incomingFunctionableValues) {
             String insName = functionableSet.className;
             Computable<?> lastValue = functionableSet.initLastValue;
             Functionable functionable = this.findFunctionableByName(insName);

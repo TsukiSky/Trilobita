@@ -2,7 +2,6 @@ package com.trilobita.engine.server.masterserver;
 
 import com.trilobita.commons.Mail;
 import com.trilobita.core.graph.Graph;
-import com.trilobita.core.graph.vertex.Edge;
 import com.trilobita.core.graph.vertex.Vertex;
 import com.trilobita.core.messaging.MessageProducer;
 import com.trilobita.engine.monitor.Monitor;
@@ -11,8 +10,8 @@ import com.trilobita.engine.server.AbstractServer;
 import com.trilobita.engine.server.masterserver.execution.ExecutionManager;
 import com.trilobita.engine.server.masterserver.heartbeat.HeartbeatManager;
 import com.trilobita.engine.server.masterserver.partition.Partitioner;
+import com.trilobita.engine.server.util.functionable.Functionable;
 import com.trilobita.engine.server.util.functionable.FunctionableRunner.MasterFunctionableRunner;
-import com.trilobita.engine.server.util.functionable.examples.ExampleFunctionable;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -103,7 +102,7 @@ public class MasterServer<T> extends AbstractServer<T> {
      *
      * @param functionables functionable sets
      */
-    public void setFunctionables(ExampleFunctionable[] functionables) {
+    public void setFunctionables(Functionable.FunctionableRepresenter[] functionables) {
         if (functionables != null) {
             this.masterFunctionableRunner.registerFunctionables(functionables);
         }

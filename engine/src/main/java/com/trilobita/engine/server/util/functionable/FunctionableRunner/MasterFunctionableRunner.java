@@ -13,7 +13,6 @@ import com.trilobita.commons.Message;
 import com.trilobita.commons.Mail.MailType;
 import com.trilobita.core.messaging.MessageProducer;
 import com.trilobita.engine.server.util.functionable.Functionable;
-import com.trilobita.engine.server.util.functionable.examples.ExampleFunctionable;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -69,7 +68,7 @@ public class MasterFunctionableRunner extends FunctionableRunner {
             if (mail != null) {
                 if (mail.getMailType() == MailType.FUNCTIONAL) {
                     // put values in functinalValue by insName
-                    ExampleFunctionable class_value = (ExampleFunctionable) mail.getMessage().getContent();
+                    Functionable.FunctionableRepresenter class_value = (Functionable.FunctionableRepresenter) mail.getMessage().getContent();
                     this.addToFunctionalValues(class_value.className, class_value.initLastValue);
                 } else {
                     newInMailQueue.add(mail);
@@ -102,8 +101,8 @@ public class MasterFunctionableRunner extends FunctionableRunner {
     /**
      * Register several functionables by class names and defautlt topics
      */
-    public void registerFunctionables(ExampleFunctionable[] functionables) {
-        for (ExampleFunctionable functionable : functionables) {
+    public void registerFunctionables(Functionable.FunctionableRepresenter[] functionables) {
+        for (Functionable.FunctionableRepresenter functionable : functionables) {
             this.registerFunctionable(functionable.className, functionable.topic, functionable.initLastValue, functionable.initNewValue);
         }
     }

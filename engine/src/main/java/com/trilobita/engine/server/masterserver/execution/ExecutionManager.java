@@ -99,12 +99,11 @@ public class ExecutionManager<T> {
                     log.info("[Graph] the updated graph is : {}", masterServer.getGraph());
                 }
 
-                // aggregate functional values and send to workers
-                masterServer.getMasterFunctionableRunner()
-                        .runFunctionableTasks(masterServer.getInMailQueue());
-                log.info("[Functionable] finished executing Functionable tasks");
-
                 if (nFinishWorker == masterServer.getWorkerIds().size()) {
+                    // aggregate functional values and send to workers
+                    masterServer.getMasterFunctionableRunner().runFunctionableTasks(masterServer.getInMailQueue());
+                    log.info("[Functionable] finished executing Functionable tasks");
+
                     Metrics.Superstep.computeMasterDuration();
                     Monitor.stopAndStartNewSuperstepMaster();
                     // check if the master needs to do a snapshot
@@ -124,8 +123,6 @@ public class ExecutionManager<T> {
                 }
             }
         });
-
-
     }
 
     /**

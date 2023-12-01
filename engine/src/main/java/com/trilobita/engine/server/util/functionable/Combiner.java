@@ -19,7 +19,6 @@ public abstract class Combiner<T> extends Functionable<T> {
 
     public Combiner(Computable<T> initLastValue, Computable<T> initNewValue) {
         super(initLastValue, initNewValue);
-        this.functionableType = FunctionableType.COMBINER;
     }
 
     private Map<Integer, CopyOnWriteArrayList<Mail>> vertexMailMap = new HashMap<Integer, CopyOnWriteArrayList<Mail>>();
@@ -42,7 +41,6 @@ public abstract class Combiner<T> extends Functionable<T> {
 
     @Override
     public void execute(List<Computable<?>> computables) {
-        return;
     }
 
     // combine mails

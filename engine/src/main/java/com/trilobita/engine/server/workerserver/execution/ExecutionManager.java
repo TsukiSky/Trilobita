@@ -55,11 +55,8 @@ public class ExecutionManager<T> {
         Metrics.Superstep.computeDistributionDuration();
 
         log.info("[ExecutionManager] futures added server.distributeMailToVertex");
-
         // inform functionable instances of functionables values
-        futures.add(this.executorService.submit(() -> {
-            server.getFunctionableRunner().distributeValues();
-        }));
+        server.getFunctionableRunner().distributeValues();
 
         log.info("[ExecutionManager] futures added server.getFunctionableRunner().distributeValues()");
 
@@ -93,16 +90,8 @@ public class ExecutionManager<T> {
         }
         log.info("[ExecutionManager] futures added vertex.setStatus INACTIVE");
 
-
         // execute functionables
-        CountDownLatch functionableLatch = new CountDownLatch(1);
-        futures.add(executorService.submit(() -> {
-            server.getFunctionableRunner().runFunctionableTasks(this.server);
-            functionableLatch.countDown();
-        }));
-
-        functionableLatch.await(); // block until all functionable tasks are finished (future?)
-
+        server.getFunctionableRunner().runFunctionableTasks(this.server);
         log.info("[ExecutionManager] finished runFunctionableTasks");
 
         Metrics.Superstep.setMessagingStartTime();

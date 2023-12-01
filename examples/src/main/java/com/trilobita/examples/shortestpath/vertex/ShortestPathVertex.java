@@ -23,6 +23,7 @@ public class ShortestPathVertex extends Vertex<Double> implements Serializable {
     public ShortestPathVertex(int id) {
         super(id, new ShortestPathValue(Double.MAX_VALUE));
         this.source = false;
+        this.setValueLastSuperstep(new ShortestPathValue(Double.MAX_VALUE));
     }
 
     public ShortestPathVertex(int id,Double value, Boolean source) {
@@ -43,6 +44,7 @@ public class ShortestPathVertex extends Vertex<Double> implements Serializable {
             this.sendMail();
             this.source = false;
         }
+        this.getValueLastSuperstep().setValue(this.getValue().getValue());
         List<Double> allvalue = new ArrayList<>();
         while (!this.getIncomingQueue().isEmpty()) {
             Message message = this.getIncomingQueue().poll().getMessage();
@@ -52,12 +54,13 @@ public class ShortestPathVertex extends Vertex<Double> implements Serializable {
         Double minvalue = Double.MAX_VALUE;
         if (!allvalue.isEmpty()) {
             minvalue = Collections.min(allvalue);
-            log.info("the min value received is {}",minvalue);
+            log.info("[COMPUTE] Min value received: {}",minvalue);
         } else {
-            log.info("the list is empty");
+            log.info("[COMPUTE] The list is empty");
         }
         if (minvalue<this.getValue().getValue()){
-            log.info("We are here the min value received is {} and current value is {} ",minvalue, this.getValue().getValue());
+            log.info("[COMPUTE] Min value received: {} ",minvalue);
+            log.info("[COMPUTE] Current value: {}", this.getValue().getValue());
             this.getValue().setValue(minvalue);
             this.sendMail();
         }

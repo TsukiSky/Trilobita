@@ -22,25 +22,22 @@ public class EdgeSumAggregator extends Aggregator<Integer> {
         }
 
         @Override
-        public Computable<Integer> aggregate(VertexGroup vertexGroup) {
-                List<Computable<?>> computables = new ArrayList<>();
+        public Integer aggregate(VertexGroup vertexGroup) {
+                List<Integer> numEdgesList = new ArrayList<>();
                 List<Vertex<?>> vertices = vertexGroup.getVertices();
                 for (Vertex<?> vertex : vertices) {
                         Integer numEdges = vertex.getEdges().size();
-                        this.getNewFunctionableValue().setValue(numEdges);
-                        computables.add(this.getNewFunctionableValue());
+                        numEdgesList.add(numEdges);
                 }
-                return this.reduce(computables);
+                return this.reduce(numEdgesList);
         }
 
         @Override
-        public Computable<Integer> reduce(List<Computable<?>> computables) {
+        public Integer reduce(List<Integer> numEdgesList) {
                 Integer total_edges = initAggregatedValue;
-                for (Computable<?> edge : computables) {
-                        Integer num_edges = (Integer) edge.getValue();
+                for (Integer num_edges : numEdgesList) {
                         total_edges += num_edges;
                 }
-                this.getNewFunctionableValue().setValue(total_edges);
-                return this.getNewFunctionableValue();
+                return total_edges ;
         }
 }

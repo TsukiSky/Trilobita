@@ -23,7 +23,6 @@ import lombok.extern.slf4j.Slf4j;
 public abstract class Functionable<T> implements Serializable {
 
     public String instanceName;
-    public FunctionableType functionableType;
     private Computable<T> lastFunctionableValue; // returned by master for last superstep
     private Computable<T> newFunctionableValue; // this superstep
     private String topic = null;
@@ -78,8 +77,36 @@ public abstract class Functionable<T> implements Serializable {
         }
     }
 
-    public enum FunctionableType{
-        AGGREGATOR,
-        COMBINER,
+    public static class FunctionableRepresenter implements Serializable {
+        public String className;
+        public String topic;
+        public Computable<?> initLastValue;
+        public Computable<?> initNewValue;
+
+        public FunctionableRepresenter(String className, String topic, Computable<?> initLastValue, Computable<?> initNewValue){
+            this.className = className;
+            this.topic = topic;
+            this.initLastValue = initLastValue;
+            this.initNewValue = initNewValue;
+        }
+
+        public FunctionableRepresenter(String className, String topic, Computable<?> initLastValue){
+            this.className = className;
+            this.topic = topic;
+            this.initLastValue = initLastValue;
+            this.initNewValue = initLastValue;
+        }
+
+        public FunctionableRepresenter(String className, Computable<?> initLastValue, Computable<?> initNewValue){
+            this.className = className;
+            this.initLastValue = initLastValue;
+            this.initNewValue = initNewValue;
+        }
+
+        public FunctionableRepresenter(String className, Computable<?> initLastValue){
+            this.className = className;
+            this.initLastValue = initLastValue;
+            this.initNewValue = initLastValue;
+        }
     }
 }
