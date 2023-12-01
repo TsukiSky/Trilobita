@@ -8,7 +8,7 @@ import com.trilobita.engine.server.util.functionable.Functionable;
 import com.trilobita.engine.server.workerserver.WorkerServer;
 import com.trilobita.runtime.configuration.Configuration;
 import com.trilobita.runtime.configuration.JCommandHandler;
-import com.trilobita.runtime.parser.inputparser.InputParse;
+//import com.trilobita.runtime.parser.inputparser.InputParse;
 import lombok.Getter;
 
 import java.util.concurrent.ExecutionException;
@@ -18,7 +18,7 @@ import java.util.concurrent.ExecutionException;
  */
 public class TrilobitaEnvironment<T> {
     public static TrilobitaEnvironment<?> trilobitaEnvironment;
-    private InputParse inputParser;
+//    private InputParse inputParser;
     @Getter
     private final Configuration configuration = new Configuration();
     private final JCommandHandler jCommandHandler = new JCommandHandler(); // Command-line handler for Trilobita
@@ -47,9 +47,9 @@ public class TrilobitaEnvironment<T> {
         this.partitionStrategy = partitioner.getPartitionStrategy();
     }
 
-    public void setInputParser(InputParse inputParser) {
-        this.inputParser = inputParser;
-    }
+//    public void setInputParser(InputParse inputParser) {
+//        this.inputParser = inputParser;
+//    }
 
     public void createMasterServer(int id, int snapshotFrequency, boolean isPrimary, Functionable.FunctionableRepresenter[] functionables)
             throws ExecutionException, InterruptedException {
