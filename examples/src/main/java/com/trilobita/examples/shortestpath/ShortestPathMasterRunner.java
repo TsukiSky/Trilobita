@@ -17,8 +17,8 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 public class ShortestPathMasterRunner {
-    public static Graph createVertices(){
-        List<ShortestPathVertex> vertices = new ArrayList<>();
+    public static Graph<Double> createVertices(){
+        List<Vertex<Double>> vertices = new ArrayList<>();
         ShortestPathVertex vertex0 = new ShortestPathVertex(0,0.0,true);
         vertex0.setStatus(Vertex.VertexStatus.ACTIVE);
         vertices.add(vertex0);
@@ -65,14 +65,12 @@ public class ShortestPathMasterRunner {
         vertex0.addEdge(vertex7,new ShortestPathValue((double) 7));
         vertex7.addEdge(vertex5,new ShortestPathValue((double) 2));
 
-
-        Graph<ShortestPathValue> graph = new Graph(vertices);
-        return graph;
+        return new Graph<>(vertices);
     }
     public static void main(String[] args) throws ExecutionException, InterruptedException {
-        TrilobitaEnvironment<ShortestPathValue> trilobitaEnvironment = new TrilobitaEnvironment<>();
+        TrilobitaEnvironment<Double> trilobitaEnvironment = new TrilobitaEnvironment<>();
         trilobitaEnvironment.initConfig();
-        Graph g = ShortestPathMasterRunner.createVertices();
+        Graph<Double> g = ShortestPathMasterRunner.createVertices();
         trilobitaEnvironment.loadGraph(g);
         PartitionStrategyFactory partitionStrategyFactory = new PartitionStrategyFactory();
         PartitionStrategy partitionStrategy = partitionStrategyFactory.getPartitionStrategy("hashPartitionStrategy",(int) trilobitaEnvironment.getConfiguration().get("numOfWorker"),trilobitaEnvironment.getGraph().getSize());
