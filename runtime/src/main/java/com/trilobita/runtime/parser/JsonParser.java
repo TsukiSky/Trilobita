@@ -39,7 +39,7 @@ public class JsonParser {
             JSONObject vertexObject = verticesArray.getJSONObject(i);
             int id = vertexObject.getInt("id");
             Vertex<T> vertex = vertexClazz.getDeclaredConstructor(int.class).newInstance(id);
-            vertex.setStatus(Vertex.VertexStatus.valueOf(vertexObject.getString("status").toUpperCase()));
+            vertex.setStatus(Vertex.VertexStatus.valueOf(vertexObject.getString("status")));
             JSONArray edgesArray = vertexObject.getJSONArray("edges");
             for (int j = 0; j < edgesArray.length(); j++) {
                 JSONObject edgeObject = edgesArray.getJSONObject(j);
