@@ -38,21 +38,20 @@ public class MasterFunctionableRunner extends FunctionableRunner {
      * To run all functionable tasks and broadcast to worker
      */
     public void runFunctionableTasks(LinkedBlockingQueue<Mail> inMailQueue) {
-        log.info("Started runFunctionableTasks...");
         clusterIncomingMails(inMailQueue);
-        log.info("Received functionalValues: {}", functionalValues);
+        log.info("Received functional values: {}", functionalValues);
         for (Map.Entry<String, List<Computable<?>>> entry : functionalValues.entrySet()) {
             String instanceName = entry.getKey();
             List<Computable<?>> values = entry.getValue();
-            Functionable<?> functionable = this.findFunctionableByName(instanceName);
-            if (functionable != null) {
-                functionable.execute(values);
-                log.info("Executed {}",values);
-                functionable.sendMail(functionable.getNewFunctionableValue(), true);
-                log.info("Sent Mails.");
-                values.clear(); // resetFunctionableValues
-            } else {
-               log.info("No matching functionable found.");
+            if (!values.isEmpty()) {
+                Functionable<?> functionable = this.findFunctionableByName(instanceName);
+                if (functionable != null) {
+                    functionable.execute(values);
+                    functionable.sendMail(functionable.getNewFunctionableValue(), true);
+                    values.clear(); // resetFunctionableValues
+                } else {
+                    log.info("No matching functionable found.");
+                }
             }
         }
     }
@@ -71,7 +70,7 @@ public class MasterFunctionableRunner extends FunctionableRunner {
                 if (mail.getMailType() == MailType.FUNCTIONAL) {
                     // put values in functinalValue by insName
                     ExampleFunctionable class_value = (ExampleFunctionable) mail.getMessage().getContent();
-                    this.addToFunctionalValues(class_value.className, class_value.value);
+                    this.addToFunctionalValues(class_value.className, class_value.initLastValue);
                 } else {
                     newInMailQueue.add(mail);
                 }
@@ -86,9 +85,9 @@ public class MasterFunctionableRunner extends FunctionableRunner {
      *                  Functionable)
      * @param topicName the topic that the functionable is attached to
      */
-    public void registerFunctionable(String className, String topicName, Computable<?> initValue) {
+    public void registerFunctionable(String className, String topicName, Computable<?> initLastValue, Computable<?> initNewValue) {
         try {
-            Functionable<?> functionable = initFunctionableInstance(className, topicName, initValue);
+            Functionable<?> functionable = initFunctionableInstance(className, topicName, initLastValue,initNewValue);
             this.registerFunctionable(functionable);
             // create topic if not exist
             if (topicName != null){
@@ -105,13 +104,12 @@ public class MasterFunctionableRunner extends FunctionableRunner {
      */
     public void registerFunctionables(ExampleFunctionable[] functionables) {
         for (ExampleFunctionable functionable : functionables) {
-            this.registerFunctionable(functionable.className, functionable.topic, functionable.value);
+            this.registerFunctionable(functionable.className, functionable.topic, functionable.initLastValue, functionable.initNewValue);
         }
     }
 
     // send functionable instances to all workers
     public void broadcastFunctionables() {
-        log.info("master broadcasting Functionables");
         if (this.getFunctionables() != null) {
             for (Functionable<?> functionable : this.getFunctionables()) {
                 Mail mail = new Mail(-1, new Message(functionable), Mail.MailType.FUNCTIONAL);
@@ -124,15 +122,15 @@ public class MasterFunctionableRunner extends FunctionableRunner {
 
     }
 
-    private static Functionable<?> initFunctionableInstance(String className, String topic, Computable<?> initValue)
+    private static Functionable<?> initFunctionableInstance(String className, String topic, Computable<?> initLastValue, Computable<?> initNewValue)
             throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException,
             NoSuchMethodException, SecurityException, ClassNotFoundException {
 
         Class<?> cls = Class.forName(className);
         return topic == null
-                ? (Functionable<?>) cls.getConstructor(Computable.class).newInstance(initValue)
-                : (Functionable<?>) cls.getConstructor(Computable.class, String.class)
-                        .newInstance(initValue, topic);
+                ? (Functionable<?>) cls.getConstructor(Computable.class, Computable.class).newInstance(initLastValue,initNewValue)
+                : (Functionable<?>) cls.getConstructor(Computable.class, Computable.class, String.class)
+                        .newInstance(initLastValue,initNewValue, topic);
     }
 
     private void addToFunctionalValues(String insName, Computable<?> value) {

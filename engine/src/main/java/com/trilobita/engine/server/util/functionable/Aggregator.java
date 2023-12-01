@@ -20,8 +20,8 @@ import com.trilobita.engine.server.AbstractServer;
 public abstract class Aggregator<T> extends Functionable<T> {
 
     // how the aggregated value is initialized from the first input value
-    public Aggregator(Computable<T> initAggregatedValue, String topicName) {
-        super(initAggregatedValue,topicName);
+    public Aggregator(Computable<T> initLastValue, Computable<T> initNewValue, String topicName) {
+        super(initLastValue,initNewValue,topicName);
         this.functionableType = FunctionableType.AGGREGATOR;
     }
 
@@ -41,7 +41,5 @@ public abstract class Aggregator<T> extends Functionable<T> {
     public abstract Computable<T> aggregate(VertexGroup<?> vertexGroup);
 
     public abstract Computable<T> reduce(List<Computable<?>> computables);
-
-    public abstract void stop();
 
 }

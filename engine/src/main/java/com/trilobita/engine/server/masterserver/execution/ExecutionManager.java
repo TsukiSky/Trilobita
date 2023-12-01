@@ -43,12 +43,14 @@ public class ExecutionManager<T> {
         this.confirmStartConsumer.start();
         this.completeSignalConsumer.start();
         this.synchronizer.listen();
+        masterServer.messageConsumer.start();
     }
 
     public void stop() throws InterruptedException {
         this.confirmStartConsumer.stop();
         this.completeSignalConsumer.stop();
         this.synchronizer.stop();
+        masterServer.messageConsumer.stop();
     }
 
 
@@ -100,7 +102,7 @@ public class ExecutionManager<T> {
                 // aggregate functional values and send to workers
                 masterServer.getMasterFunctionableRunner()
                         .runFunctionableTasks(masterServer.getInMailQueue());
-                log.info("[Functionable] finished runFunctionableTasks");
+                log.info("[Functionable] finished executing Functionable tasks");
 
                 if (nFinishWorker == masterServer.getWorkerIds().size()) {
                     Metrics.Superstep.computeMasterDuration();

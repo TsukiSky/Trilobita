@@ -5,6 +5,9 @@ import com.trilobita.core.graph.vertex.Vertex;
 import com.trilobita.engine.server.masterserver.partition.Partitioner;
 import com.trilobita.engine.server.masterserver.partition.strategy.PartitionStrategy;
 import com.trilobita.engine.server.masterserver.partition.strategy.PartitionStrategyFactory;
+import com.trilobita.engine.server.util.functionable.examples.ExampleFunctionable;
+import com.trilobita.engine.server.util.functionable.examples.aggregators.MinValueAggregator;
+import com.trilobita.engine.server.util.functionable.examples.combiners.MinCombiner;
 import com.trilobita.examples.shortestpath.vertex.ShortestPathValue;
 import com.trilobita.examples.shortestpath.vertex.ShortestPathVertex;
 import com.trilobita.runtime.environment.TrilobitaEnvironment;
@@ -74,7 +77,11 @@ public class ShortestPathMasterRunner {
         PartitionStrategyFactory partitionStrategyFactory = new PartitionStrategyFactory();
         PartitionStrategy partitionStrategy = partitionStrategyFactory.getPartitionStrategy("hashPartitionStrategy",(int) trilobitaEnvironment.getConfiguration().get("numOfWorker"),trilobitaEnvironment.getGraph().getSize());
         trilobitaEnvironment.setPartitioner(new Partitioner<>(partitionStrategy));
-        trilobitaEnvironment.createMasterServer(2,10, true);
+        ExampleFunctionable[] funcs = {
+                new ExampleFunctionable(MinCombiner.class.getName(), null, new ShortestPathValue(Double.POSITIVE_INFINITY),new ShortestPathValue(Double.POSITIVE_INFINITY)),
+                new ExampleFunctionable(MinValueAggregator.class.getName(), "MIN_VAL_AGG", new ShortestPathValue(Double.POSITIVE_INFINITY),new ShortestPathValue(Double.POSITIVE_INFINITY))
+        };
+        trilobitaEnvironment.createMasterServer(0,10, true,funcs);
         trilobitaEnvironment.startMasterServer();
     }
 }

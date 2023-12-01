@@ -1,6 +1,8 @@
 package com.trilobita.engine.server.util.functionable.examples.aggregators;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import com.trilobita.commons.Computable;
@@ -11,23 +13,15 @@ import com.trilobita.engine.server.util.functionable.Aggregator;
 import lombok.extern.slf4j.Slf4j;
 
 /*
- * Sum total number of edges in the graph.
- * Applied to the out-degree of each vertex yields
+ * Calculate the min value of all vertices.
  */
 @Slf4j
 public class MinValueAggregator extends Aggregator<Double> {
 
-        private static MinValueAggregator instance;
+        Double initAggregatedValue = Double.POSITIVE_INFINITY;
 
-        public MinValueAggregator(Computable<Double> initValue, String topic) {
-                super(initValue, topic);
-        }
-
-        public static synchronized MinValueAggregator getInstance(Computable<Double> initValue, String topic) {
-                if (instance == null) {
-                        instance = new MinValueAggregator(initValue, topic);
-                }
-                return instance;
+        public MinValueAggregator(Computable<Double> initLastValue, Computable<Double> initNewValue, String topic) {
+                super(initLastValue, initNewValue, topic);
         }
 
         @Override
@@ -39,28 +33,21 @@ public class MinValueAggregator extends Aggregator<Double> {
                         computables.add(vertex.getValue());
                 }
                 Computable<Double> min_value = this.reduce(computables);
-                log.info("Min vertex value calculated by {}: {}", this.getServerId(), min_value.getValue());
+                log.info("[MinValueAggregator] Min vertex vale calculated by {}: {}", this.getServerId(), min_value.getValue());
                 return min_value;
         }
 
-        @Override
-        public void stop() {
-                instance = null;
-        }
 
         @Override
         public Computable<Double> reduce(List<Computable<?>> computables) {
-
+                Double min_value = initAggregatedValue;
                 for (Computable<?> computable : computables) {
                         Double value = (Double) computable.getValue();
-                        if (this.getNewFunctionableValue() == null) {
-                                this.getNewFunctionableValue().setValue(value);
-                        } else {
-                                if (this.getNewFunctionableValue().compareTo(value) > 0) {
-                                        this.getNewFunctionableValue().setValue(value);
-                                }
+                        if (min_value > value) {
+                                min_value = value;
                         }
                 }
+                this.getNewFunctionableValue().setValue(min_value);
                 return this.getNewFunctionableValue();
         }
 }

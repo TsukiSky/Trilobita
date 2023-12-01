@@ -2,6 +2,8 @@ package com.trilobita.engine.server.masterserver;
 
 import com.trilobita.commons.Mail;
 import com.trilobita.core.graph.Graph;
+import com.trilobita.core.graph.vertex.Edge;
+import com.trilobita.core.graph.vertex.Vertex;
 import com.trilobita.core.messaging.MessageProducer;
 import com.trilobita.engine.monitor.Monitor;
 import com.trilobita.engine.monitor.metrics.Metrics;
@@ -60,7 +62,6 @@ public class MasterServer<T> extends AbstractServer<T> {
             Metrics.setMasterStartTime();
             this.executionManager.listen();
             this.heartbeatManager.listen();
-            this.messageConsumer.start();
             this.executionManager.partitionGraph(workerIds);
             this.sendfunctionables();
         } catch (ExecutionException | InterruptedException  e) {
@@ -82,7 +83,6 @@ public class MasterServer<T> extends AbstractServer<T> {
         MessageProducer.createAndProduce(null, new Mail(), "STOP");
         this.executionManager.stop();
         this.heartbeatManager.stop();
-        this.messageConsumer.stop();
     }
 
     /**
@@ -91,6 +91,11 @@ public class MasterServer<T> extends AbstractServer<T> {
      */
     public void setGraph(Graph<T> graph) {
         this.graph = graph;
+        Metrics.Superstep.initialize();
+        for (Vertex<T> vertex : graph.getVertices()) {
+            Metrics.Superstep.incrementVertexNum(1);
+            Metrics.Superstep.incrementEdgeNum(vertex.getEdges().size());
+        }
     }
 
     /**
@@ -101,7 +106,6 @@ public class MasterServer<T> extends AbstractServer<T> {
     public void setFunctionables(ExampleFunctionable[] functionables) {
         if (functionables != null) {
             this.masterFunctionableRunner.registerFunctionables(functionables);
-            log.info("masterFunctionableRunner finished registerFunctionables");
         }
     }
 
