@@ -38,6 +38,7 @@ public class WorkerServer<T> extends AbstractServer<T> {
     private final MessageConsumer confirmStartConsumer;
     private final MessageConsumer stopSignalConsumer;
     private final WorkerFunctionableRunner functionableRunner;
+    private int superstep = 0;
 
     public WorkerServer(int serverId, int parallelism, PartitionStrategy partitionStrategy) throws ExecutionException, InterruptedException {
         super(serverId, partitionStrategy);

@@ -30,7 +30,6 @@ public class MasterServer<T> extends AbstractServer<T> {
     Partitioner<T> graphPartitioner;                        // the partitioner of the graph
     ExecutionManager<T> executionManager;                   // the superstep coordinator
     HeartbeatManager heartbeatManager;                      // the heartbeat manager
-    int snapshotFrequency;
     @Setter
     List<Integer> workerIds = new ArrayList<>();            // the alive working servers' ids
     @Setter
@@ -47,7 +46,6 @@ public class MasterServer<T> extends AbstractServer<T> {
             this.masterIds.add(i + 1);
         }
         this.graphPartitioner = graphPartitioner;
-        this.snapshotFrequency = snapshotFrequency;
         this.isPrimary = isPrimary;
         this.executionManager = new ExecutionManager<>(this, snapshotFrequency);
         this.heartbeatManager = new HeartbeatManager(this, this.workerIds, this.masterIds);
