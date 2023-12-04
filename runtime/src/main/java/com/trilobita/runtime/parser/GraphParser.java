@@ -10,7 +10,6 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -18,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
-public class JsonParser {
+public class GraphParser {
     public  static final ObjectMapper objectMapper = new ObjectMapper();
 
     public static void store(String outDir, String fileNameStr, Object o) {

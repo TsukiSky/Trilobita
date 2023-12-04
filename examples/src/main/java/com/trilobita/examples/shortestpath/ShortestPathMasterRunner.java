@@ -12,11 +12,14 @@ import com.trilobita.engine.server.util.functionable.instance.combiner.MinCombin
 import com.trilobita.examples.shortestpath.vertex.ShortestPathValue;
 import com.trilobita.examples.shortestpath.vertex.ShortestPathVertex;
 import com.trilobita.runtime.environment.TrilobitaEnvironment;
+import lombok.extern.slf4j.Slf4j;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+@Slf4j
 public class ShortestPathMasterRunner {
     public static Graph<Double> createVertices(){
         List<Vertex<Double>> vertices = new ArrayList<>();
@@ -24,31 +27,31 @@ public class ShortestPathMasterRunner {
         vertex0.setStatus(Vertex.VertexStatus.ACTIVE);
         vertices.add(vertex0);
 
-        ShortestPathVertex vertex1 = new ShortestPathVertex(1);
+        ShortestPathVertex vertex1 = new ShortestPathVertex(1, Double.MAX_VALUE, false);
         vertex1.setStatus(Vertex.VertexStatus.INACTIVE);
         vertices.add(vertex1);
 
-        ShortestPathVertex vertex2 = new ShortestPathVertex(2);
+        ShortestPathVertex vertex2 = new ShortestPathVertex(2, Double.MAX_VALUE, false);
         vertex2.setStatus(Vertex.VertexStatus.INACTIVE);
         vertices.add(vertex2);
 
-        ShortestPathVertex vertex3 = new ShortestPathVertex(3);
+        ShortestPathVertex vertex3 = new ShortestPathVertex(3, Double.MAX_VALUE, false);
         vertex3.setStatus(Vertex.VertexStatus.INACTIVE);
         vertices.add(vertex3);
 
-        ShortestPathVertex vertex4 = new ShortestPathVertex(4);
+        ShortestPathVertex vertex4 = new ShortestPathVertex(4, Double.MAX_VALUE, false);
         vertex4.setStatus(Vertex.VertexStatus.INACTIVE);
         vertices.add(vertex4);
 
-        ShortestPathVertex vertex5 = new ShortestPathVertex(5);
+        ShortestPathVertex vertex5 = new ShortestPathVertex(5, Double.MAX_VALUE, false);
         vertex5.setStatus(Vertex.VertexStatus.INACTIVE);
         vertices.add(vertex5);
 
-        ShortestPathVertex vertex6 = new ShortestPathVertex(6);
+        ShortestPathVertex vertex6 = new ShortestPathVertex(6, Double.MAX_VALUE, false);
         vertex6.setStatus(Vertex.VertexStatus.INACTIVE);
         vertices.add(vertex6);
 
-        ShortestPathVertex vertex7 = new ShortestPathVertex(7);
+        ShortestPathVertex vertex7 = new ShortestPathVertex(7, Double.MAX_VALUE, false);
         vertex7.setStatus(Vertex.VertexStatus.INACTIVE);
         vertices.add(vertex7);
 
@@ -68,10 +71,19 @@ public class ShortestPathMasterRunner {
 
         return new Graph<>(vertices);
     }
+
+    public static Graph<Double> createVerticesFromFile(){
+        try {
+            return GraphLoader.loadGraph("data/graph/OTCNet.csv");
+        } catch (IOException e) {
+            log.error(e.getMessage());
+            return ShortestPathMasterRunner.createVertices();
+        }
+    }
     public static void main(String[] args) throws ExecutionException, InterruptedException {
         TrilobitaEnvironment<Double> trilobitaEnvironment = new TrilobitaEnvironment<>();
         trilobitaEnvironment.initConfig();
-        Graph<Double> g = ShortestPathMasterRunner.createVertices();
+        Graph<Double> g = ShortestPathMasterRunner.createVerticesFromFile();
         trilobitaEnvironment.loadGraph(g);
         PartitionStrategyFactory partitionStrategyFactory = new PartitionStrategyFactory();
         PartitionStrategy partitionStrategy = partitionStrategyFactory.getPartitionStrategy("hashPartitionStrategy",(int) trilobitaEnvironment.getConfiguration().get("numOfWorker"),trilobitaEnvironment.getGraph().getSize());

@@ -6,7 +6,7 @@ import lombok.Data;
 @Data
 public class ShortestPathValue implements Computable<Double> {
     private Double value;
-    public ShortestPathValue(Double value) {
+    public ShortestPathValue(double value) {
         this.value = value;
     }
 

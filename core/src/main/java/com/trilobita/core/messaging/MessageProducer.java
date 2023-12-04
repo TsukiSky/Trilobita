@@ -60,7 +60,7 @@ public class MessageProducer {
                 MessageAdmin.getInstance().props)) {
             producer.send(new ProducerRecord<>(topic, finalKey.toString(), value), (event, ex) -> {
                 if (ex != null) {
-                    log.error("[Message] error producing message: {}", ex.getMessage());
+                    log.error("[Message] error producing message: ", ex);
                 } else {
                     if (LOG_FLAG) {
                         log.info("[Message] produced event to topic {}: key = {} value = {}", topic, finalKey, value);
