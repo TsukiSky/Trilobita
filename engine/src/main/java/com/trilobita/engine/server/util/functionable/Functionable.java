@@ -15,24 +15,20 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 /*
- * An abstract class for easy adding or removing functional blocks, 
+ * An abstract class for easy adding or removing functional blocks,
  * We provide the implementation of Combiner and Aggregator, as discussed in Pregel.
  */
 @Data
 @Slf4j
 public abstract class Functionable<T> implements Serializable {
 
+    private static String MASTER_TOPIC = "MASTER_FUNCTIONAL";
     public String instanceName;
     private Computable<T> lastFunctionableValue; // returned by master for last superstep
     private Computable<T> newFunctionableValue; // this superstep
     private String topic = null;
-    private static String MASTER_TOPIC = "SERVER_0_MESSAGE";
     private MessageConsumer workerMessageConsumer = null;
     private Integer serverId;
-
-    public abstract void execute(AbstractServer<?> server);
-
-    public abstract void execute(List<Computable<?>> computables);
 
     public Functionable(Computable<T> initLastValue, Computable<T> initNewValue) {
         this.instanceName = this.getClass().getName();
@@ -46,6 +42,10 @@ public abstract class Functionable<T> implements Serializable {
         this.newFunctionableValue = initNewValue;
         this.topic = topic;
     }
+
+    public abstract void execute(AbstractServer<?> server);
+
+    public abstract void execute(List<Computable<?>> computables);
 
     /**
      * Register a consumer to the functionable. Else the default is null.
@@ -65,7 +65,7 @@ public abstract class Functionable<T> implements Serializable {
      * Send mail to master/workers if needed.
      * (this.workerMessageConsumer == null) means that no need to communicate
      *
-     * @param funcValue the calculated functionable value tro be sent
+     * @param funcValue      the calculated functionable value tro be sent
      * @param serverIsMaster to decide which topic to sent to
      */
     public void sendMail(Computable<?> funcValue, boolean serverIsMaster) {
@@ -83,14 +83,14 @@ public abstract class Functionable<T> implements Serializable {
         public Computable<?> initLastValue;
         public Computable<?> initNewValue;
 
-        public FunctionableRepresenter(String className, String topic, Computable<?> initLastValue, Computable<?> initNewValue){
+        public FunctionableRepresenter(String className, String topic, Computable<?> initLastValue, Computable<?> initNewValue) {
             this.className = className;
             this.topic = topic;
             this.initLastValue = initLastValue;
             this.initNewValue = initNewValue;
         }
 
-        public FunctionableRepresenter(String className, Computable<?> initLastValue){
+        public FunctionableRepresenter(String className, Computable<?> initLastValue) {
             this.className = className;
             this.initLastValue = initLastValue;
             this.initNewValue = initLastValue;
