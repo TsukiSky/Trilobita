@@ -3,7 +3,7 @@ package com.trilobita.core.messaging;
 import com.trilobita.commons.Computable;
 import com.trilobita.commons.Mail;
 import com.trilobita.commons.Message;
-import com.trilobita.core.graph.Graph;
+import com.trilobita.core.common.Snapshot;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -94,17 +94,15 @@ public class MessageProducer {
     }
 
     /**
-     * Produce a sync message among masters to the topic.
+     * Produce a snapshot message to the topic.
      *
-     * @param graph          the graph
-     * @param aliveWorkerIds alive worker ids
+     * @param snapshot snapshot to be sent
      */
-    public static void produceSyncMessage(Graph<?> graph, List<Integer> aliveWorkerIds) {
-        HashMap<String, Object> syncMap = new HashMap<>();
-        syncMap.put("GRAPH", graph);
-        syncMap.put("ALIVE_WORKER_IDS", aliveWorkerIds);
+    public static void produceSyncMessage(Snapshot<?> snapshot) {
+        HashMap<String, Object> syncContent = new HashMap<>();
+        syncContent.put("SNAPSHOT", snapshot);
         Message message = new Message();
-        message.setContent(syncMap);
+        message.setContent(syncContent);
         Mail mail = new Mail();
         mail.setMessage(message);
         MessageProducer.createAndProduce(null, mail, "MASTER_SYNC");
@@ -144,5 +142,4 @@ public class MessageProducer {
     public static void produceWorkerServerMessage(Mail mail, Integer serverId) {
         MessageProducer.createAndProduce(null, mail, "SERVER_" + serverId + "_MESSAGE");
     }
-
 }

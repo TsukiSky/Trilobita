@@ -155,9 +155,16 @@ public class ExecutionManager<T> {
         nConfirmWorker = 0;
         Map<Integer, VertexGroup<T>> vertexGroups = this.masterServer.getGraphPartitioner().partition(this.masterServer.getGraph(), aliveWorkerIds);
         vertexGroups.forEach((workerId, vertexGroup) -> {
+            List<Mail> mails = new ArrayList<>();
+            vertexGroup.getVertices().forEach(vertex -> {
+                if (masterServer.getMailTable().get(vertex.getId()) != null) {
+                    mails.addAll(masterServer.getMailTable().get(vertex.getId()));
+                }
+            });
             Map<String, Object> objectMap = new HashMap<>();
             objectMap.put("PARTITION", vertexGroup);
             objectMap.put("PARTITION_STRATEGY", this.masterServer.getGraphPartitioner().getPartitionStrategy());
+            objectMap.put("MAILS", mails);
             MessageProducer.producePartitionGraphMessage(objectMap, workerId);
         });
     }

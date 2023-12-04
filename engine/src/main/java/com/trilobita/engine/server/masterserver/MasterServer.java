@@ -36,6 +36,8 @@ public class MasterServer<T> extends AbstractServer<T> {
     List<Integer> masterIds = new ArrayList<>();            // the alive master servers' ids
     public boolean isPrimary;
     MasterFunctionableRunner masterFunctionableRunner;
+    @Setter
+    Map<Integer, List<Mail>> mailTable = new HashMap<>();   // the mail table of the graph
 
     public MasterServer(Partitioner<T> graphPartitioner, int nWorker, int id, int nReplica, int snapshotFrequency, boolean isPrimary) throws ExecutionException, InterruptedException {
         super(id, graphPartitioner.getPartitionStrategy()); // the standard server id of master is 0

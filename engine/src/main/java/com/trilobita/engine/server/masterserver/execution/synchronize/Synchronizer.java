@@ -1,6 +1,7 @@
 package com.trilobita.engine.server.masterserver.execution.synchronize;
 
 import com.trilobita.commons.Mail;
+import com.trilobita.core.common.Snapshot;
 import com.trilobita.core.graph.Graph;
 import com.trilobita.core.messaging.MessageConsumer;
 import com.trilobita.core.messaging.MessageProducer;
@@ -26,22 +27,22 @@ public class Synchronizer<T> {
             @Override
             public void handleMessage(UUID key, Mail value, int partition, long offset) {
                 Map<String, Object> objectMap = (Map<String, Object>) value.getMessage().getContent();
-                Graph<T> graph = (Graph<T>) objectMap.get("GRAPH");
-                List<Integer> aliveWorkerIds = (List<Integer>) objectMap.get("ALIVE_WORKER_IDS");
-                synchronize(graph, aliveWorkerIds);
+                Snapshot<T> snapshot = (Snapshot<T>) objectMap.get("SNAPSHOT");
+                synchronize(snapshot);
             }
         });
     }
 
     /**
-     * Synchronize the graph and alive worker ids among the master and replicas
-     * @param graph the graph to be synchronized
-     * @param aliveWorkerIds the alive worker ids
+     * synchronize the graph with other masters
+     * @param snapshot the snapshot to synchronize
      */
-    public void synchronize(Graph<T> graph, List<Integer> aliveWorkerIds) {
+    public void synchronize(Snapshot<T> snapshot) {
         // TODO: SYNC should synchronize everything, not just the graph
-        masterServer.setGraph(graph);
-        masterServer.setWorkerIds(aliveWorkerIds);
+        snapshot.store();
+        masterServer.setGraph(snapshot.getGraph());
+        masterServer.setWorkerIds(snapshot.getAliveWorkerIds());
+        masterServer.setMailTable(snapshot.getMailTable());
     }
 
     /**
@@ -49,18 +50,24 @@ public class Synchronizer<T> {
      */
     public void snapshotAndSync(Graph<T> graph) {
         log.info("[Snapshot] doing a snapshot");
-        Snapshot<T> snapshot = Snapshot.createSnapshot(masterServer.getExecutionManager().getSuperstep(), masterServer.getExecutionManager().getSuperstep(), graph, masterServer.getExecutionManager().snapshotMailTable);
+        Snapshot<T> snapshot = Snapshot.createSnapshot(
+                masterServer.getExecutionManager().getSuperstep(),
+                masterServer.getExecutionManager().getSuperstep(),
+                graph,
+                this.masterServer.getWorkerIds(),
+                masterServer.getExecutionManager().snapshotMailTable
+        );
         snapshot.store();
         masterServer.getExecutionManager().snapshotMailTable.clear();
         this.snapshots.add(snapshot);
-        this.syncGraph();
+        this.sendSynchronizeMessage(snapshot);
     }
 
     /**
      * sync the graph with other masters
      */
-    private void syncGraph() {
-        MessageProducer.produceSyncMessage(this.masterServer.getGraph(), this.masterServer.getWorkerIds());
+    private void sendSynchronizeMessage(Snapshot<T> snapshot) {
+        MessageProducer.produceSyncMessage(snapshot);
     }
 
     /**

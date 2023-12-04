@@ -1,4 +1,4 @@
-package com.trilobita.engine.server.masterserver.execution.synchronize;
+package com.trilobita.core.common;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.trilobita.commons.Mail;
@@ -8,9 +8,9 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 
 /**
  * The snapshot of the graph
@@ -18,17 +18,19 @@ import java.util.Queue;
  */
 @Slf4j
 @Data
-public class Snapshot<T> {
+public class Snapshot<T> implements Serializable {
     private final int id;
     private final int superstep;
     private final Graph<T> graph;
     private final Map<Integer, List<Mail>> mailTable;
+    private final List<Integer> aliveWorkerIds;
     private final String snapshotDirectory = "data/snapshot/";
 
-    private Snapshot(int id, int superstep, Graph<T> graph, Map<Integer, List<Mail>> mailTable) {
+    private Snapshot(int id, int superstep, Graph<T> graph, List<Integer> aliveWorkerIds, Map<Integer, List<Mail>> mailTable) {
         this.id = id;
         this.superstep = superstep;
         this.graph = graph;
+        this.aliveWorkerIds = aliveWorkerIds;
         this.mailTable = mailTable;
     }
 
@@ -61,7 +63,7 @@ public class Snapshot<T> {
      * @return the snapshot
      * @param <T> the type of the vertex value
      */
-    public static <T> Snapshot<T> createSnapshot(int snapshotId, int superstep, Graph<T> graph, Map<Integer, List<Mail>> mailTable) {
-        return new Snapshot<>(snapshotId, superstep, graph, mailTable);
+    public static <T> Snapshot<T> createSnapshot(int snapshotId, int superstep, Graph<T> graph, List<Integer> aliveWorkerIds, Map<Integer, List<Mail>> mailTable) {
+        return new Snapshot<>(snapshotId, superstep, graph, aliveWorkerIds, mailTable);
     }
 }
