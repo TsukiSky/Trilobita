@@ -58,7 +58,7 @@ public abstract class Functionable<T> implements Serializable {
         this.setWorkerMessageConsumer(
                 new MessageConsumer(this.topic, this.serverId, workerMessageHandler));
         this.workerMessageConsumer.start();
-        log.info("Started {}'s consumer", this.getInstanceName());
+        log.info("[Functionable] Started {}'s consumer", this.getInstanceName());
     }
 
     /**
@@ -72,7 +72,7 @@ public abstract class Functionable<T> implements Serializable {
         if (this.topic != null) {
             Mail mail = new FunctionalMail(this.instanceName, funcValue);
             String topic = serverIsMaster ? this.topic : MASTER_TOPIC;
-            log.info("Send mail to {} topic.", topic);
+            log.info("[Functionable] Send mail {} to {} topic.", funcValue, topic);
             MessageProducer.createAndProduce(null, mail, topic);
         }
     }
@@ -86,19 +86,6 @@ public abstract class Functionable<T> implements Serializable {
         public FunctionableRepresenter(String className, String topic, Computable<?> initLastValue, Computable<?> initNewValue){
             this.className = className;
             this.topic = topic;
-            this.initLastValue = initLastValue;
-            this.initNewValue = initNewValue;
-        }
-
-        public FunctionableRepresenter(String className, String topic, Computable<?> initLastValue){
-            this.className = className;
-            this.topic = topic;
-            this.initLastValue = initLastValue;
-            this.initNewValue = initLastValue;
-        }
-
-        public FunctionableRepresenter(String className, Computable<?> initLastValue, Computable<?> initNewValue){
-            this.className = className;
             this.initLastValue = initLastValue;
             this.initNewValue = initNewValue;
         }

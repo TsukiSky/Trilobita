@@ -22,9 +22,10 @@ public class SumCombiner extends Combiner<Double> {
         for (Mail mail : mails) {
             content = (Computable<Double>) mail.getMessage().getContent();
             sum += content.getValue();
+            content.setValue(sum);
+            newMail.setFromVertexId(mail.getFromVertexId());
+            newMail.setMessage(new Message(content));
         }
-        this.getNewFunctionableValue().setValue(sum);
-        newMail.setMessage(new Message(this.getNewFunctionableValue()));
         return newMail;
     }
 }

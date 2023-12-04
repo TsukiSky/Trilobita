@@ -1,6 +1,6 @@
 package com.trilobita.engine.server.workerserver.execution;
 
-import com.trilobita.commons.*;
+import com.trilobita.commons.Mail;
 import com.trilobita.core.graph.vertex.Vertex;
 import com.trilobita.core.messaging.MessageProducer;
 import com.trilobita.engine.monitor.metrics.Metrics;
@@ -57,11 +57,8 @@ public class ExecutionManager<T> {
         distributeLatch.await();
         Metrics.Superstep.computeDistributionDuration();
 
-        log.info("[ExecutionManager] futures added server.distributeMailToVertex");
         // inform functionable instances of functionables values
         server.getFunctionableRunner().distributeValues();
-
-        log.info("[ExecutionManager] futures added server.getFunctionableRunner().distributeValues()");
 
         List<Vertex<T>> vertices = this.server.getVertexGroup().getVertices();
         int activeVertexCount = 0;
@@ -86,16 +83,14 @@ public class ExecutionManager<T> {
         computeLatch.await(); // block until all computing tasks are finished
         Metrics.Superstep.computeExecutionDuration();
 
-        if (server.getOutMailQueue().isEmpty()){
-            for (Vertex<T> vertex : vertices) {
-                vertex.setStatus(Vertex.VertexStatus.INACTIVE);
-            }
-        }
-        log.info("[ExecutionManager] futures added vertex.setStatus INACTIVE");
+//        if (server.getOutMailQueue().isEmpty()){
+//            for (Vertex<T> vertex : vertices) {
+//                vertex.setStatus(Vertex.VertexStatus.INACTIVE);
+//            }
+//        }
 
         // execute functionables
         server.getFunctionableRunner().runFunctionableTasks(this.server);
-        log.info("[ExecutionManager] finished runFunctionableTasks");
 
         Metrics.Superstep.setMessagingStartTime();
         CountDownLatch mailingLatch = new CountDownLatch(server.getOutMailQueue().size());

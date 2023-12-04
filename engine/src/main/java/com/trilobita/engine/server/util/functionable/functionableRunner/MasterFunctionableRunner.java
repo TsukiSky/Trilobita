@@ -56,7 +56,7 @@ public class MasterFunctionableRunner extends FunctionableRunner {
     }
 
     /**
-     * Cluster incoming mails by functinable instance name. Store the values into
+     * Cluster incoming mails by functionable instance name. Store the values into
      * functionalValues.
      *
      * @param inMailQueue inMailQueue of the server that store functionable msgs form workers

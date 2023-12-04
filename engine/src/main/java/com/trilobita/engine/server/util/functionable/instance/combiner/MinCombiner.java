@@ -29,10 +29,9 @@ public class MinCombiner extends Combiner<Double> {
             if (min_value > content.getValue()) {
                 min_value = content.getValue();
                 newMail.setFromVertexId(mail.getFromVertexId());
+                newMail.setMessage(new Message(content));
             }
         }
-        this.getNewFunctionableValue().setValue(min_value);
-        newMail.setMessage(new Message(this.getNewFunctionableValue()));
         return newMail;
     }
 }

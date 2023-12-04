@@ -16,18 +16,18 @@ public class MaxCombiner extends Combiner<java.lang.Double> {
     @Override
     public Mail combineMails(Integer toVertexId, CopyOnWriteArrayList<Mail> mails) {
         Mail newMail = new Mail(toVertexId, null, Mail.MailType.NORMAL);
-        Double min_value = this.getLastFunctionableValue().getValue();
+        Double max_value = this.getLastFunctionableValue().getValue();
 
         Computable<Double> content;
         for (Mail mail : mails) {
             content = (Computable<Double>) mail.getMessage().getContent();
 
-            if (min_value < content.getValue()) {
-                min_value = content.getValue();
+            if (max_value < content.getValue()) {
+                max_value = content.getValue();
+                newMail.setFromVertexId(mail.getFromVertexId());
+                newMail.setMessage(new Message(content));
             }
         }
-        this.getNewFunctionableValue().setValue(min_value);
-        newMail.setMessage(new Message(this.getNewFunctionableValue()));
         return newMail;
     }
 }
