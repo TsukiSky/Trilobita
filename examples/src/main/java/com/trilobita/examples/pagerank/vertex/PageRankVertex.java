@@ -1,7 +1,9 @@
 package com.trilobita.examples.pagerank.vertex;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.trilobita.commons.*;
+import com.trilobita.core.common.Mail;
+import com.trilobita.core.common.Computable;
+import com.trilobita.core.common.Message;
 import com.trilobita.core.graph.vertex.Edge;
 import com.trilobita.core.graph.vertex.Vertex;
 import lombok.EqualsAndHashCode;

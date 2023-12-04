@@ -1,7 +1,7 @@
 package com.trilobita.core.messaging;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.trilobita.commons.Mail;
+import com.trilobita.core.common.Mail;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.*;
 

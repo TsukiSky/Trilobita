@@ -1,6 +1,6 @@
 package com.trilobita.engine.server.util.functionable;
 
-import com.trilobita.commons.Computable;
+import com.trilobita.core.common.Computable;
 import com.trilobita.core.graph.VertexGroup;
 import com.trilobita.engine.server.AbstractServer;
 

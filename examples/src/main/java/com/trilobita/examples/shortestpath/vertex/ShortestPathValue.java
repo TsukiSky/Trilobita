@@ -1,6 +1,6 @@
 package com.trilobita.examples.shortestpath.vertex;
 
-import com.trilobita.commons.Computable;
+import com.trilobita.core.common.Computable;
 import lombok.Data;
 
 @Data

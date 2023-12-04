@@ -4,8 +4,8 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-import com.trilobita.commons.Computable;
-import com.trilobita.commons.Mail;
+import com.trilobita.core.common.Computable;
+import com.trilobita.core.common.Mail;
 import com.trilobita.core.messaging.MessageConsumer;
 import com.trilobita.core.messaging.MessageProducer;
 import com.trilobita.core.messaging.MessageConsumer.MessageHandler;

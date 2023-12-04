@@ -1,6 +1,6 @@
 package com.trilobita.engine.server.masterserver;
 
-import com.trilobita.commons.Mail;
+import com.trilobita.core.common.Mail;
 import com.trilobita.core.graph.Graph;
 import com.trilobita.core.graph.vertex.Vertex;
 import com.trilobita.core.messaging.MessageProducer;

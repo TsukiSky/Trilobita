@@ -7,10 +7,10 @@ import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import com.trilobita.commons.Computable;
-import com.trilobita.commons.Mail;
-import com.trilobita.commons.Message;
-import com.trilobita.commons.Mail.MailType;
+import com.trilobita.core.common.Computable;
+import com.trilobita.core.common.Mail;
+import com.trilobita.core.common.Message;
+import com.trilobita.core.common.Mail.MailType;
 import com.trilobita.core.messaging.MessageProducer;
 import com.trilobita.engine.server.util.functionable.Functionable;
 

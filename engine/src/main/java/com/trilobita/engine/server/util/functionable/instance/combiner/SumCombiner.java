@@ -2,7 +2,9 @@ package com.trilobita.engine.server.util.functionable.instance.combiner;
 
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import com.trilobita.commons.*;
+import com.trilobita.core.common.Mail;
+import com.trilobita.core.common.Computable;
+import com.trilobita.core.common.Message;
 import com.trilobita.engine.server.util.functionable.Combiner;
 
 /*

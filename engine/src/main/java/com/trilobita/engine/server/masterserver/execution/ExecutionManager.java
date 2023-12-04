@@ -1,7 +1,7 @@
 package com.trilobita.engine.server.masterserver.execution;
 
-import com.trilobita.commons.Computable;
-import com.trilobita.commons.Mail;
+import com.trilobita.core.common.Computable;
+import com.trilobita.core.common.Mail;
 import com.trilobita.core.graph.VertexGroup;
 import com.trilobita.core.messaging.MessageConsumer;
 import com.trilobita.core.messaging.MessageProducer;

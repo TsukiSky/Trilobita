@@ -1,7 +1,6 @@
-package com.trilobita.deserializer;
+package com.trilobita.core.deserializer;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.trilobita.commons.Mail;
+import com.trilobita.core.common.Mail;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.kafka.common.header.Headers;

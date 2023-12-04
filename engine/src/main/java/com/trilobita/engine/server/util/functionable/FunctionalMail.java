@@ -1,8 +1,8 @@
 package com.trilobita.engine.server.util.functionable;
 
-import com.trilobita.commons.Computable;
-import com.trilobita.commons.Mail;
-import com.trilobita.commons.Message;
+import com.trilobita.core.common.Computable;
+import com.trilobita.core.common.Mail;
+import com.trilobita.core.common.Message;
 
 public class FunctionalMail extends Mail {
     public FunctionalMail(String instanceName, Computable<?> value) {

@@ -1,7 +1,7 @@
 package com.trilobita.core.graph;
 
 
-import com.trilobita.commons.Computable;
+import com.trilobita.core.common.Computable;
 import com.trilobita.core.graph.vertex.Vertex;
 import lombok.Data;
 

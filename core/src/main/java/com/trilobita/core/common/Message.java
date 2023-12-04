@@ -1,4 +1,4 @@
-package com.trilobita.commons;
+package com.trilobita.core.common;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
