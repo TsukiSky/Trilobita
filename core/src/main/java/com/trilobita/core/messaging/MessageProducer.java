@@ -7,6 +7,7 @@ import com.trilobita.core.common.Snapshot;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 
 import java.util.HashMap;
@@ -23,8 +24,11 @@ import java.util.concurrent.ExecutionException;
  */
 @Slf4j
 public class MessageProducer {
+    static Producer<Object, Object> producer = new KafkaProducer<>(MessageAdmin.getInstance().props);
     private MessageProducer() {
+        producer = new KafkaProducer<>(MessageAdmin.getInstance().props);
     }
+
 
     private static final boolean LOG_FLAG = false;
 
@@ -42,11 +46,11 @@ public class MessageProducer {
     }
 
     public static void createAndProduce(UUID key, Mail value, String topic) {
-        try {
-            MessageAdmin.getInstance().createIfNotExist(topic);
-        } catch (ExecutionException | InterruptedException exception) {
-//            log.error("produce create topic: {}", exception.getMessage());
-        }
+//        try {
+//            MessageAdmin.getInstance().createIfNotExist(topic);
+//        } catch (ExecutionException | InterruptedException exception) {
+////            log.error("produce create topic: {}", exception.getMessage());
+//        }
         produce(key, value, topic);
     }
 
@@ -56,8 +60,8 @@ public class MessageProducer {
         }
         UUID finalKey = key;
 
-        try (final org.apache.kafka.clients.producer.Producer<Object, Object> producer = new KafkaProducer<>(
-                MessageAdmin.getInstance().props)) {
+//        try (final org.apache.kafka.clients.producer.Producer<Object, Object> producer = new KafkaProducer<>(
+//                MessageAdmin.getInstance().props)) {
             producer.send(new ProducerRecord<>(topic, finalKey.toString(), value), (event, ex) -> {
                 if (ex != null) {
                     log.error("[Message] error producing message: ", ex);
@@ -67,7 +71,7 @@ public class MessageProducer {
                     }
                 }
             });
-        }
+//        }
     }
 
     /**

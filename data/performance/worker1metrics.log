@@ -1,0 +1,74 @@
+TotalDurations:
+SuperStep 1 : 0.0689436
+SuperStep 2 : 0.4265767
+SuperStep 3 : 0.7701824
+SuperStep 4 : 0.4330575
+SuperStep 5 : 0.3795236
+SuperStep 6 : 0.3918668
+SuperStep 7 : 0.3888043
+SuperStep 8 : 0.3710051
+SuperStep 9 : 0.3900501
+SuperStep 10 : 0.458206
+SuperStep 11 : 0.4731553
+
+DistributionDurations:
+SuperStep 1 : 1.09E-5
+SuperStep 2 : 0.0082065
+SuperStep 3 : 0.2068377
+SuperStep 4 : 0.0162893
+SuperStep 5 : 0.0123117
+SuperStep 6 : 0.014074
+SuperStep 7 : 0.0141158
+SuperStep 8 : 0.0107208
+SuperStep 9 : 0.0132389
+SuperStep 10 : 0.0135411
+SuperStep 11 : 0.0107075
+
+ExecutionDurations:
+SuperStep 1 : 0.0061011
+SuperStep 2 : 0.0726466
+SuperStep 3 : 0.1615801
+SuperStep 4 : 0.0640614
+SuperStep 5 : 0.022566
+SuperStep 6 : 0.0182178
+SuperStep 7 : 0.0183126
+SuperStep 8 : 0.0187524
+SuperStep 9 : 0.0188118
+SuperStep 10 : 0.0155466
+SuperStep 11 : 0.0190754
+
+MessagingDurations:
+SuperStep 1 : 0.0286802
+SuperStep 2 : 0.3040457
+SuperStep 3 : 0.36941
+SuperStep 4 : 0.3310779
+SuperStep 5 : 0.3253192
+SuperStep 6 : 0.3365819
+SuperStep 7 : 0.3214112
+SuperStep 8 : 0.3226996
+SuperStep 9 : 0.3424364
+SuperStep 10 : 0.4130372
+SuperStep 11 : 0.353954
+
+MessageNums:
+SuperStep 1 : 215.0
+SuperStep 2 : 3570.0
+SuperStep 3 : 5647.0
+SuperStep 4 : 5840.0
+SuperStep 5 : 5849.0
+SuperStep 6 : 5849.0
+SuperStep 7 : 5849.0
+SuperStep 8 : 5849.0
+SuperStep 9 : 5849.0
+SuperStep 10 : 5849.0
+SuperStep 11 : 5849.0
+
+Worker's vertex group - Vertex numbers: 4814
+Worker's vertex group - Edge numbers: 35592
+
+TotalDurations - Sum: 4.5513714, Mean: 0.41376103636363637, Min: 0.0689436, Max: 0.7701824, Std Dev: 0.1601997371682755
+DistributionDurations - Sum: 0.3200542, Mean: 0.029095836363636367, Min: 1.09E-5, Max: 0.2068377, Std Dev: 0.05910956333791128
+ExecutionDurations - Sum: 0.4356718, Mean: 0.039606527272727274, Min: 0.0061011, Max: 0.1615801, Std Dev: 0.045561896869425675
+MessagingDurations - Sum: 3.4486533, Mean: 0.3135139363636364, Min: 0.0286802, Max: 0.4130372, Std Dev: 0.09891804368220464
+MessageNums - Sum: 56215.0, Mean: 5110.454545454545, Min: 215.0, Max: 5849.0, Std Dev: 1760.0209864451258
+Worker total operation time: 9.5111304

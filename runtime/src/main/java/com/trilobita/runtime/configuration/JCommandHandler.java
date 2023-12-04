@@ -9,7 +9,7 @@ public class JCommandHandler {
     @Parameter(names = {"--help", "-h"}, description = "Print this help message")
     public boolean help = false;
     @Parameter(names = {"--parallelism"}, description = "The parallelism of the job")
-    public int parallelism = 4; // default parallelism
+    public int parallelism = 2; // default parallelism
     @Parameter(names = {"--numOfWorker"}, description = "The number of workers")
     public int numOfWorker = 3; // default number of workers
 
