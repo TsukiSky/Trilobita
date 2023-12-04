@@ -1,7 +1,6 @@
 package com.trilobita.core.common;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.trilobita.commons.Mail;
 import com.trilobita.core.graph.Graph;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;

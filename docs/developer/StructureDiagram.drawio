@@ -251,7 +251,7 @@
         <mxCell id="lBvt6h_ialfLkE9HlVQZ-73" value="+ sendCompleteSignal(): void" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontSize=11;fontFamily=Helvetica;fontColor=default;" parent="fkjLrEyQXUZWaJiIOoPh-28" vertex="1">
           <mxGeometry y="86" width="300" height="26" as="geometry" />
         </mxCell>
-        <mxCell id="lBvt6h_ialfLkE9HlVQZ-20" value="+ distributeMail(com.trilobita.commons.Message): void" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontSize=11;fontFamily=Helvetica;fontColor=default;" parent="fkjLrEyQXUZWaJiIOoPh-28" vertex="1">
+        <mxCell id="lBvt6h_ialfLkE9HlVQZ-20" value="+ distributeMail(com.trilobita.core.common.Message): void" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontSize=11;fontFamily=Helvetica;fontColor=default;" parent="fkjLrEyQXUZWaJiIOoPh-28" vertex="1">
           <mxGeometry y="112" width="300" height="26" as="geometry" />
         </mxCell>
         <mxCell id="lBvt6h_ialfLkE9HlVQZ-1" value="VertexGroup" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
@@ -326,7 +326,7 @@
         <mxCell id="lBvt6h_ialfLkE9HlVQZ-46" value="+ to: Integer (vertexId)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontSize=11;fontFamily=Helvetica;fontColor=default;" parent="lBvt6h_ialfLkE9HlVQZ-40" vertex="1">
           <mxGeometry y="52" width="240" height="26" as="geometry" />
         </mxCell>
-        <mxCell id="lBvt6h_ialfLkE9HlVQZ-47" value="+ content: com.trilobita.commons.Message" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontSize=11;fontFamily=Helvetica;fontColor=default;" parent="lBvt6h_ialfLkE9HlVQZ-40" vertex="1">
+        <mxCell id="lBvt6h_ialfLkE9HlVQZ-47" value="+ content: com.trilobita.core.common.Message" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontSize=11;fontFamily=Helvetica;fontColor=default;" parent="lBvt6h_ialfLkE9HlVQZ-40" vertex="1">
           <mxGeometry y="78" width="240" height="26" as="geometry" />
         </mxCell>
         <mxCell id="lBvt6h_ialfLkE9HlVQZ-42" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;fontFamily=Helvetica;fontSize=11;fontColor=default;" parent="lBvt6h_ialfLkE9HlVQZ-40" vertex="1">

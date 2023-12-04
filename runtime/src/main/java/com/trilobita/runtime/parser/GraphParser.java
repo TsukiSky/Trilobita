@@ -1,7 +1,7 @@
 package com.trilobita.runtime.parser;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.trilobita.commons.Computable;
+import com.trilobita.core.common.Computable;
 import com.trilobita.core.graph.Graph;
 import com.trilobita.core.graph.vertex.Vertex;
 import lombok.extern.slf4j.Slf4j;

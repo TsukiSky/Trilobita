@@ -7,8 +7,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 import lombok.extern.slf4j.Slf4j;
 
-import com.trilobita.commons.Computable;
-import com.trilobita.commons.Mail;
+import com.trilobita.core.common.Computable;
+import com.trilobita.core.common.Mail;
 import com.trilobita.engine.server.AbstractServer;
 
 /*

@@ -1,6 +1,6 @@
 package com.trilobita.core.messaging;
 
-import com.trilobita.core.common.Util;
+import com.trilobita.core.Util;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.admin.*;
 import org.apache.kafka.common.KafkaFuture;

@@ -1,7 +1,7 @@
 package com.trilobita.runtime.environment;
 
-import com.trilobita.commons.Mail;
-import com.trilobita.commons.Message;
+import com.trilobita.core.common.Mail;
+import com.trilobita.core.common.Message;
 import com.trilobita.core.graph.Graph;
 import com.trilobita.core.messaging.MessageAdmin;
 import com.trilobita.core.messaging.MessageConsumer;

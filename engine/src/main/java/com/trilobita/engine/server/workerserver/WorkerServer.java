@@ -1,6 +1,7 @@
 package com.trilobita.engine.server.workerserver;
 
-import com.trilobita.commons.*;
+import com.trilobita.core.common.Mail;
+import com.trilobita.core.common.Message;
 import com.trilobita.core.graph.VertexGroup;
 import com.trilobita.core.graph.vertex.Vertex;
 import com.trilobita.core.messaging.MessageConsumer;

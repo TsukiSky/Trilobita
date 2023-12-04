@@ -1,6 +1,6 @@
 package com.trilobita.engine.server.masterserver;
 
-import com.trilobita.commons.Mail;
+import com.trilobita.core.common.Mail;
 import com.trilobita.core.graph.Graph;
 import com.trilobita.core.graph.vertex.Vertex;
 import com.trilobita.core.messaging.MessageProducer;
@@ -26,6 +26,7 @@ import java.util.concurrent.ExecutionException;
 @Slf4j
 @Getter
 public class MasterServer<T> extends AbstractServer<T> {
+    public boolean isPrimary;
     Graph<T> graph;                                         // the graph to be computed
     Partitioner<T> graphPartitioner;                        // the partitioner of the graph
     ExecutionManager<T> executionManager;                   // the superstep coordinator
@@ -34,7 +35,6 @@ public class MasterServer<T> extends AbstractServer<T> {
     List<Integer> workerIds = new ArrayList<>();            // the alive working servers' ids
     @Setter
     List<Integer> masterIds = new ArrayList<>();            // the alive master servers' ids
-    public boolean isPrimary;
     MasterFunctionableRunner masterFunctionableRunner;
     @Setter
     Map<Integer, List<Mail>> mailTable = new HashMap<>();   // the mail table of the graph
@@ -51,7 +51,7 @@ public class MasterServer<T> extends AbstractServer<T> {
         this.isPrimary = isPrimary;
         this.executionManager = new ExecutionManager<>(this, snapshotFrequency);
         this.heartbeatManager = new HeartbeatManager(this, this.workerIds, this.masterIds);
-        this.masterFunctionableRunner = MasterFunctionableRunner.getInstance();
+        this.masterFunctionableRunner = MasterFunctionableRunner.getInstance(id);
     }
 
     @Override
@@ -62,8 +62,8 @@ public class MasterServer<T> extends AbstractServer<T> {
             this.executionManager.listen();
             this.heartbeatManager.listen();
             this.executionManager.partitionGraph(workerIds);
-            this.sendfunctionables();
-        } catch (ExecutionException | InterruptedException  e) {
+            this.masterFunctionableRunner.start();
+        } catch (ExecutionException | InterruptedException e) {
             throw new RuntimeException(e);
         }
     }
@@ -78,15 +78,17 @@ public class MasterServer<T> extends AbstractServer<T> {
         //  todo: send message to all replica and workers (the same topic)
         Monitor.stop();
         Metrics.computeMasterDuration();
-        Monitor.masterStore("data/performance/master"+this.serverId);
+        Monitor.masterStore("data/performance/master" + this.serverId);
         MessageProducer.createAndProduce(null, new Mail(), "STOP");
         this.executionManager.stop();
         this.heartbeatManager.stop();
-        getMessageConsumer().stop();
+        this.getMessageConsumer().stop();
+        this.masterFunctionableRunner.stop();
     }
 
     /**
      * load the graph to the master server
+     *
      * @param graph the graph to be loaded
      */
     public void setGraph(Graph<T> graph) {
@@ -107,14 +109,6 @@ public class MasterServer<T> extends AbstractServer<T> {
         if (functionables != null) {
             this.masterFunctionableRunner.registerFunctionables(functionables);
         }
-    }
-
-    /**
-     * Send regitsered functionable instances to all working servers to their
-     * message topics.
-     */
-    private void sendfunctionables() {
-        this.masterFunctionableRunner.broadcastFunctionables();
     }
 
 }

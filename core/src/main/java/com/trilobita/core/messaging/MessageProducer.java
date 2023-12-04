@@ -1,8 +1,8 @@
 package com.trilobita.core.messaging;
 
-import com.trilobita.commons.Computable;
-import com.trilobita.commons.Mail;
-import com.trilobita.commons.Message;
+import com.trilobita.core.common.Computable;
+import com.trilobita.core.common.Mail;
+import com.trilobita.core.common.Message;
 import com.trilobita.core.common.Snapshot;
 
 import lombok.extern.slf4j.Slf4j;

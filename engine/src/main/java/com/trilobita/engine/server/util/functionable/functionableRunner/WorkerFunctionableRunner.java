@@ -1,7 +1,7 @@
 package com.trilobita.engine.server.util.functionable.functionableRunner;
 
-import com.trilobita.commons.Computable;
-import com.trilobita.commons.Mail.MailType;
+import com.trilobita.core.common.Computable;
+import com.trilobita.core.common.Mail.MailType;
 import com.trilobita.core.messaging.MessageConsumer;
 import com.trilobita.engine.server.AbstractServer;
 import com.trilobita.engine.server.util.functionable.Functionable;

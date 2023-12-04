@@ -1,4 +1,4 @@
-package com.trilobita.exception;
+package com.trilobita.core.exception;
 
 public class TrilobitaException extends Exception {
     public TrilobitaException(String message) {

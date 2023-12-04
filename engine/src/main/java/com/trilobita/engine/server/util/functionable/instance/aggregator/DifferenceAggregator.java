@@ -1,6 +1,8 @@
 package com.trilobita.engine.server.util.functionable.instance.aggregator;
 
-import com.trilobita.commons.Computable;
+import java.util.List;
+
+import com.trilobita.core.common.Computable;
 import com.trilobita.core.graph.VertexGroup;
 import com.trilobita.core.graph.vertex.Vertex;
 import com.trilobita.engine.server.AbstractServer;

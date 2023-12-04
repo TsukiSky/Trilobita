@@ -1,4 +1,4 @@
-package com.trilobita.commons;
+package com.trilobita.core.common;
 
 import java.io.Serializable;
 

@@ -1,10 +1,10 @@
 package com.trilobita.engine.server;
 
-import com.trilobita.commons.Mail;
+import com.trilobita.core.common.Mail;
 import com.trilobita.core.graph.VertexGroup;
 import com.trilobita.core.messaging.MessageConsumer;
 import com.trilobita.engine.server.masterserver.partition.strategy.PartitionStrategy;
-import com.trilobita.exception.TrilobitaException;
+import com.trilobita.core.exception.TrilobitaException;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;

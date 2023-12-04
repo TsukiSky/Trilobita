@@ -1,6 +1,7 @@
 package com.trilobita.core.graph.vertex;
 
-import com.trilobita.commons.*;
+import com.trilobita.core.common.Mail;
+import com.trilobita.core.common.Computable;
 import lombok.Data;
 
 import java.io.Serializable;

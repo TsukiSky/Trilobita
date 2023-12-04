@@ -3,7 +3,7 @@ package com.trilobita.engine.server.util.functionable.instance.aggregator;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.trilobita.commons.Computable;
+import com.trilobita.core.common.Computable;
 import com.trilobita.core.graph.VertexGroup;
 import com.trilobita.core.graph.vertex.Vertex;
 import com.trilobita.engine.server.util.functionable.Aggregator;

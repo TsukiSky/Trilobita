@@ -1,7 +1,7 @@
 package com.trilobita.engine.server.masterserver.execution;
 
-import com.trilobita.commons.Computable;
-import com.trilobita.commons.Mail;
+import com.trilobita.core.common.Computable;
+import com.trilobita.core.common.Mail;
 import com.trilobita.core.graph.VertexGroup;
 import com.trilobita.core.messaging.MessageConsumer;
 import com.trilobita.core.messaging.MessageProducer;
@@ -17,7 +17,9 @@ import java.util.concurrent.ExecutionException;
 
 @Slf4j
 public class ExecutionManager<T> {
+    public final Map<Integer, List<Mail>> snapshotMailTable = new HashMap<>();
     private final MasterServer<T> masterServer;
+    private final int snapshotFrequency;
     MessageConsumer completeSignalConsumer;
     MessageConsumer confirmStartConsumer;
     Synchronizer<T> synchronizer; // the synchronizer of the replicas
@@ -26,8 +28,6 @@ public class ExecutionManager<T> {
     private int nConfirmWorker = 0;
     @Getter
     private int superstep = 0;
-    private final int snapshotFrequency;
-    public final Map<Integer, List<Mail>> snapshotMailTable = new HashMap<>();
 
     public ExecutionManager(MasterServer<T> masterServer, int snapshotFrequency) {
         this.masterServer = masterServer;
@@ -59,7 +59,7 @@ public class ExecutionManager<T> {
         this.confirmStartConsumer = new MessageConsumer("CONFIRM_RECEIVE", masterServer.getServerId(), new MessageConsumer.MessageHandler() {
             @Override
             public void handleMessage(UUID key, Mail value, int partition, long offset) {
-                if (!masterServer.isPrimary){
+                if (!masterServer.isPrimary) {
                     return;
                 }
                 int senderId = (int) value.getMessage().getContent();
@@ -77,7 +77,7 @@ public class ExecutionManager<T> {
         this.completeSignalConsumer = new MessageConsumer(Mail.MailType.FINISH_SIGNAL.ordinal(), masterServer.getServerId(), new MessageConsumer.MessageHandler() {
             @Override
             public void handleMessage(UUID key, Mail value, int partition, long offset) throws InterruptedException {
-                if (!masterServer.isPrimary){
+                if (!masterServer.isPrimary) {
                     return;
                 }
                 if (Boolean.TRUE.equals(masterServer.getHeartbeatManager().getIsHandlingFault())) {
@@ -106,7 +106,7 @@ public class ExecutionManager<T> {
 
                 if (nFinishWorker == masterServer.getWorkerIds().size()) {
                     // aggregate functional values and send to workers
-                    masterServer.getMasterFunctionableRunner().runFunctionableTasks(masterServer.getInMailQueue());
+                    masterServer.getMasterFunctionableRunner().runFunctionableTasks();
                     log.info("[Functionable] finished executing Functionable tasks");
 
                     Metrics.Superstep.computeMasterDuration();
@@ -171,6 +171,7 @@ public class ExecutionManager<T> {
 
     /**
      * check whether the server is doing snapshot
+     *
      * @return whether the server is doing snapshot
      */
     public boolean isDoingSnapshot() {
