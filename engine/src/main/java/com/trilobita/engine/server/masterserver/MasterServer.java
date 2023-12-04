@@ -82,6 +82,7 @@ public class MasterServer<T> extends AbstractServer<T> {
         MessageProducer.createAndProduce(null, new Mail(), "STOP");
         this.executionManager.stop();
         this.heartbeatManager.stop();
+        getMessageConsumer().stop();
     }
 
     /**

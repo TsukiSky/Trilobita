@@ -53,6 +53,10 @@ public class WorkerFunctionableRunner extends FunctionableRunner {
 
     public void stop() throws InterruptedException {
         this.initFunctionablesConsumer.stop();
+        for (Functionable<?> functionable : this.getFunctionables()) {
+            if (functionable.getWorkerMessageConsumer() != null)
+                functionable.getWorkerMessageConsumer().stop();
+        }
     }
 
     /**
