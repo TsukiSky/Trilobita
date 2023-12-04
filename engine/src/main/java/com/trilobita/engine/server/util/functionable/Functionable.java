@@ -15,24 +15,20 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 /*
- * An abstract class for easy adding or removing functional blocks, 
+ * An abstract class for easy adding or removing functional blocks,
  * We provide the implementation of Combiner and Aggregator, as discussed in Pregel.
  */
 @Data
 @Slf4j
 public abstract class Functionable<T> implements Serializable {
 
+    private static String MASTER_TOPIC = "MASTER_FUNCTIONAL";
     public String instanceName;
     private Computable<T> lastFunctionableValue; // returned by master for last superstep
     private Computable<T> newFunctionableValue; // this superstep
     private String topic = null;
-    private static String MASTER_TOPIC = "SERVER_0_MESSAGE";
     private MessageConsumer workerMessageConsumer = null;
     private Integer serverId;
-
-    public abstract void execute(AbstractServer<?> server);
-
-    public abstract void execute(List<Computable<?>> computables);
 
     public Functionable(Computable<T> initLastValue, Computable<T> initNewValue) {
         this.instanceName = this.getClass().getName();
@@ -47,6 +43,10 @@ public abstract class Functionable<T> implements Serializable {
         this.topic = topic;
     }
 
+    public abstract void execute(AbstractServer<?> server);
+
+    public abstract void execute(List<Computable<?>> computables);
+
     /**
      * Register a consumer to the functionable. Else the default is null.
      *
@@ -58,21 +58,21 @@ public abstract class Functionable<T> implements Serializable {
         this.setWorkerMessageConsumer(
                 new MessageConsumer(this.topic, this.serverId, workerMessageHandler));
         this.workerMessageConsumer.start();
-        log.info("Started {}'s consumer", this.getInstanceName());
+        log.info("[Functionable] Started {}'s consumer", this.getInstanceName());
     }
 
     /**
      * Send mail to master/workers if needed.
      * (this.workerMessageConsumer == null) means that no need to communicate
      *
-     * @param funcValue the calculated functionable value tro be sent
+     * @param funcValue      the calculated functionable value tro be sent
      * @param serverIsMaster to decide which topic to sent to
      */
     public void sendMail(Computable<?> funcValue, boolean serverIsMaster) {
         if (this.topic != null) {
             Mail mail = new FunctionalMail(this.instanceName, funcValue);
             String topic = serverIsMaster ? this.topic : MASTER_TOPIC;
-            log.info("Send mail to {} topic.", topic);
+            log.info("[Functionable] Send mail {} to {} topic.", funcValue, topic);
             MessageProducer.createAndProduce(null, mail, topic);
         }
     }
@@ -83,27 +83,14 @@ public abstract class Functionable<T> implements Serializable {
         public Computable<?> initLastValue;
         public Computable<?> initNewValue;
 
-        public FunctionableRepresenter(String className, String topic, Computable<?> initLastValue, Computable<?> initNewValue){
+        public FunctionableRepresenter(String className, String topic, Computable<?> initLastValue, Computable<?> initNewValue) {
             this.className = className;
             this.topic = topic;
             this.initLastValue = initLastValue;
             this.initNewValue = initNewValue;
         }
 
-        public FunctionableRepresenter(String className, String topic, Computable<?> initLastValue){
-            this.className = className;
-            this.topic = topic;
-            this.initLastValue = initLastValue;
-            this.initNewValue = initLastValue;
-        }
-
-        public FunctionableRepresenter(String className, Computable<?> initLastValue, Computable<?> initNewValue){
-            this.className = className;
-            this.initLastValue = initLastValue;
-            this.initNewValue = initNewValue;
-        }
-
-        public FunctionableRepresenter(String className, Computable<?> initLastValue){
+        public FunctionableRepresenter(String className, Computable<?> initLastValue) {
             this.className = className;
             this.initLastValue = initLastValue;
             this.initNewValue = initLastValue;

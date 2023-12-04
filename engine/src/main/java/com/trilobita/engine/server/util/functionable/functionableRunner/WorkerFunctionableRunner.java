@@ -1,16 +1,15 @@
 package com.trilobita.engine.server.util.functionable.functionableRunner;
 
-import java.util.*;
-import java.util.concurrent.ExecutionException;
-
 import com.trilobita.core.common.Computable;
-import com.trilobita.core.common.Mail;
 import com.trilobita.core.common.Mail.MailType;
 import com.trilobita.core.messaging.MessageConsumer;
-import com.trilobita.core.messaging.MessageConsumer.MessageHandler;
 import com.trilobita.engine.server.AbstractServer;
 import com.trilobita.engine.server.util.functionable.Functionable;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 /**
  * An FunctionableRunner is a singleton in one worker.
@@ -26,29 +25,19 @@ public class WorkerFunctionableRunner extends FunctionableRunner {
 
     private WorkerFunctionableRunner(Integer serverId) throws ExecutionException, InterruptedException {
         this.initFunctionablesConsumer = new MessageConsumer("INIT_FUNCTIONAL",
-                serverId, new MessageHandler() {
-                    @Override
-                    public void handleMessage(UUID key, Mail value, int partition, long offset)
-                            throws InterruptedException, ExecutionException {
-//                        log.info("[Functionable] Received INIT_FUNCTIONAL message from master.");
-                        if (value.getMailType() == MailType.FUNCTIONAL) {
-                            Functionable<?> functionable = (Functionable<?>) value.getMessage().getContent();
-                            functionable.setServerId(serverId);
-                            WorkerFunctionableRunner.this.registerFunctionable(functionable);
-                            if (functionable.getTopic() != null) {
-                                functionable.registerAndStartConsumer(new MessageHandler() {
-                                    @Override
-                                    public void handleMessage(UUID key, Mail value, int partition, long offset) throws InterruptedException, ExecutionException {
-                                        log.info("[Functionable] Received Functionable message {}", value.getMessage().getContent());
-                                        Functionable.FunctionableRepresenter functionableRepresenter = (Functionable.FunctionableRepresenter) value.getMessage().getContent();
-                                        incomingFunctionableValues.add(functionableRepresenter);
-                                    }
-                                });
-                            }
-                        } else if (value.getMailType() == MailType.FINISH_SIGNAL) {
-                            log.info("Received all functionable instances from master.");
-                            // TODO: notify server?
+                serverId, (key, value, partition, offset) -> {
+                    if (value.getMailType() == MailType.FUNCTIONAL) {
+                        Functionable<?> functionable = (Functionable<?>) value.getMessage().getContent();
+                        functionable.setServerId(serverId);
+                        WorkerFunctionableRunner.this.registerFunctionable(functionable);
+                        if (functionable.getTopic() != null) {
+                            functionable.registerAndStartConsumer((key1, value1, partition1, offset1) -> {
+                                Functionable.FunctionableRepresenter functionableRepresenter = (Functionable.FunctionableRepresenter) value1.getMessage().getContent();
+                                incomingFunctionableValues.add(functionableRepresenter);
+                            });
                         }
+                    } else if (value.getMailType() == MailType.FINISH_SIGNAL) {
+                        log.info("[Functionable] Received all functionable instances from master.");
                     }
                 });
         this.initFunctionablesConsumer.start();
@@ -64,6 +53,10 @@ public class WorkerFunctionableRunner extends FunctionableRunner {
 
     public void stop() throws InterruptedException {
         this.initFunctionablesConsumer.stop();
+        for (Functionable<?> functionable : this.getFunctionables()) {
+            if (functionable.getWorkerMessageConsumer() != null)
+                functionable.getWorkerMessageConsumer().stop();
+        }
     }
 
     /**
@@ -76,9 +69,10 @@ public class WorkerFunctionableRunner extends FunctionableRunner {
             Functionable functionable = this.findFunctionableByName(insName);
             if (functionable != null) {
                 functionable.setLastFunctionableValue(lastValue);
+                log.info("[Functionable] Master sends back to {}: {}",functionable.getInstanceName(),lastValue);
             }
         }
-//        log.info("[Functionable] Finished distributeValues");
+        this.incomingFunctionableValues.clear();
     }
 
     /**
@@ -88,7 +82,6 @@ public class WorkerFunctionableRunner extends FunctionableRunner {
         if (this.getFunctionables() != null) {
             for (Functionable<?> functionable : this.getFunctionables()) {
                 log.info("Functionable {} is executing...", functionable.instanceName);
-                // TODO: add context
                 functionable.execute(server);
                 functionable.sendMail(functionable.getNewFunctionableValue(), false);
             }

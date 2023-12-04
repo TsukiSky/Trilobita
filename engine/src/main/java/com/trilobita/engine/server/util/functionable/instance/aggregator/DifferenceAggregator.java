@@ -5,9 +5,11 @@ import java.util.List;
 import com.trilobita.core.common.Computable;
 import com.trilobita.core.graph.VertexGroup;
 import com.trilobita.core.graph.vertex.Vertex;
+import com.trilobita.engine.server.AbstractServer;
 import com.trilobita.engine.server.util.functionable.Aggregator;
-
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.List;
 
 /*
  * Detect convergence condition of all vertices.
@@ -23,6 +25,18 @@ public class DifferenceAggregator extends Aggregator<Double> {
     }
 
     /**
+     * Override the original execute to make it possible to access vertex parameters
+     *
+     * @param server worker server
+     */
+    public void execute(AbstractServer<?> server) {
+        VertexGroup<?> vertexGroup = server.getVertexGroup();
+        Double reducedValue = this.aggregate(vertexGroup);
+        this.checkTermination(server);
+        this.getNewFunctionableValue().setValue(reducedValue);
+    }
+
+    /**
      * Calculate a global difference for all vertex values
      *
      * @return difference between old and new vertex values
@@ -31,10 +45,11 @@ public class DifferenceAggregator extends Aggregator<Double> {
     public Double aggregate(VertexGroup vertexGroup) {
         Double totalDiff = initAggregatedValue;
         List<Vertex<Double>> vertices = vertexGroup.getVertices();
+        // aggregate
         for (Vertex<Double> vertex : vertices) {
-            totalDiff += Math.abs(vertex.getValue().minus(vertex.getValueLastSuperstep()).getValue());
+            totalDiff += Math.abs(vertex.getValue().getValue() - vertex.getValueLastSuperstep().getValue());
         }
-//        log.info("Difference of all vertex values calculated by {}: {}", this.getServerId(), min_value.getValue());
+        log.info("Difference of all vertex values calculated by {}: {}", this.getServerId(), totalDiff);
         return totalDiff;
     }
 
@@ -51,8 +66,26 @@ public class DifferenceAggregator extends Aggregator<Double> {
             totalDiff += value;
         }
         if (totalDiff < tolerance) {
-            //TODO: CONVERGENCE REACHED
+            totalDiff = 0.0;
         }
+        log.info("[DifferenceAggregator] Total difference: {}", totalDiff);
         return totalDiff;
+    }
+
+    /**
+     * Check whether the total vertex value change from last step < tolerance. if so, mark all vertex's shouldStop as true.
+     *
+     * @param server worker server
+     */
+    private void checkTermination(AbstractServer<?> server) {
+        // check termination
+        log.info("[DifferenceAggregator] Checking termination: {}", (this.getLastFunctionableValue().getValue() < tolerance));
+        List<? extends Vertex<?>> vertices = server.getVertexGroup().getVertices();
+        if (this.getLastFunctionableValue().getValue() < tolerance) {
+
+            for (Vertex<?> vertex : vertices) {
+                vertex.setShouldStop(true);
+            }
+        }
     }
 }

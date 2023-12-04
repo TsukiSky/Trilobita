@@ -83,6 +83,11 @@ public abstract class Vertex<T> implements Serializable {
         this.addEdge(edge);
     }
 
+    public void addEdge(int to, Computable<T> value){
+        Edge edge = new Edge(this.id,to,value);
+        this.addEdge(edge);
+    }
+
 
     /**
      * Add an edge to the vertex

@@ -6,6 +6,7 @@ import com.trilobita.engine.server.masterserver.partition.Partitioner;
 import com.trilobita.engine.server.masterserver.partition.strategy.PartitionStrategy;
 import com.trilobita.engine.server.masterserver.partition.strategy.PartitionStrategyFactory;
 import com.trilobita.engine.server.util.functionable.Functionable;
+import com.trilobita.engine.server.util.functionable.instance.aggregator.DifferenceAggregator;
 import com.trilobita.engine.server.util.functionable.instance.aggregator.MinValueAggregator;
 import com.trilobita.engine.server.util.functionable.instance.combiner.MinCombiner;
 import com.trilobita.examples.shortestpath.vertex.ShortestPathValue;
@@ -77,7 +78,7 @@ public class ShortestPathMasterRunner {
         trilobitaEnvironment.setPartitioner(new Partitioner<>(partitionStrategy));
         Functionable.FunctionableRepresenter[] funcs = {
                 new Functionable.FunctionableRepresenter(MinCombiner.class.getName(), null, new ShortestPathValue(Double.POSITIVE_INFINITY),new ShortestPathValue(Double.POSITIVE_INFINITY)),
-                new Functionable.FunctionableRepresenter(MinValueAggregator.class.getName(), "MIN_VAL_AGG", new ShortestPathValue(Double.POSITIVE_INFINITY),new ShortestPathValue(Double.POSITIVE_INFINITY))
+                new Functionable.FunctionableRepresenter(DifferenceAggregator.class.getName(), "DIFF_AGG", new ShortestPathValue(Double.POSITIVE_INFINITY),new ShortestPathValue(Double.POSITIVE_INFINITY))
         };
         trilobitaEnvironment.createMasterServer(0,10, true,funcs);
         trilobitaEnvironment.startMasterServer();

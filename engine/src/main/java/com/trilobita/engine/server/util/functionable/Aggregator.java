@@ -3,6 +3,7 @@ package com.trilobita.engine.server.util.functionable;
 import com.trilobita.core.common.Computable;
 import com.trilobita.core.graph.VertexGroup;
 import com.trilobita.engine.server.AbstractServer;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 
@@ -16,7 +17,7 @@ import java.util.List;
 /*
  * Each worker server will have one and only one Aggregator instance   
  */
-
+@Slf4j
 public abstract class Aggregator<T> extends Functionable<T> {
 
     // how the aggregated value is initialized from the first input value
@@ -40,7 +41,7 @@ public abstract class Aggregator<T> extends Functionable<T> {
         this.getNewFunctionableValue().setValue(reducedValue);
     }
 
-    // Retreive certain properties to reduce
+    // Retrieve certain properties to reduce
     // Make use of reduce function
     public abstract T aggregate(VertexGroup<?> vertexGroup);
 
