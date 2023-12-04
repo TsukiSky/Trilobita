@@ -1,16 +1,15 @@
 package com.trilobita.engine.server.util.functionable.functionableRunner;
 
-import java.util.*;
-import java.util.concurrent.ExecutionException;
-
 import com.trilobita.commons.Computable;
-import com.trilobita.commons.Mail;
 import com.trilobita.commons.Mail.MailType;
 import com.trilobita.core.messaging.MessageConsumer;
-import com.trilobita.core.messaging.MessageConsumer.MessageHandler;
 import com.trilobita.engine.server.AbstractServer;
 import com.trilobita.engine.server.util.functionable.Functionable;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 /**
  * An FunctionableRunner is a singleton in one worker.
