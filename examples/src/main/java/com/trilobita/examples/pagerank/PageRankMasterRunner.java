@@ -5,6 +5,7 @@ import com.trilobita.core.graph.vertex.Vertex;
 import com.trilobita.engine.server.masterserver.partition.Partitioner;
 import com.trilobita.engine.server.masterserver.partition.strategy.PartitionStrategy;
 import com.trilobita.engine.server.masterserver.partition.strategy.PartitionStrategyFactory;
+import com.trilobita.examples.pagerank.vertex.PageRankValue;
 import com.trilobita.examples.pagerank.vertex.PageRankVertex;
 import com.trilobita.runtime.environment.TrilobitaEnvironment;
 import com.trilobita.runtime.parser.JsonParser;
@@ -79,7 +80,7 @@ public class PageRankMasterRunner {
 
     public static Graph<Double> createVerticesFromJson(){
         try {
-            return JsonParser.read("data/graph/PageRankGraph.json", PageRankVertex.class);
+            return JsonParser.read("data/graph/PageRankGraph.json", PageRankVertex.class, false, PageRankValue.class);// or null
         } catch (Exception e     ) {
             log.error("Failed to create graph from JSON", e);
             return new Graph<>(new ArrayList<>());
