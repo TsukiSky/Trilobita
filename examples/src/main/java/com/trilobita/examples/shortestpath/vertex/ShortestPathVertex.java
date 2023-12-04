@@ -29,6 +29,7 @@ public class ShortestPathVertex extends Vertex<Double> implements Serializable {
     public ShortestPathVertex(int id,Double value, Boolean source) {
         super(id, new ShortestPathValue(value));
         this.source = source;
+        this.setValueLastSuperstep(new ShortestPathValue(Double.MAX_VALUE));
     }
 
     @Override
