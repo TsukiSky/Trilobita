@@ -47,7 +47,6 @@
       <artifactId>slf4j-api</artifactId>
       <version>2.0.9</version> <!-- Use the latest version available -->
     </dependency>
-
     <!-- Logback Classic (includes logback-core) -->
     <dependency>
       <groupId>ch.qos.logback</groupId>
