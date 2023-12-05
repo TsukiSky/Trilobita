@@ -92,7 +92,12 @@ public class ShortestPathMasterRunner {
                 new Functionable.FunctionableRepresenter(MinCombiner.class.getName(), null, new ShortestPathValue(Double.POSITIVE_INFINITY),new ShortestPathValue(Double.POSITIVE_INFINITY)),
                 new Functionable.FunctionableRepresenter(DifferenceAggregator.class.getName(), "DIFF_AGG", new ShortestPathValue(Double.POSITIVE_INFINITY),new ShortestPathValue(Double.POSITIVE_INFINITY))
         };
-        trilobitaEnvironment.createMasterServer(0,10, true,funcs);
+
+        // if want to use functionables, run this
+        // trilobitaEnvironment.createMasterServer(0,10, true,funcs);
+
+        // if simulate fault, don't include funcs, run this
+        trilobitaEnvironment.createMasterServer(0,10, true);
         trilobitaEnvironment.startMasterServer();
     }
 }

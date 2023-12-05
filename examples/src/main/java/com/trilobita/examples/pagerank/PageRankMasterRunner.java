@@ -99,7 +99,13 @@ public class PageRankMasterRunner {
         Functionable.FunctionableRepresenter[] funcs = {
                 new Functionable.FunctionableRepresenter(SumCombiner.class.getName(), null, new PageRankValue(0.0), new PageRankValue(0.0)),
         };
-        trilobitaEnvironment.createMasterServer(0, 10, true, funcs);
+
+        // if want to use functionable, run this
+        // trilobitaEnvironment.createMasterServer(0, 10, true, funcs);
+
+        // if simulate fault, don't include funcs, run this
+        trilobitaEnvironment.createMasterServer(0, 10, true);
+
         trilobitaEnvironment.startMasterServer();
     }
 }
