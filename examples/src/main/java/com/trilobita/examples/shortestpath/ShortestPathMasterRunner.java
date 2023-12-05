@@ -7,8 +7,8 @@ import com.trilobita.engine.server.masterserver.partition.strategy.PartitionStra
 import com.trilobita.engine.server.masterserver.partition.strategy.PartitionStrategyFactory;
 import com.trilobita.engine.server.util.functionable.Functionable;
 import com.trilobita.engine.server.util.functionable.instance.aggregator.DifferenceAggregator;
-import com.trilobita.engine.server.util.functionable.instance.aggregator.MinValueAggregator;
 import com.trilobita.engine.server.util.functionable.instance.combiner.MinCombiner;
+import com.trilobita.examples.GraphLoader;
 import com.trilobita.examples.shortestpath.vertex.ShortestPathValue;
 import com.trilobita.examples.shortestpath.vertex.ShortestPathVertex;
 import com.trilobita.runtime.environment.TrilobitaEnvironment;
@@ -74,7 +74,7 @@ public class ShortestPathMasterRunner {
 
     public static Graph<Double> createVerticesFromFile(){
         try {
-            return GraphLoader.loadGraph("data/graph/OTCNet.csv");
+            return GraphLoader.loadShortestPathGraph("data/graph/OTCNet.csv");
         } catch (IOException e) {
             log.error(e.getMessage());
             return ShortestPathMasterRunner.createVertices();

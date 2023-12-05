@@ -10,7 +10,7 @@ import com.trilobita.engine.server.util.functionable.instance.combiner.SumCombin
 import com.trilobita.examples.pagerank.vertex.PageRankValue;
 import com.trilobita.examples.pagerank.vertex.PageRankVertex;
 import com.trilobita.runtime.environment.TrilobitaEnvironment;
-import com.trilobita.runtime.parser.GraphParser;
+import com.trilobita.examples.GraphLoader;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -82,7 +82,7 @@ public class PageRankMasterRunner {
 
     public static Graph<Double> createVerticesFromJson() {
         try {
-            return GraphParser.read("data/graph/PageRankGraph.json", PageRankVertex.class, false, PageRankValue.class);// or null
+            return GraphLoader.loadGraph("data/graph/PageRankGraph.json", PageRankVertex.class, false, PageRankValue.class);// or null
         } catch (Exception e) {
             log.error("Failed to create graph from JSON", e);
             return new Graph<>(new ArrayList<>());

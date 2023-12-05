@@ -1,23 +1,29 @@
-package com.trilobita.runtime.parser;
+package com.trilobita.examples;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.trilobita.core.common.Computable;
 import com.trilobita.core.graph.Graph;
 import com.trilobita.core.graph.vertex.Vertex;
+import com.trilobita.examples.shortestpath.vertex.ShortestPathValue;
+import com.trilobita.examples.shortestpath.vertex.ShortestPathVertex;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
-public class GraphParser {
+public class GraphLoader {
     public  static final ObjectMapper objectMapper = new ObjectMapper();
 
     public static void store(String outDir, String fileNameStr, Object o) {
@@ -30,7 +36,7 @@ public class GraphParser {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> Graph<T> read(String fileDirStr, Class<?> vertexClass, boolean edgeWeightFlag, Class<?> computableClass) throws IOException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+    public static <T> Graph<T> loadGraph(String fileDirStr, Class<?> vertexClass, boolean edgeWeightFlag, Class<?> computableClass) throws IOException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         Class<Vertex<T>> vertexClazz = (Class<Vertex<T>>) vertexClass;
         Class<Computable<T>> computableClazz = (Class<Computable<T>>) computableClass;
 
@@ -56,6 +62,40 @@ public class GraphParser {
             }
             vertices.add(vertex);
         }
+        return new Graph<>(vertices);
+    }
+
+    public static Graph<Double> loadShortestPathGraph(String filePath) throws IOException {
+        List<Vertex<Double>> vertices = new ArrayList<>();
+        Map<Integer, ShortestPathVertex> vertexMap = new HashMap<>();
+
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] values = line.split(",");
+                int fromId = Integer.parseInt(values[0]);
+                int toId = Integer.parseInt(values[1]);
+                double weight = Math.abs(Double.parseDouble(values[2])); // 取绝对值
+
+                ShortestPathVertex fromVertex;
+                if (!vertexMap.containsKey(fromId)) {
+                    if (fromId == 1) {
+                        fromVertex = new ShortestPathVertex(fromId, 0.0, true);
+                        fromVertex.setStatus(Vertex.VertexStatus.ACTIVE);
+                    } else {
+                        fromVertex = new ShortestPathVertex(fromId, Double.MAX_VALUE, false);
+                        fromVertex.setStatus(Vertex.VertexStatus.INACTIVE);
+                    }
+                    vertexMap.put(fromId, fromVertex);
+                    vertices.add(fromVertex);
+                } else {
+                    fromVertex = vertexMap.get(fromId);
+                }
+
+                fromVertex.addEdge(toId, new ShortestPathValue(weight));
+            }
+        }
+
         return new Graph<>(vertices);
     }
 }
