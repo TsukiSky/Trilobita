@@ -50,6 +50,17 @@ public class PageRankValue implements Computable<Double> {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
+    public Computable<Double> clone() {
+        try {
+            return (Computable<Double>) super.clone();
+        } catch (CloneNotSupportedException e) {
+            // Handle the exception as needed
+            return null;
+        }
+    }
+
+    @Override
     public int compareTo(Double other) {
         return this.value.compareTo(other);
     }
