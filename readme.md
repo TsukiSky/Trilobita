@@ -1,7 +1,7 @@
 # *Trilobita*: A Distributed Graph Computing System
-![logo.png](docs\graph\logo.png)
+![logo.png](./docs/graph/logo.png)
 
-*Trilobita* is a a Pregel-like distributed graph processing system implemented to handle large-scale graph processing tasks in a distributed environment efficiently. This is the 50.041 Distributive System group project.
+*Trilobita* is a *Pregel-like* distributed graph processing system implemented to handle large-scale graph processing tasks in a distributed environment efficiently. This is the 50.041 Distributive System group project.
 
 ## Overview
 
@@ -30,11 +30,11 @@ Throughout the development of *Trilobita*, we adhere to the following guiding pr
 
 Trilobita's architecture is structured into three layers: Core, Engine, and Runtime. Each layer builds upon the functionalities of the preceding one, providing a comprehensive and modular design.
 
-![architecture](.\docs\graph\architecture.png)
+![architecture](./docs/graph/architecture.png)
 
 Particularly, the relationships between the master, workers, and master replicas are illustrated below.
 
-![master-worker-replicas](F:\Trilobita\docs\graph\master-worker-replicas.png)
+![master-worker-replicas](./docs/graph/master-worker-replicas.png)
 
 ### Features
 
