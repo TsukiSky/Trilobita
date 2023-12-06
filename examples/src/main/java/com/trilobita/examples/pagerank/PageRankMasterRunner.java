@@ -5,10 +5,12 @@ import com.trilobita.core.graph.vertex.Vertex;
 import com.trilobita.engine.server.masterserver.partition.Partitioner;
 import com.trilobita.engine.server.masterserver.partition.strategy.PartitionStrategy;
 import com.trilobita.engine.server.masterserver.partition.strategy.PartitionStrategyFactory;
+import com.trilobita.engine.server.util.functionable.Functionable;
+import com.trilobita.engine.server.util.functionable.instance.combiner.SumCombiner;
 import com.trilobita.examples.pagerank.vertex.PageRankValue;
 import com.trilobita.examples.pagerank.vertex.PageRankVertex;
 import com.trilobita.runtime.environment.TrilobitaEnvironment;
-import com.trilobita.runtime.parser.GraphParser;
+import com.trilobita.examples.GraphLoader;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -17,7 +19,7 @@ import java.util.concurrent.ExecutionException;
 
 @Slf4j
 public class PageRankMasterRunner {
-    public static Graph<Double> createVertices(){
+    public static Graph<Double> createVertices() {
         List<Vertex<Double>> vertices = new ArrayList<>();
         PageRankVertex vertex0 = new PageRankVertex(0);
         vertex0.setStatus(Vertex.VertexStatus.ACTIVE);
@@ -78,10 +80,10 @@ public class PageRankMasterRunner {
         return new Graph<>(vertices);
     }
 
-    public static Graph<Double> createVerticesFromJson(){
+    public static Graph<Double> createVerticesFromJson() {
         try {
-            return GraphParser.read("data/graph/PageRankGraph.json", PageRankVertex.class, false, PageRankValue.class);// or null
-        } catch (Exception e     ) {
+            return GraphLoader.loadGraph("data/graph/PageRankGraph.json", PageRankVertex.class, false, PageRankValue.class);// or null
+        } catch (Exception e) {
             log.error("Failed to create graph from JSON", e);
             return new Graph<>(new ArrayList<>());
         }
@@ -92,9 +94,18 @@ public class PageRankMasterRunner {
         trilobitaEnvironment.initConfig();
         trilobitaEnvironment.loadGraph(PageRankMasterRunner.createVerticesFromJson());
         PartitionStrategyFactory partitionStrategyFactory = new PartitionStrategyFactory();
-        PartitionStrategy partitionStrategy = partitionStrategyFactory.getPartitionStrategy("hashPartitionStrategy",(int) trilobitaEnvironment.getConfiguration().get("numOfWorker"),trilobitaEnvironment.getGraph().getSize());
+        PartitionStrategy partitionStrategy = partitionStrategyFactory.getPartitionStrategy("hashPartitionStrategy", (int) trilobitaEnvironment.getConfiguration().get("numOfWorker"), trilobitaEnvironment.getGraph().getSize());
         trilobitaEnvironment.setPartitioner(new Partitioner<>(partitionStrategy));
-        trilobitaEnvironment.createMasterServer(0, 10,true);
+        Functionable.FunctionableRepresenter[] funcs = {
+                new Functionable.FunctionableRepresenter(SumCombiner.class.getName(), null, new PageRankValue(0.0), new PageRankValue(0.0)),
+        };
+
+        // if want to use functionable, run this
+        // trilobitaEnvironment.createMasterServer(0, 10, true, funcs);
+
+        // if simulate fault, don't include funcs, run this
+        trilobitaEnvironment.createMasterServer(0, 10, true);
+
         trilobitaEnvironment.startMasterServer();
     }
 }

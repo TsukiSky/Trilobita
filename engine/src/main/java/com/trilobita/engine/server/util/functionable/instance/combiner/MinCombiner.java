@@ -21,19 +21,16 @@ public class MinCombiner extends Combiner<Double> {
     @Override
     public Mail combineMails(Integer toVertexId, CopyOnWriteArrayList<Mail> mails) {
 
-        Mail newMail = new Mail(-1,toVertexId, null, Mail.MailType.NORMAL);
-        Double min_value = this.getLastFunctionableValue().getValue();
-
-        Computable<Double> content;
+        Computable<Double> min_value = this.getLastFunctionableValue().clone();
+        int fromVertexId = -1;
         for (Mail mail : mails) {
-            content = (Computable<Double>) mail.getMessage().getContent();
+            Computable<Double> content = (Computable<Double>) mail.getMessage().getContent();
 
-            if (min_value > content.getValue()) {
-                min_value = content.getValue();
-                newMail.setFromVertexId(mail.getFromVertexId());
-                newMail.setMessage(new Message(content));
+            if (min_value.getValue() > content.getValue()) {
+                min_value.setValue(content.getValue());
+                fromVertexId = mail.getFromVertexId();
             }
         }
-        return newMail;
+        return new Mail(fromVertexId, toVertexId, new Message(min_value), Mail.MailType.NORMAL);
     }
 }

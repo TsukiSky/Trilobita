@@ -83,11 +83,11 @@ public class ExecutionManager<T> {
         computeLatch.await(); // block until all computing tasks are finished
         Metrics.Superstep.computeExecutionDuration();
 
-//        if (server.getOutMailQueue().isEmpty()){
-//            for (Vertex<T> vertex : vertices) {
-//                vertex.setStatus(Vertex.VertexStatus.INACTIVE);
-//            }
-//        }
+        if (server.getOutMailQueue().isEmpty()){
+            for (Vertex<T> vertex : vertices) {
+                vertex.setStatus(Vertex.VertexStatus.INACTIVE);
+            }
+        }
 
         // execute functionables
         server.getFunctionableRunner().runFunctionableTasks(this.server);

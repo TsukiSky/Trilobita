@@ -19,6 +19,7 @@ public class DifferenceAggregator extends Aggregator<Double> {
 
     static Double initAggregatedValue = 0.0;
     static Double tolerance = 0.00001;
+    int superstep = 0;
 
     public DifferenceAggregator(Computable<Double> initLastValue, Computable<Double> initNewValue, String topic) {
         super(initLastValue, initNewValue, topic);
@@ -34,6 +35,7 @@ public class DifferenceAggregator extends Aggregator<Double> {
         Double reducedValue = this.aggregate(vertexGroup);
         this.checkTermination(server);
         this.getNewFunctionableValue().setValue(reducedValue);
+        superstep++;
     }
 
     /**
@@ -79,12 +81,14 @@ public class DifferenceAggregator extends Aggregator<Double> {
      */
     private void checkTermination(AbstractServer<?> server) {
         // check termination
-        log.info("[DifferenceAggregator] Checking termination: {}", (this.getLastFunctionableValue().getValue() < tolerance));
-        List<? extends Vertex<?>> vertices = server.getVertexGroup().getVertices();
-        if (this.getLastFunctionableValue().getValue() < tolerance) {
+        if (this.superstep > 0) {
+            log.info("[DifferenceAggregator] Checking termination: {}", (this.getLastFunctionableValue().getValue() < tolerance));
+            List<? extends Vertex<?>> vertices = server.getVertexGroup().getVertices();
+            if (this.getLastFunctionableValue().getValue() < tolerance) {
 
-            for (Vertex<?> vertex : vertices) {
-                vertex.setShouldStop(true);
+                for (Vertex<?> vertex : vertices) {
+                    vertex.setShouldStop(true);
+                }
             }
         }
     }

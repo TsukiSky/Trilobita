@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
+
 import lombok.extern.slf4j.Slf4j;
 
 import com.trilobita.core.common.Computable;
@@ -17,24 +18,32 @@ import com.trilobita.engine.server.AbstractServer;
 @Slf4j
 public abstract class Combiner<T> extends Functionable<T> {
 
+    private Map<Integer, CopyOnWriteArrayList<Mail>> vertexMailMap = new HashMap<>();
+
     public Combiner(Computable<T> initLastValue, Computable<T> initNewValue) {
         super(initLastValue, initNewValue);
     }
 
-    private Map<Integer, CopyOnWriteArrayList<Mail>> vertexMailMap = new HashMap<Integer, CopyOnWriteArrayList<Mail>>();
-
     @Override
     public void execute(AbstractServer<?> server) {
         LinkedBlockingQueue<Mail> outMailQueue = server.getOutMailQueue();
-//        log.info("outMailQueue before combination: {}",outMailQueue);
+//        log.info("outMailQueue before combination: {}", outMailQueue);
         while (!outMailQueue.isEmpty()) {
             Mail mail = server.getOutMailQueue().poll();
-            int receiverId = mail.getToVertexId();
-            this.addToVertexMailMap(receiverId, mail);
+            if (mail != null) {
+                int receiverId = mail.getToVertexId();
+                this.addToVertexMailMap(receiverId, mail);
+            }
+        }
+//        log.info("vertexMailMap: {}", vertexMailMap);
+        for (Map.Entry<Integer, CopyOnWriteArrayList<Mail>> map : vertexMailMap.entrySet()) {
+            if (!map.getValue().isEmpty()) {
+                Mail combinedMail = this.combineMails(map.getKey(), map.getValue());
+                server.getOutMailQueue().add(combinedMail);
+            }
         }
         for (Map.Entry<Integer, CopyOnWriteArrayList<Mail>> map : vertexMailMap.entrySet()) {
-            Mail combinedMail = this.combineMails(map.getKey(), map.getValue());
-            server.getOutMailQueue().add(combinedMail);
+            vertexMailMap.get(map.getKey()).clear();
         }
 //        log.info("outMailQueue after combination: {}", server.getOutMailQueue());
     }
