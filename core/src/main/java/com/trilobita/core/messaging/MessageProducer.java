@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 /**
  * <h1>MessageProducer</h1>
@@ -45,11 +46,15 @@ public class MessageProducer {
     }
 
     public static void produce(UUID key, Mail value, String topic) {
-//        try {
-//            MessageAdmin.getInstance().createIfNotExist(topic);
-//        } catch (ExecutionException | InterruptedException exception) {
-////            log.error("produce create topic: {}", exception.getMessage());
-//        }
+        doProduce(key, value, topic);
+    }
+
+    public static void createAndProduce(UUID key, Mail value, String topic) {
+        try {
+            MessageAdmin.getInstance().createIfNotExist(topic);
+        } catch (ExecutionException | InterruptedException exception) {
+            log.error("produce create topic: {}", exception.getMessage());
+        }
         doProduce(key, value, topic);
     }
 
