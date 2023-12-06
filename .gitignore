@@ -36,3 +36,5 @@ build/
 
 ### data ###
 /data/snapshot
+/data/graph
+/data/performance

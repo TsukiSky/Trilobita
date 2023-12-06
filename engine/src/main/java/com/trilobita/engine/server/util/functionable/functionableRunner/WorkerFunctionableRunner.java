@@ -38,7 +38,7 @@ public class WorkerFunctionableRunner extends FunctionableRunner {
                         }
                     } else if (value.getMailType() == MailType.FINISH_SIGNAL) {
                         this.stopInitFunctionablesConsumer();
-                        log.info("[Functionable] Received all functionable instances from master.");
+                        //log.info("[Functionable] Received all functionable instances from master.");
                     }
                 });
         this.initFunctionablesConsumer.start();
@@ -70,7 +70,7 @@ public class WorkerFunctionableRunner extends FunctionableRunner {
             Functionable functionable = this.findFunctionableByName(insName);
             if (functionable != null) {
                 functionable.setLastFunctionableValue(lastValue);
-                log.info("[Functionable] Master sends back to {}: {}",functionable.getInstanceName(),lastValue);
+                //log.info("[Functionable] Master sends back to {}: {}",functionable.getInstanceName(),lastValue);
             }
         }
         this.incomingFunctionableValues.clear();
@@ -86,11 +86,11 @@ public class WorkerFunctionableRunner extends FunctionableRunner {
     public void runFunctionableTasks(AbstractServer<?> server) {
         if (this.getFunctionables() != null) {
             for (Functionable<?> functionable : this.getFunctionables()) {
-                log.info("Functionable {} is executing...", functionable.instanceName);
+                //log.info("Functionable {} is executing...", functionable.instanceName);
                 functionable.execute(server);
                 functionable.sendMail(functionable.getNewFunctionableValue(), false);
             }
-            log.info("Finished all functionable tasks;");
+            //log.info("Finished all functionable tasks;");
         }
     }
 }

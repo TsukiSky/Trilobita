@@ -55,16 +55,16 @@ public class Snapshot<T> implements Serializable {
         File directory = new File(snapshotDirectory);
         if (!directory.exists()) {
             if (directory.mkdirs()) {
-                log.info("[Snapshot] Snapshot directory data/snapshot created successfully");
+                //log.info("[Snapshot] Snapshot directory data/snapshot created successfully");
             } else {
-                log.info("[Snapshot] Failed to create snapshot directory");
+                //log.info("[Snapshot] Failed to create snapshot directory");
             }
         }
         ObjectMapper objectMapper = new ObjectMapper();
 
         try {
             objectMapper.writeValue(new File(directory, "snapshot_superstep_" + this.superstep + ".json"), this);
-            log.info("[Snapshot] Snapshot stored");
+            //log.info("[Snapshot] Snapshot stored");
         } catch (IOException e) {
             e.printStackTrace();
         }

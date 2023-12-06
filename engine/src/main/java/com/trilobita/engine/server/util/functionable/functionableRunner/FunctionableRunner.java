@@ -33,7 +33,7 @@ public abstract class FunctionableRunner {
         if (!this.getFunctionables().contains(functionable)) {
             this.getFunctionables().add(functionable);
         } else {
-            log.info("Functionable {} already exists.", functionable);
+            //log.info("Functionable {} already exists.", functionable);
         }
     }
 }

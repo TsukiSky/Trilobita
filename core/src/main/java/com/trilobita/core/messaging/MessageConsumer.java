@@ -81,14 +81,14 @@ public class MessageConsumer {
         if (!existing.contains(topic)) {
             try {
                 messageAdmin.createIfNotExist(topic);
-                log.info("existing topic: {} do not contain {}! Creating, and then subscribe...", existing, topic);
+                //log.info("existing topic: {} do not contain {}! Creating, and then subscribe...", existing, topic);
             } catch (ExecutionException | InterruptedException e) {
-                log.error("[MessageConsumer]", e);
+                //log.error("[MessageConsumer]", e);
             }
 
         }
         if (runFlag) {
-            log.info("already listening to topic: {}!", topic);
+            //log.info("already listening to topic: {}!", topic);
             return;
         }
         runFlag = true;
@@ -105,9 +105,9 @@ public class MessageConsumer {
                         int partition = consumerRecord.partition();
                         long offset = consumerRecord.offset();
                         if (DEBUG_LOG){
-                            log.info("Consumer Record: Topic: {}, key: {}, value: {}, partition: {}, offset: {}",
-                                    topic, consumerRecord.key(), value, partition, offset
-                            );
+                            //log.info("Consumer Record: Topic: {}, key: {}, value: {}, partition: {}, offset: {}",
+                                    //topic, consumerRecord.key(), value, partition, offset
+                            //);
                         }
 //                        if (value != null){
                         messageHandler.handleMessage(UUID.fromString(consumerRecord.key()), value, partition, offset);
@@ -115,7 +115,7 @@ public class MessageConsumer {
                     }
                 }
             } catch (ExecutionException | JsonProcessingException | InterruptedException e) {
-                log.error("[MessageConsumer]", e);
+                //log.error("[MessageConsumer]", e);
             }
         });
         consumerThread.start();

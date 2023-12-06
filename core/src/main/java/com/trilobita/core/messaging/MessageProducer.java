@@ -53,7 +53,7 @@ public class MessageProducer {
         try {
             MessageAdmin.getInstance().createIfNotExist(topic);
         } catch (ExecutionException | InterruptedException exception) {
-            log.error("produce create topic: {}", exception.getMessage());
+            //log.error("produce create topic: {}", exception.getMessage());
         }
     }
 
@@ -61,7 +61,7 @@ public class MessageProducer {
         try {
             MessageAdmin.getInstance().createIfNotExist(topic);
         } catch (ExecutionException | InterruptedException exception) {
-            log.error("produce create topic: {}", exception.getMessage());
+            //log.error("produce create topic: {}", exception.getMessage());
         }
         doProduce(key, value, topic);
     }
@@ -76,10 +76,10 @@ public class MessageProducer {
 //                MessageAdmin.getInstance().props)) {
             producer.send(new ProducerRecord<>(topic, finalKey.toString(), value), (event, ex) -> {
                 if (ex != null) {
-                    log.error("[Message] error producing message: ", ex);
+                    //log.error("[Message] error producing message: ", ex);
                 } else {
                     if (LOG_FLAG) {
-                        log.info("[Message] produced event to topic {}: key = {} value = {}", topic, finalKey, value);
+                        //log.info("[Message] produced event to topic {}: key = {} value = {}", topic, finalKey, value);
                     }
                 }
             });

@@ -77,7 +77,7 @@ public class MessageAdmin {
                     if (memberDescription.assignment().topicPartitions().stream()
                             .anyMatch(tp -> tp.topic().equals(topic))) {
 
-                        log.info("Group " + group + " is subscribed to topic " + topic);
+                        //log.info("Group " + group + " is subscribed to topic " + topic);
                         ret.add(group);
                     }
                 }
@@ -109,7 +109,7 @@ public class MessageAdmin {
                 for (MemberDescription memberDescription : description.members()) {
                     if (memberDescription.assignment().topicPartitions().stream()
                             .anyMatch(tp -> tp.topic().equals(topic))) {
-                        log.debug("Consumer " + memberDescription.consumerId() + " in group " + group + " is subscribed to topic " + topic);
+                        //log.debug("Consumer " + memberDescription.consumerId() + " in group " + group + " is subscribed to topic " + topic);
                         consumersInGroup.add(memberDescription.consumerId());
                     }
                 }

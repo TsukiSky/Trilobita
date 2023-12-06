@@ -63,9 +63,9 @@ public class ExecutionManager<T> {
                     return;
                 }
                 int senderId = (int) value.getMessage().getContent();
-                log.info("[Confirm] received a confirm message from worker {}", senderId);
+                //log.info("[Confirm] received a confirm message from worker {}", senderId);
                 nConfirmWorker += 1;
-                log.info("nconfirmworker: {}, alive workers: {}", nConfirmWorker, masterServer.getWorkerIds());
+                //log.info("nconfirmworker: {}, alive workers: {}", nConfirmWorker, masterServer.getWorkerIds());
                 if (nConfirmWorker == masterServer.getWorkerIds().size()) {
                     // send start message to all workers
                     MessageProducer.produce(null, new Mail(), "CONFIRM_START");
@@ -92,12 +92,12 @@ public class ExecutionManager<T> {
                     nCompleteWorker++;
                 }
                 nFinishWorker++;
-                log.info("[Superstep] number of finished workers: {}", nFinishWorker);
+                //log.info("[Superstep] number of finished workers: {}", nFinishWorker);
 
                 if (!vertexValues.isEmpty()) {
                     // update the graph
                     masterServer.getGraph().updateVertexValues(vertexValues);
-                    log.info("[Graph] the updated graph is : {}", masterServer.getGraph());
+                    //log.info("[Graph] the updated graph is : {}", masterServer.getGraph());
                     for (Mail snapshotMail : snapshotMails) {
                         snapshotMailTable.computeIfAbsent(snapshotMail.getToVertexId(), k -> new ArrayList<>());
                         snapshotMailTable.get(snapshotMail.getToVertexId()).add(snapshotMail);
@@ -107,7 +107,7 @@ public class ExecutionManager<T> {
                 if (nFinishWorker == masterServer.getWorkerIds().size()) {
                     // aggregate functional values and send to workers
                     masterServer.getMasterFunctionableRunner().runFunctionableTasks();
-                    log.info("[Functionable] finished executing Functionable tasks");
+                    //log.info("[Functionable] finished executing Functionable tasks");
 
                     Metrics.Superstep.computeMasterDuration();
                     Monitor.stopAndStartNewSuperstepMaster();
@@ -117,11 +117,11 @@ public class ExecutionManager<T> {
                     }
                     // check whether all workers have finished
                     if (nCompleteWorker == masterServer.getWorkerIds().size()) {
-                        log.info("[Complete] the work has complete, the final graph is: {}", masterServer.getGraph());
+                        //log.info("[Complete] the work has complete, the final graph is: {}", masterServer.getGraph());
                         masterServer.shutdown();
                     } else {
                         // start a new superstep
-                        Thread.sleep(300);
+//                        Thread.sleep(300);
                         Metrics.Superstep.setMasterSuperStepStartTime();
                         superstep();
                     }

@@ -74,9 +74,9 @@ public class ShortestPathMasterRunner {
 
     public static Graph<Double> createVerticesFromFile(){
         try {
-            return GraphLoader.loadShortestPathGraph("data/graph/ShortestPathGraph.csv");
+            return GraphLoader.loadShortestPathGraph("data/graph/Graph-91.csv");
         } catch (IOException e) {
-            log.error(e.getMessage());
+            //log.error(e.getMessage());
             return ShortestPathMasterRunner.createVertices();
         }
     }
