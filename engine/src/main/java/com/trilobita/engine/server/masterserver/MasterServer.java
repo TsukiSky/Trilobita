@@ -79,7 +79,7 @@ public class MasterServer<T> extends AbstractServer<T> {
         Monitor.stop();
         Metrics.computeMasterDuration();
         Monitor.masterStore("data/performance/master" + this.serverId);
-        MessageProducer.createAndProduce(null, new Mail(), "STOP");
+        MessageProducer.produce(null, new Mail(), "STOP");
         this.executionManager.stop();
         this.heartbeatManager.stop();
         this.getMessageConsumer().stop();

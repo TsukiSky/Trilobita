@@ -44,7 +44,7 @@ public class TrilobitaCluster<T> {
         log.info("[JOIN CLUSTER] Machine joins the cluster --> MachineId: {}", machineId);
         this.numOfWorkers = machineId;  // the current number of workers is the current number of machines in the cluster
         this.isMaster = machineId == 0; // the first machine is the master
-        MessageProducer.createAndProduce(null, new Mail(new Message(this.machineId), Mail.MailType.NORMAL), topic);
+        MessageProducer.produce(null, new Mail(new Message(this.machineId), Mail.MailType.NORMAL), topic);
 
         this.clusterConsumer = new MessageConsumer(topic, machineId, new MessageConsumer.MessageHandler() {
             @Override
@@ -124,7 +124,7 @@ public class TrilobitaCluster<T> {
         content.put("GRAPH", graph);
         content.put("PARTITION_STRATEGY", partitionStrategy);
         submitMail.setMessage(new Message(content));
-        MessageProducer.createAndProduce(null, submitMail, topic);
+        MessageProducer.produce(null, submitMail, topic);
     }
 
     private void startServer(Graph<T> graph, PartitionStrategy partitionStrategy) throws ExecutionException, InterruptedException {

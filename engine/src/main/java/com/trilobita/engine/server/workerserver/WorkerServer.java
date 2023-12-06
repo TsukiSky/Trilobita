@@ -83,7 +83,7 @@ public class WorkerServer<T> extends AbstractServer<T> {
                 Mail mailToConfirmReceive = new Mail();
                 mailToConfirmReceive.setMessage(message);
                 // TODO: wait for functionables to register themselves
-                MessageProducer.createAndProduce(null, mailToConfirmReceive,"CONFIRM_RECEIVE");
+                MessageProducer.produce(null, mailToConfirmReceive,"CONFIRM_RECEIVE");
             }
         });
 

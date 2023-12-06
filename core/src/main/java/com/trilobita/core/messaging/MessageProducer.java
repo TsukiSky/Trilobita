@@ -14,7 +14,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
 
 /**
  * <h1>MessageProducer</h1>
@@ -41,20 +40,20 @@ public class MessageProducer {
      *              created if it does not exist.
      * @author Guo Ziniu : ziniu@catroll.io
      */
-    public static void createAndProduce(UUID key, Mail value, int topic) {
-        createAndProduce(key, value, String.valueOf(topic));
+    public static void produce(UUID key, Mail value, int topic) {
+        produce(key, value, String.valueOf(topic));
     }
 
-    public static void createAndProduce(UUID key, Mail value, String topic) {
+    public static void produce(UUID key, Mail value, String topic) {
 //        try {
 //            MessageAdmin.getInstance().createIfNotExist(topic);
 //        } catch (ExecutionException | InterruptedException exception) {
 ////            log.error("produce create topic: {}", exception.getMessage());
 //        }
-        produce(key, value, topic);
+        doProduce(key, value, topic);
     }
 
-    public static void produce(UUID key, Mail value, String topic) {
+    public static void doProduce(UUID key, Mail value, String topic) {
         if (key == null) {
             key = UUID.randomUUID();
         }
@@ -78,7 +77,7 @@ public class MessageProducer {
      * Produce a start signal to the topic
      */
     public static void produceStartSignal(boolean doSnapshot) {
-        createAndProduce(null, new Mail(-1, new Message(doSnapshot), Mail.MailType.START_SIGNAL),
+        produce(null, new Mail(-1, new Message(doSnapshot), Mail.MailType.START_SIGNAL),
                 Mail.MailType.START_SIGNAL.ordinal());
     }
 
@@ -94,7 +93,7 @@ public class MessageProducer {
         map.put("SNAPSHOT_MAILS", snapshotMails);
         Message message = new Message(map);
         Mail mail = new Mail(-1, message, Mail.MailType.FINISH_SIGNAL);
-        MessageProducer.createAndProduce(null, mail, mail.getMailType().ordinal());
+        MessageProducer.produce(null, mail, mail.getMailType().ordinal());
     }
 
     /**
@@ -109,7 +108,7 @@ public class MessageProducer {
         message.setContent(syncContent);
         Mail mail = new Mail();
         mail.setMessage(message);
-        MessageProducer.createAndProduce(null, mail, "MASTER_SYNC");
+        MessageProducer.produce(null, mail, "MASTER_SYNC");
     }
 
     /**
@@ -122,7 +121,7 @@ public class MessageProducer {
         Message message = new Message(serverId);
         Mail mail = new Mail(message, Mail.MailType.HEARTBEAT);
         String topic = isWorker ? "HEARTBEAT_WORKER" : "HEARTBEAT_MASTER";
-        MessageProducer.createAndProduce(null, mail, topic);
+        MessageProducer.produce(null, mail, topic);
     }
 
     /**
@@ -134,7 +133,7 @@ public class MessageProducer {
     public static void producePartitionGraphMessage(Object objectMap, Integer serverId) {
         Message message = new Message(objectMap);
         Mail mail = new Mail(-1, message, Mail.MailType.PARTITION);
-        MessageProducer.createAndProduce(null, mail, "SERVER_" + serverId + "_PARTITION");
+        MessageProducer.produce(null, mail, "SERVER_" + serverId + "_PARTITION");
     }
 
     /**
@@ -144,6 +143,6 @@ public class MessageProducer {
      * @param serverId receiver worker id
      */
     public static void produceWorkerServerMessage(Mail mail, Integer serverId) {
-        MessageProducer.createAndProduce(null, mail, "SERVER_" + serverId + "_MESSAGE");
+        MessageProducer.produce(null, mail, "SERVER_" + serverId + "_MESSAGE");
     }
 }
