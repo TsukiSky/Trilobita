@@ -88,10 +88,10 @@ public class HeartbeatManager {
             @Override
             public void handleMessage(UUID key, Mail value, int partition, long offset) {
                 int senderId = (int) value.getMessage().getContent();
-                if (!workerIds.contains(senderId)) {
-                    workerIds.add(senderId);
+                if (!masterServer.getWorkerIds().contains(senderId)) {
+                    masterServer.getWorkerIds().add(senderId);
                     workerHeartBeatChecker.getHeartbeats().put(senderId, true);
-                    masterServer.getExecutionManager().partitionGraph(workerIds);
+                    masterServer.getExecutionManager().partitionGraph(masterServer.getWorkerIds());
                 } else {
                     // update the heartbeat
                     workerHeartBeatChecker.recordHeartbeatFrom(senderId);
