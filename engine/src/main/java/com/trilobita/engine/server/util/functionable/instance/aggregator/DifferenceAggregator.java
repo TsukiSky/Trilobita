@@ -9,8 +9,6 @@ import com.trilobita.engine.server.AbstractServer;
 import com.trilobita.engine.server.util.functionable.Aggregator;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.List;
-
 /*
  * Detect convergence condition of all vertices.
  */
@@ -49,7 +47,9 @@ public class DifferenceAggregator extends Aggregator<Double> {
         List<Vertex<Double>> vertices = vertexGroup.getVertices();
         // aggregate
         for (Vertex<Double> vertex : vertices) {
-            totalDiff += Math.abs(vertex.getValue().getValue() - vertex.getValueLastSuperstep().getValue());
+            if (vertex.getValueLastSuperstep() != null) {
+                totalDiff += Math.abs(vertex.getValue().getValue() - vertex.getValueLastSuperstep().getValue());
+            }
         }
         log.info("Difference of all vertex values calculated by {}: {}", this.getServerId(), totalDiff);
         return totalDiff;

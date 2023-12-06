@@ -7,10 +7,10 @@ import com.trilobita.engine.server.masterserver.partition.strategy.PartitionStra
 import com.trilobita.engine.server.masterserver.partition.strategy.PartitionStrategyFactory;
 import com.trilobita.engine.server.util.functionable.Functionable;
 import com.trilobita.engine.server.util.functionable.instance.combiner.SumCombiner;
+import com.trilobita.examples.GraphLoader;
 import com.trilobita.examples.pagerank.vertex.PageRankValue;
 import com.trilobita.examples.pagerank.vertex.PageRankVertex;
 import com.trilobita.runtime.environment.TrilobitaEnvironment;
-import com.trilobita.examples.GraphLoader;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -101,10 +101,10 @@ public class PageRankMasterRunner {
         };
 
         // if want to use functionable, run this
-        // trilobitaEnvironment.createMasterServer(0, 10, true, funcs);
+        // trilobitaEnvironment.createMasterServer(2, 10, true, funcs);
 
         // if simulate fault, don't include funcs, run this
-        trilobitaEnvironment.createMasterServer(0, 10, true);
+        trilobitaEnvironment.createMasterServer(2, 10, true);
 
         trilobitaEnvironment.startMasterServer();
     }

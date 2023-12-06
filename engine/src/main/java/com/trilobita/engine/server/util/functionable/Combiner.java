@@ -18,7 +18,7 @@ import com.trilobita.engine.server.AbstractServer;
 @Slf4j
 public abstract class Combiner<T> extends Functionable<T> {
 
-    private Map<Integer, CopyOnWriteArrayList<Mail>> vertexMailMap = new HashMap<>();
+    private final Map<Integer, CopyOnWriteArrayList<Mail>> vertexMailMap = new HashMap<>();
 
     public Combiner(Computable<T> initLastValue, Computable<T> initNewValue) {
         super(initLastValue, initNewValue);
@@ -57,7 +57,7 @@ public abstract class Combiner<T> extends Functionable<T> {
 
     private void addToVertexMailMap(Integer receiverVertextId, Mail mail) {
         // If the key is not present in the map, create a new list and put it in the map
-        this.vertexMailMap.putIfAbsent(receiverVertextId, new CopyOnWriteArrayList<Mail>());
+        this.vertexMailMap.putIfAbsent(receiverVertextId, new CopyOnWriteArrayList<>());
         // Add the value to the list associated with the key
         this.vertexMailMap.get(receiverVertextId).add(mail);
     }

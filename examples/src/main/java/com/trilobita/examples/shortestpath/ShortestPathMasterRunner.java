@@ -97,7 +97,7 @@ public class ShortestPathMasterRunner {
         // trilobitaEnvironment.createMasterServer(0,10, true,funcs);
 
         // if simulate fault, don't include funcs, run this
-        trilobitaEnvironment.createMasterServer(0,10, true);
+        trilobitaEnvironment.createMasterServer(2,10, true);
         trilobitaEnvironment.startMasterServer();
     }
 }
