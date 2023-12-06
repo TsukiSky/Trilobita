@@ -1,4 +1,4 @@
-# *Trilobita*: A Distributed Graph Computing System
+# *Trilobita*: A Distributed Graph Processing System
 ![logo.png](./docs/graph/logo.png)
 
 *Trilobita* is a *Pregel-like* distributed graph processing system implemented to handle large-scale graph processing tasks in a distributed environment efficiently. This is the 50.041 Distributive System group project.
@@ -9,10 +9,10 @@
 
 Throughout the development of *Trilobita*, we adhere to the following guiding principles.
 
-* **Fault Tolerance**: the system should be able to gracefully manage failures of both the master and worker servers, ensuring continuity in task execution and failure handling.
-* **Flexibility**: users of *Trilobita* should be empowered to customize their graph processing tasks and assemble operational clusters by using their personal laptops.
-* **Consistency**: the system should guarantee causal consistency during the computation and fault-handling process, providing a reliable and predictable environment for users.
-* **Efficiency**: the connection and communication between different machines should be efficient and adapt to varying cluster sizes for optimal performance.
+1. **Fault Tolerance**: the system should be able to gracefully manage failures of both the master and worker servers, ensuring continuity in task execution and failure handling.
+2. **Flexibility**: users of *Trilobita* should be empowered to customize their graph processing tasks and assemble operational clusters by using their personal laptops.
+3. **Consistency**: the system should guarantee causal consistency during the computation and fault-handling process, providing a reliable and predictable environment for users.
+4. **Efficiency**: the connection and communication between different machines should be efficient and adapt to varying cluster sizes for optimal performance.
 
 ## Team Members
 
@@ -42,9 +42,9 @@ We implement a rich set of features in *Trilobita* to empower users with efficie
 
 * Distributed Graph Processing: *WokerServer*, *MasterServer*, *TrilobitaEnvironment*
 
-* Fault Tolerance for Worker and Master: Heartbeat, Snapshot
+* Fault Tolerance for Worker and Master: *Heartbeat*, *Snapshot*
 
-* Functionable Instances: *Combiner*, *Aggregator*, User Self-defined Functionable
+* Functionable Instances: *Combiner*, *Aggregator*, *User Self-defined Functionable*
 
 * Server Performance Monitor
 
@@ -76,7 +76,19 @@ mvn install
 
 **Run Examples:**
 
+We implement two examples in the `examples` module, which can be run by the following sequence.
 
+***Note**: the examples are run on a local cluster with 3 workers and 1 master.*
+
+**Example 1: PageRank Algorithm**
+
+```
+```
+
+**Example 2: Shortest Path Search Algorithm**
+
+```
+```
 
 ## License
 

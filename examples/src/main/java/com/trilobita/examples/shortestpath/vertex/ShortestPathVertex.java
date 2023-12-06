@@ -41,6 +41,11 @@ public class ShortestPathVertex extends Vertex<Double> implements Serializable {
     @Override
     public void compute() {
 //        startSuperstep();
+        try {
+            Thread.sleep(50);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         this.getValueLastSuperstep().setValue(this.getValue().getValue());
         if (source) {
             this.sendMail();
