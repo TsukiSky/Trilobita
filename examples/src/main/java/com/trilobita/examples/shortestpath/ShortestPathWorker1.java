@@ -1,5 +1,6 @@
 package com.trilobita.examples.shortestpath;
 
+import com.trilobita.examples.shortestpath.vertex.ShortestPathValue;
 import com.trilobita.runtime.environment.TrilobitaEnvironment;
 
 import java.util.concurrent.ExecutionException;

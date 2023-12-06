@@ -6,7 +6,6 @@ import java.util.List;
 import com.trilobita.engine.server.util.functionable.Functionable;
 
 import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * An FunctionableRunner is a singleton in one worker.
@@ -14,7 +13,6 @@ import lombok.extern.slf4j.Slf4j;
  * user.
  */
 @Data
-@Slf4j
 public abstract class FunctionableRunner {
     private List<Functionable<?>> functionables = new ArrayList<>(); // functionable, topic
 
@@ -30,10 +28,6 @@ public abstract class FunctionableRunner {
     }
 
     public void registerFunctionable(Functionable<?> functionable) {
-        if (!this.getFunctionables().contains(functionable)) {
-            this.getFunctionables().add(functionable);
-        } else {
-            log.info("Functionable {} already exists.", functionable);
-        }
+        this.getFunctionables().add(functionable);
     }
 }

@@ -37,7 +37,6 @@ public class WorkerFunctionableRunner extends FunctionableRunner {
                             });
                         }
                     } else if (value.getMailType() == MailType.FINISH_SIGNAL) {
-                        this.stopInitFunctionablesConsumer();
                         log.info("[Functionable] Received all functionable instances from master.");
                     }
                 });
@@ -53,15 +52,11 @@ public class WorkerFunctionableRunner extends FunctionableRunner {
     }
 
     public void stop() throws InterruptedException {
-//        this.initFunctionablesConsumer.stop();
+        this.initFunctionablesConsumer.stop();
         for (Functionable<?> functionable : this.getFunctionables()) {
             if (functionable.getWorkerMessageConsumer() != null)
                 functionable.getWorkerMessageConsumer().stop();
         }
-    }
-
-    private void stopInitFunctionablesConsumer() throws InterruptedException {
-        this.initFunctionablesConsumer.stop();
     }
 
     /**
@@ -90,7 +85,7 @@ public class WorkerFunctionableRunner extends FunctionableRunner {
                 functionable.execute(server);
                 functionable.sendMail(functionable.getNewFunctionableValue(), false);
             }
-            log.info("Finished all functionable tasks.");
+            log.info("Finished all functionable tasks;");
         }
     }
 }

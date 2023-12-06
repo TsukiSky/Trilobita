@@ -58,7 +58,7 @@ public abstract class Functionable<T> implements Serializable {
         this.setWorkerMessageConsumer(
                 new MessageConsumer(this.topic, this.serverId, workerMessageHandler));
         this.workerMessageConsumer.start();
-        log.info("[Functionable] Started {}'s consumer, listening to {} topic", this.getInstanceName(), this.getTopic());
+        log.info("[Functionable] Started {}'s consumer", this.getInstanceName());
     }
 
     /**
