@@ -95,16 +95,16 @@ public class GraphLoader {
 
                 if (!vertexMap.containsKey(toId)) {
                     if (toId == 0) {
-                        toVertex = new ShortestPathVertex(fromId, 0.0, true);
+                        toVertex = new ShortestPathVertex(toId, 0.0, true);
                         toVertex.setStatus(Vertex.VertexStatus.ACTIVE);
                     } else {
-                        toVertex = new ShortestPathVertex(fromId, Double.MAX_VALUE, false);
+                        toVertex = new ShortestPathVertex(toId, Double.MAX_VALUE, false);
                         toVertex.setStatus(Vertex.VertexStatus.INACTIVE);
                     }
-                    vertexMap.put(fromId, toVertex);
+                    vertexMap.put(toId, toVertex);
                     vertices.add(toVertex);
                 } else {
-                    toVertex = vertexMap.get(fromId);
+                    toVertex = vertexMap.get(toId);
                 }
 
                 fromVertex.addEdge(toVertex, new ShortestPathValue(weight));
