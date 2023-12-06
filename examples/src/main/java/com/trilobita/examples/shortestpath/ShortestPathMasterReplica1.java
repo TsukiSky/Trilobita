@@ -23,8 +23,8 @@ public class ShortestPathMasterReplica1 {
                 new Functionable.FunctionableRepresenter(MinCombiner.class.getName(), null, new ShortestPathValue(Double.POSITIVE_INFINITY),new ShortestPathValue(Double.POSITIVE_INFINITY)),
                 new Functionable.FunctionableRepresenter(DifferenceAggregator.class.getName(), "DIFF_AGG", new ShortestPathValue(Double.POSITIVE_INFINITY),new ShortestPathValue(Double.POSITIVE_INFINITY))
         };
-//        trilobitaEnvironment.createMasterServer(1, 10, false, funcs);
-        trilobitaEnvironment.createMasterServer(1, 10, false);
+        trilobitaEnvironment.createMasterServer(0, 10, false, funcs);
+//        trilobitaEnvironment.createMasterServer(0, 10, false);
         trilobitaEnvironment.startMasterServer();
     }
 }

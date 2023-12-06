@@ -43,6 +43,7 @@ public class Synchronizer<T> {
         masterServer.setGraph(snapshot.getGraph());
         masterServer.setWorkerIds(snapshot.getAliveWorkerIds());
         masterServer.setMailTable(snapshot.getMailTable());
+        masterServer.getMasterFunctionableRunner().syncSnapshot(snapshot.getFunctionableValues());
     }
 
     /**
@@ -55,7 +56,8 @@ public class Synchronizer<T> {
                 masterServer.getExecutionManager().getSuperstep(),
                 graph,
                 this.masterServer.getWorkerIds(),
-                masterServer.getExecutionManager().snapshotMailTable
+                masterServer.getExecutionManager().snapshotMailTable,
+                masterServer.getMasterFunctionableRunner().createSnapshot()
         );
         snapshot.store();
         masterServer.getExecutionManager().snapshotMailTable.clear();

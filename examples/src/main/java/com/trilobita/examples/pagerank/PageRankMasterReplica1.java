@@ -22,8 +22,8 @@ public class PageRankMasterReplica1 {
         Functionable.FunctionableRepresenter[] funcs = {
                 new Functionable.FunctionableRepresenter(SumCombiner.class.getName(), null, new PageRankValue(0.0), new PageRankValue(0.0)),
         };
-//        trilobitaEnvironment.createMasterServer(1, 10, false,funcs);
-        trilobitaEnvironment.createMasterServer(0, 10, false);
+        trilobitaEnvironment.createMasterServer(0, 10, false,funcs);
+//        trilobitaEnvironment.createMasterServer(0, 10, false);
         trilobitaEnvironment.startMasterServer();
     }
 }

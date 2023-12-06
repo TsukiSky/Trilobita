@@ -13,6 +13,7 @@ import java.util.Map;
 
 /**
  * The snapshot of the graph
+ *
  * @param <T>
  */
 @Slf4j
@@ -23,14 +24,28 @@ public class Snapshot<T> implements Serializable {
     private final Graph<T> graph;
     private final Map<Integer, List<Mail>> mailTable;
     private final List<Integer> aliveWorkerIds;
+    private final Map<String, Computable<T>> functionableValues;
     private final String snapshotDirectory = "data/snapshot/";
 
-    private Snapshot(int id, int superstep, Graph<T> graph, List<Integer> aliveWorkerIds, Map<Integer, List<Mail>> mailTable) {
+    private Snapshot(int id, int superstep, Graph<T> graph, List<Integer> aliveWorkerIds, Map<Integer, List<Mail>> mailTable, Map<String, Computable<T>> functionableValues) {
         this.id = id;
         this.superstep = superstep;
         this.graph = graph;
         this.aliveWorkerIds = aliveWorkerIds;
         this.mailTable = mailTable;
+        this.functionableValues = functionableValues;
+    }
+
+    /**
+     * Create a snapshot of the graph
+     *
+     * @param snapshotId the id of the snapshot
+     * @param graph      the graph to be snapshot
+     * @param <T>        the type of the vertex value
+     * @return the snapshot
+     */
+    public static <T> Snapshot<T> createSnapshot(int snapshotId, int superstep, Graph<T> graph, List<Integer> aliveWorkerIds, Map<Integer, List<Mail>> mailTable, Map<String, Computable<T>> functionableValues) {
+        return new Snapshot<>(snapshotId, superstep, graph, aliveWorkerIds, mailTable, functionableValues);
     }
 
     /**
@@ -53,16 +68,5 @@ public class Snapshot<T> implements Serializable {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    /**
-     * Create a snapshot of the graph
-     * @param snapshotId the id of the snapshot
-     * @param graph the graph to be snapshot
-     * @return the snapshot
-     * @param <T> the type of the vertex value
-     */
-    public static <T> Snapshot<T> createSnapshot(int snapshotId, int superstep, Graph<T> graph, List<Integer> aliveWorkerIds, Map<Integer, List<Mail>> mailTable) {
-        return new Snapshot<>(snapshotId, superstep, graph, aliveWorkerIds, mailTable);
     }
 }

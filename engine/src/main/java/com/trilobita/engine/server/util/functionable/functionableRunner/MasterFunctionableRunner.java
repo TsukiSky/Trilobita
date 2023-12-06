@@ -24,14 +24,19 @@ import java.util.concurrent.ExecutionException;
  */
 @Slf4j
 public class MasterFunctionableRunner extends FunctionableRunner {
+    private static final String MASTER_TOPIC = "MASTER_FUNCTIONAL";
     private static MasterFunctionableRunner instance = null;
     private final MessageConsumer functionableConsumer;
     private final Map<String, List<Computable<?>>> functionalValues = new HashMap<>();
+    private Boolean isPrimary;
 
-    private MasterFunctionableRunner(Integer serverId) throws ExecutionException, InterruptedException {
+    private MasterFunctionableRunner(Integer serverId, Boolean isPrimary) throws ExecutionException, InterruptedException {
         // put values in functionalValue by insName
-        functionableConsumer = new MessageConsumer("MASTER_FUNCTIONAL",
+        functionableConsumer = new MessageConsumer(MASTER_TOPIC,
                 serverId, (key, value, partition, offset) -> {
+            if (!this.isPrimary) {
+                return;
+            }
             if (value != null) {
                 if (value.getMailType() == MailType.FUNCTIONAL) {
                     // put values in functionalValue by insName
@@ -40,12 +45,15 @@ public class MasterFunctionableRunner extends FunctionableRunner {
                 }
             }
         });
-        functionableConsumer.start();
+        if (isPrimary) {
+            this.functionableConsumer.start();
+        }
+        this.isPrimary = isPrimary;
     }
 
-    public synchronized static MasterFunctionableRunner getInstance(Integer id) throws ExecutionException, InterruptedException {
+    public synchronized static MasterFunctionableRunner getInstance(Integer id, Boolean isPrimary) throws ExecutionException, InterruptedException {
         if (instance == null) {
-            instance = new MasterFunctionableRunner(id);
+            instance = new MasterFunctionableRunner(id, isPrimary);
         }
         return instance;
     }
@@ -62,17 +70,32 @@ public class MasterFunctionableRunner extends FunctionableRunner {
     }
 
     public void start() {
-        this.broadcastFunctionables();
+        if (this.isPrimary) {
+            this.broadcastFunctionables();
+        }
     }
 
     public void stop() throws InterruptedException {
         this.functionableConsumer.stop();
     }
 
+    public void becomePrimary() {
+        this.isPrimary = true;
+        try {
+            this.functionableConsumer.start();
+            log.info("functionableConsumer started.");
+        } catch (ExecutionException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     /**
      * To run all functionable tasks and broadcast to worker
      */
     public void runFunctionableTasks() {
+        if (!this.isPrimary) {
+            return;
+        }
         log.info("Received functional values: {}", this.functionalValues);
         for (Map.Entry<String, List<Computable<?>>> entry : this.functionalValues.entrySet()) {
             String instanceName = entry.getKey();
@@ -103,7 +126,7 @@ public class MasterFunctionableRunner extends FunctionableRunner {
             this.registerFunctionable(functionable);
             // create topic if not exist
             if (topicName != null) {
-                MessageProducer.produce(null, new Mail(new Message(functionable), MailType.START_SIGNAL), topicName);
+                MessageProducer.createTopic(topicName);
             }
         } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
                  | NoSuchMethodException | SecurityException | ClassNotFoundException e) {
@@ -134,7 +157,7 @@ public class MasterFunctionableRunner extends FunctionableRunner {
             Mail mail = new Mail(-1, new Message(this.getFunctionables().size()), Mail.MailType.FINISH_SIGNAL);
             MessageProducer.produce(null, mail, "INIT_FUNCTIONAL");
         }
-
+        log.info("[Functionable] Finished broadcasting Functionables.");
     }
 
     private void addToFunctionalValues(String insName, Computable<?> value) {
@@ -142,5 +165,22 @@ public class MasterFunctionableRunner extends FunctionableRunner {
         this.functionalValues.putIfAbsent(insName, new ArrayList<>());
         // Add the value to the list associated with the key
         this.functionalValues.get(insName).add(value);
+    }
+
+    public <T> Map<String, Computable<T>> createSnapshot() {
+        Map<String, Computable<T>> nameNewvalueMap = new HashMap<>();
+        for (Functionable functionable : this.getFunctionables()) {
+            nameNewvalueMap.put(functionable.getInstanceName(), functionable.getNewFunctionableValue());
+        }
+        return nameNewvalueMap;
+    }
+
+    public <T> void syncSnapshot(Map<String, Computable<T>> nameNewvalueMap) {
+        for (Map.Entry<String, Computable<T>> entry : nameNewvalueMap.entrySet()) {
+            Functionable functionable = findFunctionableByName(entry.getKey());
+            if (functionable != null) {
+                functionable.setNewFunctionableValue(entry.getValue());
+            }
+        }
     }
 }

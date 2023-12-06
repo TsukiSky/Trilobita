@@ -50,8 +50,14 @@ public class DifferenceAggregator extends Aggregator<Double> {
         // aggregate
         for (Vertex<Double> vertex : vertices) {
             if (vertex.getValueLastSuperstep() != null) {
-                totalDiff += Math.abs(vertex.getValue().getValue() - vertex.getValueLastSuperstep().getValue());
+                if (! (vertex.getValue().getValue() == Double.MAX_VALUE || vertex.getValueLastSuperstep().getValue() == Double.MAX_VALUE)) {
+                    totalDiff += Math.abs(vertex.getValue().getValue() - vertex.getValueLastSuperstep().getValue());
+                    continue;
+                }
+
             }
+            totalDiff = Double.MAX_VALUE;
+            break;
         }
         log.info("Difference of all vertex values calculated by {}: {}", this.getServerId(), totalDiff);
         return totalDiff;

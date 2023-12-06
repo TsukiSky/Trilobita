@@ -49,6 +49,14 @@ public class MessageProducer {
         doProduce(key, value, topic);
     }
 
+    public static void createTopic(String topic) {
+        try {
+            MessageAdmin.getInstance().createIfNotExist(topic);
+        } catch (ExecutionException | InterruptedException exception) {
+            log.error("produce create topic: {}", exception.getMessage());
+        }
+    }
+
     public static void createAndProduce(UUID key, Mail value, String topic) {
         try {
             MessageAdmin.getInstance().createIfNotExist(topic);

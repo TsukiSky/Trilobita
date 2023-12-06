@@ -73,12 +73,13 @@ public class ShortestPathMasterRunner {
     }
 
     public static Graph<Double> createVerticesFromFile(){
-        try {
-            return GraphLoader.loadShortestPathGraph("data/graph/ShortestPathGraph.csv");
-        } catch (IOException e) {
-            log.error(e.getMessage());
-            return ShortestPathMasterRunner.createVertices();
-        }
+        return ShortestPathMasterRunner.createVertices();
+//        try {
+//            return GraphLoader.loadShortestPathGraph("data/graph/ShortestPathGraph.csv");
+//        } catch (IOException e) {
+//            log.error(e.getMessage());
+//            return ShortestPathMasterRunner.createVertices();
+//        }
     }
     public static void main(String[] args) throws ExecutionException, InterruptedException {
         TrilobitaEnvironment<Double> trilobitaEnvironment = new TrilobitaEnvironment<>();
@@ -93,10 +94,10 @@ public class ShortestPathMasterRunner {
         };
 
         // if want to use functionables, run this
-        // trilobitaEnvironment.createMasterServer(0,10, true,funcs);
+         trilobitaEnvironment.createMasterServer(1,10, true,funcs);
 
         // if simulate fault, don't include funcs, run this
-        trilobitaEnvironment.createMasterServer(0,10, true);
+//        trilobitaEnvironment.createMasterServer(1,10, true);
         trilobitaEnvironment.startMasterServer();
     }
 }

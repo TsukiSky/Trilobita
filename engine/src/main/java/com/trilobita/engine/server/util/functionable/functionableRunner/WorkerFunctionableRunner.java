@@ -20,8 +20,8 @@ import java.util.concurrent.ExecutionException;
 public class WorkerFunctionableRunner extends FunctionableRunner {
 
     private static WorkerFunctionableRunner instance = null;
-    private MessageConsumer initFunctionablesConsumer;
-    private List<Functionable.FunctionableRepresenter> incomingFunctionableValues = new ArrayList<>();
+    private final MessageConsumer initFunctionablesConsumer;
+    private final List<Functionable.FunctionableRepresenter> incomingFunctionableValues = new ArrayList<>();
 
     private WorkerFunctionableRunner(Integer serverId) throws ExecutionException, InterruptedException {
         this.initFunctionablesConsumer = new MessageConsumer("INIT_FUNCTIONAL",

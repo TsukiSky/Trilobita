@@ -72,6 +72,7 @@ public class HeartbeatManager {
                 log.info("[Fault] detected current master is down, trying to become master...");
                 masterServer.isPrimary = true;
                 masterServer.getExecutionManager().partitionGraph(masterServer.getWorkerIds());
+                masterServer.getMasterFunctionableRunner().becomePrimary();
                 isHandlingFault = false;
             }
         });
@@ -90,6 +91,7 @@ public class HeartbeatManager {
                     masterServer.getWorkerIds().add(senderId);
                     workerHeartBeatChecker.getHeartbeats().put(senderId, true);
                     masterServer.getExecutionManager().partitionGraph(masterServer.getWorkerIds());
+                    masterServer.getMasterFunctionableRunner().broadcastFunctionables();
                 } else {
                     // update the heartbeat
                     workerHeartBeatChecker.recordHeartbeatFrom(senderId);

@@ -51,7 +51,7 @@ public class MasterServer<T> extends AbstractServer<T> {
         this.isPrimary = isPrimary;
         this.executionManager = new ExecutionManager<>(this, snapshotFrequency);
         this.heartbeatManager = new HeartbeatManager(this, this.masterIds);
-        this.masterFunctionableRunner = MasterFunctionableRunner.getInstance(id);
+        this.masterFunctionableRunner = MasterFunctionableRunner.getInstance(id, isPrimary);
     }
 
     @Override
