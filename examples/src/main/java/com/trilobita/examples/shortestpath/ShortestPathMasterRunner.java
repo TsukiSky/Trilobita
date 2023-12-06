@@ -73,13 +73,12 @@ public class ShortestPathMasterRunner {
     }
 
     public static Graph<Double> createVerticesFromFile(){
-        return ShortestPathMasterRunner.createVertices();
-//        try {
-//            return GraphLoader.loadShortestPathGraph("data/graph/ShortestPathGraph.csv");
-//        } catch (IOException e) {
-//            log.error(e.getMessage());
-//            return ShortestPathMasterRunner.createVertices();
-//        }
+        try {
+            return GraphLoader.loadShortestPathGraph("data/graph/ShortestPathGraph.csv");
+        } catch (IOException e) {
+            log.error(e.getMessage());
+            return ShortestPathMasterRunner.createVertices();
+        }
     }
     public static void main(String[] args) throws ExecutionException, InterruptedException {
         TrilobitaEnvironment<Double> trilobitaEnvironment = new TrilobitaEnvironment<>();
