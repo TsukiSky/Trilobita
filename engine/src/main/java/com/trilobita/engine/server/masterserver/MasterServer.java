@@ -50,7 +50,7 @@ public class MasterServer<T> extends AbstractServer<T> {
         this.graphPartitioner = graphPartitioner;
         this.isPrimary = isPrimary;
         this.executionManager = new ExecutionManager<>(this, snapshotFrequency);
-        this.heartbeatManager = new HeartbeatManager(this, this.workerIds, this.masterIds);
+        this.heartbeatManager = new HeartbeatManager(this, this.masterIds);
         this.masterFunctionableRunner = MasterFunctionableRunner.getInstance(id);
     }
 

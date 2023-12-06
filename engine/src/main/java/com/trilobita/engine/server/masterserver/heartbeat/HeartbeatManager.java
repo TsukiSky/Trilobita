@@ -19,7 +19,6 @@ import java.util.concurrent.ExecutionException;
 @Slf4j
 public class HeartbeatManager {
     MasterServer<?> masterServer;
-    List<Integer> workerIds;
     List<Integer> masterIds;
     MessageConsumer workerHeartBeatConsumer;
     HeartbeatChecker masterHeartBeatChecker;
@@ -31,9 +30,8 @@ public class HeartbeatManager {
     @Getter
     Boolean isHandlingFault = false;
 
-    public HeartbeatManager(MasterServer<?> masterServer, List<Integer> workerIds, List<Integer> masterIds) {
+    public HeartbeatManager(MasterServer<?> masterServer, List<Integer> masterIds) {
         this.masterServer = masterServer;
-        this.workerIds = workerIds;
         this.masterIds = masterIds;
         initializeHeartbeatSender();
         initializeHeartbeatChecker();
@@ -49,7 +47,7 @@ public class HeartbeatManager {
      */
     public void initializeHeartbeatChecker() {
         // create heartbeat checker for workers
-        workerHeartBeatChecker = new HeartbeatChecker(masterServer.getServerId(), workerIds, true, new HeartbeatChecker.FaultHandler() {
+        workerHeartBeatChecker = new HeartbeatChecker(masterServer.getServerId(), this.masterServer.getWorkerIds(), true, new HeartbeatChecker.FaultHandler() {
             @Override
             public void handleFault(List<Integer> errors) {
                 isHandlingFault = true;
@@ -58,7 +56,7 @@ public class HeartbeatManager {
                     masterServer.getWorkerIds().remove((Integer) id);
                     workerHeartBeatChecker.getHeartbeats().remove(id);
                 }
-                log.info("worker ids: {}", workerIds);
+                log.info("worker ids: {}", masterServer.getWorkerIds());
                 masterServer.getExecutionManager().partitionGraph(masterServer.getWorkerIds());
                 log.info("finished repartitioning...");
                 isHandlingFault = false;
@@ -73,7 +71,7 @@ public class HeartbeatManager {
                 // if all id with greater id has died, become the master
                 log.info("[Fault] detected current master is down, trying to become master...");
                 masterServer.isPrimary = true;
-                masterServer.getExecutionManager().partitionGraph(workerIds);
+                masterServer.getExecutionManager().partitionGraph(masterServer.getWorkerIds());
                 isHandlingFault = false;
             }
         });
@@ -161,12 +159,12 @@ public class HeartbeatManager {
     }
 
     public void removeWorker(int id) {
-        workerIds.remove(id);
+        this.masterServer.getWorkerIds().remove(id);
         workerHeartBeatChecker.getHeartbeats().remove(id);
     }
 
     public void addWorker(int id) {
-        workerIds.add(id);
+        this.masterServer.getWorkerIds().add(id);
         workerHeartBeatChecker.getHeartbeats().put(id, true);
     }
 

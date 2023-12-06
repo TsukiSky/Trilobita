@@ -18,7 +18,7 @@ import com.trilobita.engine.server.AbstractServer;
 @Slf4j
 public abstract class Combiner<T> extends Functionable<T> {
 
-    private Map<Integer, CopyOnWriteArrayList<Mail>> vertexMailMap = new HashMap<>();
+    private final Map<Integer, CopyOnWriteArrayList<Mail>> vertexMailMap = new HashMap<>();
 
     public Combiner(Computable<T> initLastValue, Computable<T> initNewValue) {
         super(initLastValue, initNewValue);

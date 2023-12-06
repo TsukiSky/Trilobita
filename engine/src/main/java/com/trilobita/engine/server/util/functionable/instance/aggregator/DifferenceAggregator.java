@@ -49,7 +49,9 @@ public class DifferenceAggregator extends Aggregator<Double> {
         List<Vertex<Double>> vertices = vertexGroup.getVertices();
         // aggregate
         for (Vertex<Double> vertex : vertices) {
-            totalDiff += Math.abs(vertex.getValue().getValue() - vertex.getValueLastSuperstep().getValue());
+            if (vertex.getValueLastSuperstep() != null) {
+                totalDiff += Math.abs(vertex.getValue().getValue() - vertex.getValueLastSuperstep().getValue());
+            }
         }
         log.info("Difference of all vertex values calculated by {}: {}", this.getServerId(), totalDiff);
         return totalDiff;
