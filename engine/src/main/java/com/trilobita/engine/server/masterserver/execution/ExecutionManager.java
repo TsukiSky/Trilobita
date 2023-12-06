@@ -68,7 +68,7 @@ public class ExecutionManager<T> {
                 log.info("nconfirmworker: {}, alive workers: {}", nConfirmWorker, masterServer.getWorkerIds());
                 if (nConfirmWorker == masterServer.getWorkerIds().size()) {
                     // send start message to all workers
-                    MessageProducer.createAndProduce(null, new Mail(), "CONFIRM_START");
+                    MessageProducer.produce(null, new Mail(), "CONFIRM_START");
                 }
             }
         });

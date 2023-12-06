@@ -73,7 +73,7 @@ public abstract class Functionable<T> implements Serializable {
             Mail mail = new FunctionalMail(this.instanceName, funcValue);
             String topic = serverIsMaster ? this.topic : MASTER_TOPIC;
             log.info("[Functionable] Send mail {} to {} topic.", funcValue, topic);
-            MessageProducer.createAndProduce(null, mail, topic);
+            MessageProducer.produce(null, mail, topic);
         }
     }
 

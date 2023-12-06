@@ -103,7 +103,7 @@ public class MasterFunctionableRunner extends FunctionableRunner {
             this.registerFunctionable(functionable);
             // create topic if not exist
             if (topicName != null) {
-                MessageProducer.createAndProduce(null, new Mail(new Message(functionable), MailType.START_SIGNAL), topicName);
+                MessageProducer.produce(null, new Mail(new Message(functionable), MailType.START_SIGNAL), topicName);
             }
         } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
                  | NoSuchMethodException | SecurityException | ClassNotFoundException e) {
@@ -128,11 +128,11 @@ public class MasterFunctionableRunner extends FunctionableRunner {
         if (this.getFunctionables() != null) {
             for (Functionable<?> functionable : this.getFunctionables()) {
                 Mail mail = new Mail(-1, new Message(functionable), Mail.MailType.FUNCTIONAL);
-                MessageProducer.createAndProduce(null, mail, "INIT_FUNCTIONAL");
+                MessageProducer.produce(null, mail, "INIT_FUNCTIONAL");
             }
             // send stop signal
             Mail mail = new Mail(-1, new Message(this.getFunctionables().size()), Mail.MailType.FINISH_SIGNAL);
-            MessageProducer.createAndProduce(null, mail, "INIT_FUNCTIONAL");
+            MessageProducer.produce(null, mail, "INIT_FUNCTIONAL");
         }
 
     }

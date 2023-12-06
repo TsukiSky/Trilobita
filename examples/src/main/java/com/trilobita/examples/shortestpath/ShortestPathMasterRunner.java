@@ -74,7 +74,7 @@ public class ShortestPathMasterRunner {
 
     public static Graph<Double> createVerticesFromFile(){
         try {
-            return GraphLoader.loadShortestPathGraph("data/graph/OTCNet.csv");
+            return GraphLoader.loadShortestPathGraph("data/graph/ShortestPathGraph.csv");
         } catch (IOException e) {
             log.error(e.getMessage());
             return ShortestPathMasterRunner.createVertices();
@@ -83,8 +83,7 @@ public class ShortestPathMasterRunner {
     public static void main(String[] args) throws ExecutionException, InterruptedException {
         TrilobitaEnvironment<Double> trilobitaEnvironment = new TrilobitaEnvironment<>();
         trilobitaEnvironment.initConfig();
-        Graph<Double> g = ShortestPathMasterRunner.createVerticesFromFile();
-        trilobitaEnvironment.loadGraph(g);
+        trilobitaEnvironment.loadGraph(ShortestPathMasterRunner.createVerticesFromFile());
         PartitionStrategyFactory partitionStrategyFactory = new PartitionStrategyFactory();
         PartitionStrategy partitionStrategy = partitionStrategyFactory.getPartitionStrategy("hashPartitionStrategy",(int) trilobitaEnvironment.getConfiguration().get("numOfWorker"),trilobitaEnvironment.getGraph().getSize());
         trilobitaEnvironment.setPartitioner(new Partitioner<>(partitionStrategy));

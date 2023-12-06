@@ -78,8 +78,9 @@ public class GraphLoader {
                 double weight = Math.abs(Double.parseDouble(values[2])); // 取绝对值
 
                 ShortestPathVertex fromVertex;
+                ShortestPathVertex toVertex;
                 if (!vertexMap.containsKey(fromId)) {
-                    if (fromId == 1) {
+                    if (fromId == 0) {
                         fromVertex = new ShortestPathVertex(fromId, 0.0, true);
                         fromVertex.setStatus(Vertex.VertexStatus.ACTIVE);
                     } else {
@@ -92,7 +93,23 @@ public class GraphLoader {
                     fromVertex = vertexMap.get(fromId);
                 }
 
-                fromVertex.addEdge(toId, new ShortestPathValue(weight));
+                if (!vertexMap.containsKey(toId)) {
+                    if (toId == 0) {
+                        toVertex = new ShortestPathVertex(toId, 0.0, true);
+                        toVertex.setStatus(Vertex.VertexStatus.ACTIVE);
+                    } else {
+                        toVertex = new ShortestPathVertex(toId, Double.MAX_VALUE, false);
+                        toVertex.setStatus(Vertex.VertexStatus.INACTIVE);
+                    }
+                    vertexMap.put(toId, toVertex);
+                    vertices.add(toVertex);
+                } else {
+                    toVertex = vertexMap.get(toId);
+                }
+
+                fromVertex.addEdge(toVertex, new ShortestPathValue(weight));
+                // both same?
+                //fromVertex.addEdge(toId, new ShortestPathValue(weight));
             }
         }
 

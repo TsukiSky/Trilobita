@@ -15,7 +15,7 @@ public class PageRankMasterReplica1 {
     public static void main(String[] args) throws ExecutionException, InterruptedException {
         TrilobitaEnvironment<Double> trilobitaEnvironment = new TrilobitaEnvironment<>();
         trilobitaEnvironment.initConfig();
-        trilobitaEnvironment.loadGraph(PageRankMasterRunner.createVertices());
+        trilobitaEnvironment.loadGraph(PageRankMasterRunner.createVerticesFromJson());
         PartitionStrategyFactory partitionStrategyFactory = new PartitionStrategyFactory();
         PartitionStrategy partitionStrategy = partitionStrategyFactory.getPartitionStrategy("hashPartitionStrategy",(int) trilobitaEnvironment.getConfiguration().get("numOfWorker"),trilobitaEnvironment.getGraph().getSize());
         trilobitaEnvironment.setPartitioner(new Partitioner<>(partitionStrategy));
