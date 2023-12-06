@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 public class ExecutionManager<T> {
@@ -23,11 +24,11 @@ public class ExecutionManager<T> {
     MessageConsumer completeSignalConsumer;
     MessageConsumer confirmStartConsumer;
     Synchronizer<T> synchronizer; // the synchronizer of the replicas
-    private int nFinishWorker = 0;
-    private int nCompleteWorker = 0;
-    private int nConfirmWorker = 0;
+    private final AtomicInteger nFinishWorker = new AtomicInteger(0);
+    private final AtomicInteger nCompleteWorker = new AtomicInteger(0);
+    private final AtomicInteger nConfirmWorker = new AtomicInteger(0);
     @Getter
-    private int superstep = 0;
+    private AtomicInteger superstep = new AtomicInteger(0);
 
     public ExecutionManager(MasterServer<T> masterServer, int snapshotFrequency) {
         this.masterServer = masterServer;
@@ -64,9 +65,9 @@ public class ExecutionManager<T> {
                 }
                 int senderId = (int) value.getMessage().getContent();
                 //log.info("[Confirm] received a confirm message from worker {}", senderId);
-                nConfirmWorker += 1;
+                nConfirmWorker.getAndAdd(1);
                 //log.info("nconfirmworker: {}, alive workers: {}", nConfirmWorker, masterServer.getWorkerIds());
-                if (nConfirmWorker == masterServer.getWorkerIds().size()) {
+                if (nConfirmWorker.get() == masterServer.getWorkerIds().size()) {
                     // send start message to all workers
                     MessageProducer.produce(null, new Mail(), "CONFIRM_START");
                 }
@@ -89,9 +90,9 @@ public class ExecutionManager<T> {
                 List<Mail> snapshotMails = (List<Mail>) content.get("SNAPSHOT_MAILS");
                 boolean complete = (boolean) content.get("COMPLETE");
                 if (complete) {
-                    nCompleteWorker++;
+                    nCompleteWorker.addAndGet(1);
                 }
-                nFinishWorker++;
+                nFinishWorker.addAndGet(1);
                 //log.info("[Superstep] number of finished workers: {}", nFinishWorker);
 
                 if (!vertexValues.isEmpty()) {
@@ -104,7 +105,7 @@ public class ExecutionManager<T> {
                     }
                 }
 
-                if (nFinishWorker == masterServer.getWorkerIds().size()) {
+                if (nFinishWorker.get() == masterServer.getWorkerIds().size()) {
                     // aggregate functional values and send to workers
                     masterServer.getMasterFunctionableRunner().runFunctionableTasks();
                     //log.info("[Functionable] finished executing Functionable tasks");
@@ -116,7 +117,7 @@ public class ExecutionManager<T> {
                         synchronizer.snapshotAndSync(masterServer.getGraph());
                     }
                     // check whether all workers have finished
-                    if (nCompleteWorker == masterServer.getWorkerIds().size()) {
+                    if (nCompleteWorker.get() == masterServer.getWorkerIds().size()) {
                         //log.info("[Complete] the work has complete, the final graph is: {}", masterServer.getGraph());
                         masterServer.shutdown();
                     } else {
@@ -134,9 +135,9 @@ public class ExecutionManager<T> {
      * start a new round of superstep
      */
     public void superstep() {
-        this.superstep += 1;
-        nFinishWorker = 0;
-        nCompleteWorker = 0;
+        this.superstep.addAndGet(1);
+        nFinishWorker.set(0);
+        nCompleteWorker.set(0);
         MessageProducer.produceStartSignal(this.isDoingSnapshot());
     }
 
@@ -150,9 +151,9 @@ public class ExecutionManager<T> {
         if (this.masterServer.getGraph() == null) {
             throw new Error("graph is not set!");
         }
-        nFinishWorker = 0;
-        nCompleteWorker = 0;
-        nConfirmWorker = 0;
+        nFinishWorker.set(0);
+        nCompleteWorker.set(0);
+        nConfirmWorker.set(0);
         Map<Integer, VertexGroup<T>> vertexGroups = this.masterServer.getGraphPartitioner().partition(this.masterServer.getGraph(), aliveWorkerIds);
         vertexGroups.forEach((workerId, vertexGroup) -> {
             List<Mail> mails = new ArrayList<>();
@@ -175,6 +176,6 @@ public class ExecutionManager<T> {
      * @return whether the server is doing snapshot
      */
     public boolean isDoingSnapshot() {
-        return superstep % snapshotFrequency == 0;
+        return superstep.get() % snapshotFrequency == 0;
     }
 }

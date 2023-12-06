@@ -42,7 +42,7 @@ public class ShortestPathVertex extends Vertex<Double> implements Serializable {
     public void compute() {
 //        startSuperstep();
         try {
-            Thread.sleep(50);
+            Thread.sleep(10);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }

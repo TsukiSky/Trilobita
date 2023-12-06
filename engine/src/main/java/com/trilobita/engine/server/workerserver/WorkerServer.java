@@ -94,8 +94,8 @@ public class WorkerServer<T> extends AbstractServer<T> {
                     boolean doSnapshot = (boolean) mail.getMessage().getContent();
                     //log.info("is doing snapshot: {}", doSnapshot);
 
-                    Metrics.Superstep.computeSuperstepDuration();
-                    Metrics.Superstep.setSuperstepStartTime();
+//                    Metrics.Superstep.computeSuperstepDuration();
+//                    Metrics.Superstep.setSuperstepStartTime();
                     superstep(doSnapshot);
                 }
             }
@@ -131,6 +131,7 @@ public class WorkerServer<T> extends AbstractServer<T> {
     private void superstep(boolean doSnapshot) throws InterruptedException {
         superstep++;
         //log.info("[Superstep] entering a new super step...");
+        Metrics.Superstep.setSuperstepStartTime();
         this.executionManager.setDoSnapshot(doSnapshot);
         this.executionManager.execute();
 
@@ -144,6 +145,7 @@ public class WorkerServer<T> extends AbstractServer<T> {
             }
         }
         sendCompleteSignal(doSnapshot, stop);
+        Metrics.Superstep.computeSuperstepDuration();
         Monitor.stopAndStartNewSuperstep();
     }
 

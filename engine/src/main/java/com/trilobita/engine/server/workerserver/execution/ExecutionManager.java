@@ -3,6 +3,7 @@ package com.trilobita.engine.server.workerserver.execution;
 import com.trilobita.core.common.Mail;
 import com.trilobita.core.graph.vertex.Vertex;
 import com.trilobita.core.messaging.MessageProducer;
+import com.trilobita.engine.monitor.Monitor;
 import com.trilobita.engine.monitor.metrics.Metrics;
 import com.trilobita.engine.server.workerserver.WorkerServer;
 import lombok.Setter;
@@ -41,6 +42,7 @@ public class ExecutionManager<T> {
      */
     public void execute() throws InterruptedException {
         futures.clear();
+
         // distribute the mail to the vertices
         Metrics.Superstep.setDistributionStartTime();
 
@@ -55,11 +57,12 @@ public class ExecutionManager<T> {
             }
         }
         distributeLatch.await();
-        Metrics.Superstep.computeDistributionDuration();
 
         // inform functionable instances of functionables values
         server.getFunctionableRunner().distributeValues();
+        Metrics.Superstep.computeDistributionDuration();
 
+        Metrics.Superstep.setExecutionStartTime();
         List<Vertex<T>> vertices = this.server.getVertexGroup().getVertices();
         int activeVertexCount = 0;
         for (Vertex<T> vertex : vertices) {
@@ -68,7 +71,6 @@ public class ExecutionManager<T> {
             }
         }
 
-        Metrics.Superstep.setExecutionStartTime();
         CountDownLatch computeLatch = new CountDownLatch(activeVertexCount);
         // start the computation of the vertices
         for (Vertex<T> vertex : vertices) {
@@ -90,9 +92,9 @@ public class ExecutionManager<T> {
         }
 
         // execute functionables
+        Metrics.Superstep.setMessagingStartTime();
         server.getFunctionableRunner().runFunctionableTasks(this.server);
 
-        Metrics.Superstep.setMessagingStartTime();
         CountDownLatch mailingLatch = new CountDownLatch(server.getOutMailQueue().size());
         if (doSnapshot) {
             // add incoming mails

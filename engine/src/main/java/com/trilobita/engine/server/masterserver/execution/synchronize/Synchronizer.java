@@ -52,8 +52,8 @@ public class Synchronizer<T> {
     public void snapshotAndSync(Graph<T> graph) {
         //log.info("[Snapshot] doing a snapshot");
         Snapshot<T> snapshot = Snapshot.createSnapshot(
-                masterServer.getExecutionManager().getSuperstep(),
-                masterServer.getExecutionManager().getSuperstep(),
+                masterServer.getExecutionManager().getSuperstep().get(),
+                masterServer.getExecutionManager().getSuperstep().get(),
                 graph,
                 this.masterServer.getWorkerIds(),
                 masterServer.getExecutionManager().snapshotMailTable,
