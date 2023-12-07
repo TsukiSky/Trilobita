@@ -33,10 +33,10 @@ public class HeartbeatSender {
         this.delayed = delayed;
         this.period = period;
         if (isRunning.compareAndSet(false, true)) {
-            heartbeatExecutor.scheduleAtFixedRate(this::sendHeartbeat, this.delayed, this.period, TimeUnit.MICROSECONDS);
-            //log.info("Heartbeat sending service will start in 1 second.");
+            heartbeatExecutor.scheduleAtFixedRate(this::sendHeartbeat, this.delayed, this.period, TimeUnit.MILLISECONDS);
+            log.info("Heartbeat sending service will start in 1 second.");
         } else {
-            //log.info("Heartbeat sending service is already running.");
+            log.info("Heartbeat sending service is already running.");
         }
     }
 
@@ -52,13 +52,13 @@ public class HeartbeatSender {
                 if (!heartbeatExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
                     heartbeatExecutor.shutdownNow();
                 }
-                //log.info("Heartbeat sending service stopped.");
+                log.info("Heartbeat sending service stopped.");
             } catch (InterruptedException e) {
                 heartbeatExecutor.shutdownNow();
                 Thread.currentThread().interrupt();
             }
         } else {
-            //log.info("Heartbeat sending service is not running.");
+            log.info("Heartbeat sending service is not running.");
         }
     }
 

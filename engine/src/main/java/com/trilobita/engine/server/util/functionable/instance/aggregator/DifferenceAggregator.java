@@ -57,7 +57,7 @@ public class DifferenceAggregator extends Aggregator<Double> {
             totalDiff = Double.MAX_VALUE;
             break;
         }
-        //log.info("Difference of all vertex values calculated by {}: {}", this.getServerId(), totalDiff);
+        log.info("Difference of all vertex values calculated by {}: {}", this.getServerId(), totalDiff);
         return totalDiff;
     }
 
@@ -76,7 +76,7 @@ public class DifferenceAggregator extends Aggregator<Double> {
         if (totalDiff < tolerance) {
             totalDiff = 0.0;
         }
-        //log.info("[DifferenceAggregator] Total difference: {}", totalDiff);
+        log.info("[DifferenceAggregator] Total difference: {}", totalDiff);
         return totalDiff;
     }
 
@@ -88,7 +88,7 @@ public class DifferenceAggregator extends Aggregator<Double> {
     private void checkTermination(AbstractServer<?> server) {
         // check termination
         if (this.superstep > 0) {
-            //log.info("[DifferenceAggregator] Checking termination: {}", (this.getLastFunctionableValue().getValue() < tolerance));
+            log.info("[DifferenceAggregator] Checking termination: {}", (this.getLastFunctionableValue().getValue() < tolerance));
             List<? extends Vertex<?>> vertices = server.getVertexGroup().getVertices();
             if (this.getLastFunctionableValue().getValue() < tolerance) {
 

@@ -58,7 +58,7 @@ public abstract class Functionable<T> implements Serializable {
         this.setWorkerMessageConsumer(
                 new MessageConsumer(this.topic, this.serverId, workerMessageHandler));
         this.workerMessageConsumer.start();
-        //log.info("[Functionable] Started {}'s consumer, listening to {} topic", this.getInstanceName(), this.getTopic());
+        log.info("[Functionable] Started {}'s consumer, listening to {} topic", this.getInstanceName(), this.getTopic());
     }
 
     /**
@@ -72,7 +72,7 @@ public abstract class Functionable<T> implements Serializable {
         if (this.topic != null) {
             Mail mail = new FunctionalMail(this.instanceName, funcValue);
             String topic = serverIsMaster ? this.topic : MASTER_TOPIC;
-            //log.info("[Functionable] Send mail {} to {} topic.", funcValue, topic);
+            log.info("[Functionable] Send mail {} to {} topic.", funcValue, topic);
             MessageProducer.produce(null, mail, topic);
         }
     }

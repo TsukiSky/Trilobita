@@ -52,13 +52,13 @@ public class HeartbeatManager {
             public void handleFault(List<Integer> errors) {
                 isHandlingFault = true;
                 for (Integer id : errors){
-                    //log.info("[Fault] server {} is down, start repartitioning...", id);
+                    log.info("[Fault] server {} is down, start repartitioning...", id);
                     masterServer.getWorkerIds().remove((Integer) id);
                     workerHeartBeatChecker.getHeartbeats().remove(id);
                 }
-                //log.info("worker ids: {}", masterServer.getWorkerIds());
+                log.info("worker ids: {}", masterServer.getWorkerIds());
                 masterServer.getExecutionManager().partitionGraph(masterServer.getWorkerIds());
-                //log.info("finished repartitioning...");
+                log.info("finished repartitioning...");
                 isHandlingFault = false;
             }
         });
@@ -69,7 +69,7 @@ public class HeartbeatManager {
                     return;
                 }
                 // if all id with greater id has died, become the master
-                //log.info("[Fault] detected current master is down, trying to become master...");
+                log.info("[Fault] detected current master is down, trying to become master...");
                 masterServer.isPrimary = true;
                 masterServer.getExecutionManager().partitionGraph(masterServer.getWorkerIds());
                 masterServer.getMasterFunctionableRunner().becomePrimary();
@@ -88,6 +88,7 @@ public class HeartbeatManager {
             public void handleMessage(UUID key, Mail value, int partition, long offset) {
                 int senderId = (int) value.getMessage().getContent();
                 if (!masterServer.getWorkerIds().contains(senderId)) {
+                    System.out.println(masterServer.getWorkerIds());
                     masterServer.getWorkerIds().add(senderId);
                     workerHeartBeatChecker.getHeartbeats().put(senderId, true);
                     masterServer.getExecutionManager().partitionGraph(masterServer.getWorkerIds());

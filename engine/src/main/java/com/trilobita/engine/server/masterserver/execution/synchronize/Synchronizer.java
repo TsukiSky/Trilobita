@@ -50,7 +50,7 @@ public class Synchronizer<T> {
      * do snapshot and sync the graph with other masters
      */
     public void snapshotAndSync(Graph<T> graph) {
-        //log.info("[Snapshot] doing a snapshot");
+        log.info("[Snapshot] doing a snapshot");
         Snapshot<T> snapshot = Snapshot.createSnapshot(
                 masterServer.getExecutionManager().getSuperstep().get(),
                 masterServer.getExecutionManager().getSuperstep().get(),

@@ -83,7 +83,7 @@ public class MasterFunctionableRunner extends FunctionableRunner {
         this.isPrimary = true;
         try {
             this.functionableConsumer.start();
-            //log.info("functionableConsumer started.");
+            log.info("functionableConsumer started.");
         } catch (ExecutionException | InterruptedException e) {
             throw new RuntimeException(e);
         }
@@ -96,7 +96,7 @@ public class MasterFunctionableRunner extends FunctionableRunner {
         if (!this.isPrimary) {
             return;
         }
-        //log.info("Received functional values: {}", this.functionalValues);
+        log.info("Received functional values: {}", this.functionalValues);
         for (Map.Entry<String, List<Computable<?>>> entry : this.functionalValues.entrySet()) {
             String instanceName = entry.getKey();
             List<Computable<?>> values = entry.getValue();
@@ -107,7 +107,7 @@ public class MasterFunctionableRunner extends FunctionableRunner {
                     functionable.sendMail(functionable.getNewFunctionableValue(), true);
                     values.clear(); // reset FunctionableValues
                 } else {
-                    //log.info("No matching functionable found.");
+                    log.info("No matching functionable found.");
                 }
             }
         }
@@ -130,7 +130,7 @@ public class MasterFunctionableRunner extends FunctionableRunner {
             }
         } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
                  | NoSuchMethodException | SecurityException | ClassNotFoundException e) {
-            //log.error("Error registerFunctionable:", e);
+            log.error("Error registerFunctionable:", e);
         }
     }
 
@@ -157,7 +157,7 @@ public class MasterFunctionableRunner extends FunctionableRunner {
             Mail mail = new Mail(-1, new Message(this.getFunctionables().size()), Mail.MailType.FINISH_SIGNAL);
             MessageProducer.produce(null, mail, "INIT_FUNCTIONAL");
         }
-        //log.info("[Functionable] Finished broadcasting Functionables.");
+        log.info("[Functionable] Finished broadcasting Functionables.");
     }
 
     private void addToFunctionalValues(String insName, Computable<?> value) {
