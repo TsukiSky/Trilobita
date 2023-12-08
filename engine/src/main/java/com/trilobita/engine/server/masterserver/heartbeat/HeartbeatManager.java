@@ -5,6 +5,7 @@ import com.trilobita.core.messaging.MessageConsumer;
 import com.trilobita.engine.server.masterserver.MasterServer;
 import com.trilobita.engine.server.masterserver.heartbeat.checker.HeartbeatChecker;
 import com.trilobita.engine.server.util.HeartbeatSender;
+import lombok.Data;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -17,6 +18,7 @@ import java.util.concurrent.ExecutionException;
  * It contains the fault handler for the workers and masters
  */
 @Slf4j
+@Data
 public class HeartbeatManager {
     MasterServer<?> masterServer;
     List<Integer> masterIds;
@@ -59,7 +61,6 @@ public class HeartbeatManager {
                 log.info("[Fault] Alive worker ids: {}", masterServer.getWorkerIds());
                 masterServer.getExecutionManager().partitionGraph(masterServer.getWorkerIds());
                 log.info("[Fault] Finished fault handling");
-                isHandlingFault = false;
             }
         });
         masterHeartBeatChecker = new HeartbeatChecker(masterServer.getServerId(), masterIds, false, new HeartbeatChecker.FaultHandler() {
@@ -73,7 +74,6 @@ public class HeartbeatManager {
                 masterServer.isPrimary = true;
                 masterServer.getExecutionManager().partitionGraph(masterServer.getWorkerIds());
                 masterServer.getMasterFunctionableRunner().becomePrimary();
-                isHandlingFault = false;
             }
         });
     }
@@ -88,7 +88,7 @@ public class HeartbeatManager {
             public void handleMessage(UUID key, Mail value, int partition, long offset) {
                 int senderId = (int) value.getMessage().getContent();
                 if (!masterServer.getWorkerIds().contains(senderId)) {
-                    System.out.println(masterServer.getWorkerIds());
+                    isHandlingFault = true;
                     masterServer.getWorkerIds().add(senderId);
                     workerHeartBeatChecker.getHeartbeats().put(senderId, true);
                     masterServer.getExecutionManager().partitionGraph(masterServer.getWorkerIds());

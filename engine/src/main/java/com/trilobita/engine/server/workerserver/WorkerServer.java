@@ -57,31 +57,33 @@ public class WorkerServer<T> extends AbstractServer<T> {
             @Override
             @SuppressWarnings("unchecked")
             public void handleMessage(UUID key, Mail mail, int partition, long offset) throws InterruptedException, ExecutionException {
-                log.info("[Signal] Receive VertexGroup from master");
-                Monitor.start();
-                Metrics.setWorkerStartTime();
-                WorkerServer.this.executionManager.waitForFutures(); // in case of fault, repartition is needed
-                Map<String, Object> res = (Map<String, Object>) mail.getMessage().getContent();
-                setVertexGroup((VertexGroup<T>) res.get("PARTITION"));
-                PartitionStrategy partitionStrategy = (PartitionStrategy) res.get("PARTITION_STRATEGY");
-                List<Mail> incomingMails = (List<Mail>) res.get("MAILS");
-                if (!incomingMails.isEmpty()) {
-                    getInMailQueue().addAll(incomingMails);
+                synchronized (WorkerServer.this) {
+                    log.info("[Signal] Receive VertexGroup from master");
+                    Monitor.start();
+                    Metrics.setWorkerStartTime();
+                    Map<String, Object> res = (Map<String, Object>) mail.getMessage().getContent();
+                    setVertexGroup((VertexGroup<T>) res.get("PARTITION"));
+                    PartitionStrategy partitionStrategy = (PartitionStrategy) res.get("PARTITION_STRATEGY");
+                    List<Mail> incomingMails = (List<Mail>) res.get("MAILS");
+                    superstep = (Integer) res.get("SUPERSTEP");
+                    if (!incomingMails.isEmpty()) {
+                        getInMailQueue().addAll(incomingMails);
+                    }
+                    setPartitionStrategy(partitionStrategy);
+                    // assign the server's hashmap to each vertex
+                    Metrics.Superstep.initialize();
+                    List<Vertex<T>> vertices = vertexGroup.getVertices();
+                    for (Vertex<T> vertex : vertices) {
+                        Metrics.Superstep.incrementVertexNum(1);
+                        Metrics.Superstep.incrementEdgeNum(vertex.getEdges().size());
+                        vertex.setServerQueue(getOutMailQueue());
+                    }
+                    Message message = new Message();
+                    message.setContent(WorkerServer.this.getServerId());
+                    Mail mailToConfirmReceive = new Mail();
+                    mailToConfirmReceive.setMessage(message);
+                    MessageProducer.produce(null, mailToConfirmReceive,"CONFIRM_RECEIVE");
                 }
-                setPartitionStrategy(partitionStrategy);
-                // assign the server's hashmap to each vertex
-                Metrics.Superstep.initialize();
-                List<Vertex<T>> vertices = vertexGroup.getVertices();
-                for (Vertex<T> vertex : vertices) {
-                    Metrics.Superstep.incrementVertexNum(1);
-                    Metrics.Superstep.incrementEdgeNum(vertex.getEdges().size());
-                    vertex.setServerQueue(getOutMailQueue());
-                }
-                Message message = new Message();
-                message.setContent(WorkerServer.this.getServerId());
-                Mail mailToConfirmReceive = new Mail();
-                mailToConfirmReceive.setMessage(message);
-                MessageProducer.produce(null, mailToConfirmReceive,"CONFIRM_RECEIVE");
             }
         });
 
@@ -124,8 +126,7 @@ public class WorkerServer<T> extends AbstractServer<T> {
     /**
      * Execute the superstep
      */
-    private void superstep(boolean doSnapshot) throws InterruptedException {
-        superstep++;
+    private synchronized void superstep(boolean doSnapshot) throws InterruptedException {
         log.info("[Superstep] Start Superstep {}", superstep);
         Metrics.Superstep.setSuperstepStartTime();
         this.executionManager.setDoSnapshot(doSnapshot);
@@ -141,6 +142,7 @@ public class WorkerServer<T> extends AbstractServer<T> {
         sendCompleteSignal(doSnapshot, stop);
         Metrics.Superstep.computeSuperstepDuration();
         Monitor.stopAndStartNewSuperstep();
+        superstep++;
     }
 
     @Override
@@ -168,11 +170,12 @@ public class WorkerServer<T> extends AbstractServer<T> {
      */
     public void sendCompleteSignal(boolean doSnapshot, boolean complete) {
         log.info("[Superstep] Superstep {} completed", superstep);
+        log.info("[Complete] {}, [DoSnapshot] {}", complete, doSnapshot);
         log.info("#############################################################################################");
         if (doSnapshot) {
-            MessageProducer.produceFinishSignal(this.vertexGroup.getVertexValues(), this.snapshotMails, complete);
+            MessageProducer.produceFinishSignal(this.vertexGroup.getVertexValues(), this.snapshotMails, complete, superstep);
         } else {
-            MessageProducer.produceFinishSignal(new HashMap<>(), new ArrayList<>(), false);
+            MessageProducer.produceFinishSignal(new HashMap<>(), new ArrayList<>(), false, superstep);
         }
     }
 
