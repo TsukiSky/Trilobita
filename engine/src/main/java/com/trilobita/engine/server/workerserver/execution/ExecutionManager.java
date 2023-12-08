@@ -59,7 +59,7 @@ public class ExecutionManager<T> {
         distributeLatch.await();
 
         // inform functionable instances of functionables values
-        server.getFunctionableRunner().distributeValues();
+//        server.getFunctionableRunner().distributeValues();
         Metrics.Superstep.computeDistributionDuration();
 
         Metrics.Superstep.setExecutionStartTime();
@@ -93,9 +93,11 @@ public class ExecutionManager<T> {
 
         // execute functionables
         Metrics.Superstep.setMessagingStartTime();
-        server.getFunctionableRunner().runFunctionableTasks(this.server);
+//        server.getFunctionableRunner().runFunctionableTasks(this.server);
 
         CountDownLatch mailingLatch = new CountDownLatch(server.getOutMailQueue().size());
+        System.out.println("out going mail: " + server.getOutMailQueue());
+
         if (doSnapshot) {
             // add incoming mails
             server.setSnapshotMails(server.getOutMailQueue().stream().toList());

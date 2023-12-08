@@ -5,6 +5,7 @@ import com.trilobita.core.messaging.MessageConsumer;
 import com.trilobita.engine.server.masterserver.MasterServer;
 import com.trilobita.engine.server.masterserver.heartbeat.checker.HeartbeatChecker;
 import com.trilobita.engine.server.util.HeartbeatSender;
+import lombok.Data;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -17,10 +18,12 @@ import java.util.concurrent.ExecutionException;
  * It contains the fault handler for the workers and masters
  */
 @Slf4j
+@Data
 public class HeartbeatManager {
     MasterServer<?> masterServer;
     List<Integer> masterIds;
     MessageConsumer workerHeartBeatConsumer;
+
     HeartbeatChecker masterHeartBeatChecker;
     MessageConsumer masterHeartBeatConsumer;
     HeartbeatChecker workerHeartBeatChecker;
@@ -28,7 +31,7 @@ public class HeartbeatManager {
     MessageConsumer stopSignalConsumer;
 
     @Getter
-    Boolean isHandlingFault = false;
+    volatile Boolean isHandlingFault = false;
 
     public HeartbeatManager(MasterServer<?> masterServer, List<Integer> masterIds) {
         this.masterServer = masterServer;
@@ -52,14 +55,12 @@ public class HeartbeatManager {
             public void handleFault(List<Integer> errors) {
                 isHandlingFault = true;
                 for (Integer id : errors){
-                    log.info("[Fault] server {} is down, start repartitioning...", id);
+                    log.info("[Fault] server {} is down", id);
                     masterServer.getWorkerIds().remove((Integer) id);
                     workerHeartBeatChecker.getHeartbeats().remove(id);
                 }
                 log.info("worker ids: {}", masterServer.getWorkerIds());
                 masterServer.getExecutionManager().partitionGraph(masterServer.getWorkerIds());
-                log.info("finished repartitioning...");
-                isHandlingFault = false;
             }
         });
         masterHeartBeatChecker = new HeartbeatChecker(masterServer.getServerId(), masterIds, false, new HeartbeatChecker.FaultHandler() {
@@ -86,6 +87,9 @@ public class HeartbeatManager {
         workerHeartBeatConsumer = new MessageConsumer("HEARTBEAT_WORKER", masterServer.getServerId(), new MessageConsumer.MessageHandler() {
             @Override
             public void handleMessage(UUID key, Mail value, int partition, long offset) {
+                if (isHandlingFault) {
+                    return;
+                }
                 int senderId = (int) value.getMessage().getContent();
                 if (!masterServer.getWorkerIds().contains(senderId)) {
                     System.out.println(masterServer.getWorkerIds());

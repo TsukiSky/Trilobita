@@ -65,6 +65,7 @@ public class WorkerServer<T> extends AbstractServer<T> {
                 setVertexGroup((VertexGroup<T>) res.get("PARTITION"));
                 PartitionStrategy partitionStrategy = (PartitionStrategy) res.get("PARTITION_STRATEGY");
                 List<Mail> incomingMails = (List<Mail>) res.get("MAILS");
+                log.info("mail received from server: {}", incomingMails);
                 if (!incomingMails.isEmpty()) {
                     getInMailQueue().addAll(incomingMails);
                 }
@@ -144,6 +145,7 @@ public class WorkerServer<T> extends AbstractServer<T> {
                 break;
             }
         }
+        log.info("worker stopped: {}, do snapshot: {}", stop, doSnapshot);
         sendCompleteSignal(doSnapshot, stop);
         Metrics.Superstep.computeSuperstepDuration();
         Monitor.stopAndStartNewSuperstep();
@@ -174,11 +176,12 @@ public class WorkerServer<T> extends AbstractServer<T> {
      */
     public void sendCompleteSignal(boolean doSnapshot, boolean complete) {
         log.info("[Superstep] super step {} completed", superstep);
-        if (doSnapshot) {
-            log.info("[Graph] {}", this.vertexGroup);
-            MessageProducer.produceFinishSignal(this.vertexGroup.getVertexValues(), this.snapshotMails, complete);
+        if (doSnapshot || complete) {
+//            log.info("[Graph] {}", this.vertexGroup);
+            log.info("[Mail Queue] {}", this.snapshotMails);
+            MessageProducer.produceFinishSignal(this.getServerId(), this.vertexGroup.getVertexValues(), this.snapshotMails, complete);
         } else {
-            MessageProducer.produceFinishSignal(new HashMap<>(), new ArrayList<>(), false);
+            MessageProducer.produceFinishSignal(this.getServerId(),new HashMap<>(), new ArrayList<>(), false);
         }
     }
 

@@ -198,7 +198,8 @@ public class MessageAdmin {
         try {
             return getTopics().contains(topic);
         } catch (ExecutionException | InterruptedException e) {
-            e.printStackTrace();
+            log.error("existTopic: ", e);
+//            e.printStackTrace();
             return false;
         }
     }

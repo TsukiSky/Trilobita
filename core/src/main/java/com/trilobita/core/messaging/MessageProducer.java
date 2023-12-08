@@ -99,8 +99,9 @@ public class MessageProducer {
      *
      * @param vertexValues vertex values to be stored as checkpoints
      */
-    public static <T> void produceFinishSignal(HashMap<Integer, Computable<T>> vertexValues, List<Mail> snapshotMails, boolean complete) {
+    public static <T> void produceFinishSignal(Integer id, HashMap<Integer, Computable<T>> vertexValues, List<Mail> snapshotMails, boolean complete) {
         Map<String, Object> map = new HashMap<>();
+        map.put("ID", id);
         map.put("VERTEX_VALUES", vertexValues);
         map.put("COMPLETE", complete);
         map.put("SNAPSHOT_MAILS", snapshotMails);

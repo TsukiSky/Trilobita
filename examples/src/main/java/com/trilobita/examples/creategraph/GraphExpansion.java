@@ -11,13 +11,13 @@ public class GraphExpansion {
     public static void main(String[] args) {
         try {
             // Generate the graph for 3 parts
-            String graph = generateGraph(100);
+            String graph = generateGraph(50);
 
             // Print the graph to the console
             System.out.println(graph);
 
             // Save the graph to a text file
-            saveGraphToFile(graph, "data/graph/Graph-901.csv");
+            saveGraphToFile(graph, "data/graph/Graph-451.csv");
         } catch (IOException e) {
             e.printStackTrace();
         }
