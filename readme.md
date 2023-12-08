@@ -82,13 +82,47 @@ We implement two examples in the `examples` module, which can be run by the foll
 
 **Example 1: PageRank Algorithm**
 
+Navigate to the PageRank example directory: `Trilobita\examples\src\main\java\com\trilobita\examples\pagerank`
+
+Compile files:
+
+```bash
+javac *.java
 ```
-```
+
+Run Worker Server:
+
+``````
+java WorkerServer.java
+``````
+
+Run Master Server:
+
+``````
+java MasterServer.java
+``````
 
 **Example 2: Shortest Path Search Algorithm**
 
+Navigate to the Shortest Path Search example directory: `Trilobita\examples\src\main\java\com\trilobita\examples\shortestpath`
+
+Compile files:
+
+```bash
+javac *.java
 ```
-```
+
+Run Worker Server:
+
+``````
+java WorkerServer.java
+``````
+
+Run Master Server:
+
+``````
+java MasterServer.java
+``````
 
 ## License
 
