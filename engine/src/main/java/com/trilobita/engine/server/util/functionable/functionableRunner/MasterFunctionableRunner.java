@@ -1,20 +1,18 @@
 package com.trilobita.engine.server.util.functionable.functionableRunner;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.ArrayList;
-
 import com.trilobita.core.common.Computable;
 import com.trilobita.core.common.Mail;
-import com.trilobita.core.common.Message;
 import com.trilobita.core.common.Mail.MailType;
-import com.trilobita.core.messaging.MessageProducer;
+import com.trilobita.core.common.Message;
 import com.trilobita.core.messaging.MessageConsumer;
+import com.trilobita.core.messaging.MessageProducer;
 import com.trilobita.engine.server.util.functionable.Functionable;
 import lombok.extern.slf4j.Slf4j;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -27,7 +25,7 @@ public class MasterFunctionableRunner extends FunctionableRunner {
     private static final String MASTER_TOPIC = "MASTER_FUNCTIONAL";
     private static MasterFunctionableRunner instance = null;
     private final MessageConsumer functionableConsumer;
-    private final Map<String, List<Computable<?>>> functionalValues = new HashMap<>();
+    private final Map<String, CopyOnWriteArrayList<Computable<?>>> functionalValues = new HashMap<>();
     private Boolean isPrimary;
 
     private MasterFunctionableRunner(Integer serverId, Boolean isPrimary) throws ExecutionException, InterruptedException {
@@ -97,9 +95,9 @@ public class MasterFunctionableRunner extends FunctionableRunner {
             return;
         }
         log.info("Received functional values: {}", this.functionalValues);
-        for (Map.Entry<String, List<Computable<?>>> entry : this.functionalValues.entrySet()) {
+        for (Map.Entry<String, CopyOnWriteArrayList<Computable<?>>> entry : this.functionalValues.entrySet()) {
             String instanceName = entry.getKey();
-            List<Computable<?>> values = entry.getValue();
+            CopyOnWriteArrayList<Computable<?>> values = entry.getValue();
             if (!values.isEmpty()) {
                 Functionable<?> functionable = this.findFunctionableByName(instanceName);
                 if (functionable != null) {
@@ -162,7 +160,7 @@ public class MasterFunctionableRunner extends FunctionableRunner {
 
     private void addToFunctionalValues(String insName, Computable<?> value) {
         // If the key is not present in the map, create a new list and put it in the map
-        this.functionalValues.putIfAbsent(insName, new ArrayList<>());
+        this.functionalValues.putIfAbsent(insName, new CopyOnWriteArrayList<>());
         // Add the value to the list associated with the key
         this.functionalValues.get(insName).add(value);
     }
