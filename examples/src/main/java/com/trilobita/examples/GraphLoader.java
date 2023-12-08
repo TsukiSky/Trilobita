@@ -29,9 +29,9 @@ public class GraphLoader {
     public static void store(String outDir, String fileNameStr, Object o) {
         try {
             objectMapper.writeValue(new File(outDir, fileNameStr), o);
-            //log.info("[JsonParser] JSON file stored");
+            log.info("[JsonParser] JSON file stored");
         } catch (IOException e) {
-            //log.error("[JsonParser] Failed to store JSON file", e);
+            log.error("[JsonParser] Failed to store JSON file", e);
         }
     }
 

@@ -28,7 +28,7 @@ public class ExecutionManager<T> {
 
     public ExecutionManager(int parallelism, WorkerServer<T> server) {
         this.server = server;
-        this.executorService = Executors.newFixedThreadPool(10);
+        this.executorService = Executors.newFixedThreadPool(parallelism);
     }
 
     public void waitForFutures() throws ExecutionException, InterruptedException {

@@ -27,7 +27,6 @@ public abstract class Combiner<T> extends Functionable<T> {
     @Override
     public void execute(AbstractServer<?> server) {
         LinkedBlockingQueue<Mail> outMailQueue = server.getOutMailQueue();
-//        log.info("outMailQueue before combination: {}", outMailQueue);
         while (!outMailQueue.isEmpty()) {
             Mail mail = server.getOutMailQueue().poll();
             if (mail != null) {
@@ -35,7 +34,6 @@ public abstract class Combiner<T> extends Functionable<T> {
                 this.addToVertexMailMap(receiverId, mail);
             }
         }
-//        log.info("vertexMailMap: {}", vertexMailMap);
         for (Map.Entry<Integer, CopyOnWriteArrayList<Mail>> map : vertexMailMap.entrySet()) {
             if (!map.getValue().isEmpty()) {
                 Mail combinedMail = this.combineMails(map.getKey(), map.getValue());
@@ -45,7 +43,7 @@ public abstract class Combiner<T> extends Functionable<T> {
         for (Map.Entry<Integer, CopyOnWriteArrayList<Mail>> map : vertexMailMap.entrySet()) {
             vertexMailMap.get(map.getKey()).clear();
         }
-//        log.info("outMailQueue after combination: {}", server.getOutMailQueue());
+        log.info("[Superstep] Combiner handled all Mails");
     }
 
     @Override

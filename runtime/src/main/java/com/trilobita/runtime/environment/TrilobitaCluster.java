@@ -41,7 +41,6 @@ public class TrilobitaCluster<T> {
     public TrilobitaCluster(String topic) throws ExecutionException, InterruptedException {
         this.topic = topic;
         this.machineId = messageAdmin.getConsumerGroupsForTopic(topic).size();
-        //log.info("[JOIN CLUSTER] Machine joins the cluster --> MachineId: {}", machineId);
         this.numOfWorkers = machineId;  // the current number of workers is the current number of machines in the cluster
         this.isMaster = machineId == 0; // the first machine is the master
         MessageProducer.produce(null, new Mail(new Message(this.machineId), Mail.MailType.NORMAL), topic);
@@ -55,7 +54,7 @@ public class TrilobitaCluster<T> {
                         if (!isMaster) {
                             return; // only the master needs to handle this message
                         }
-                        //log.info("[SUBMIT JOB] a job is submitted to the cluster");
+                        ////log.info("[SUBMIT JOB] a job is submitted to the cluster");
                         HashMap<String, Object> content = (HashMap<String, Object>) value.getMessage().getContent();
                         Graph<T> graph = (Graph<T>) content.get("GRAPH");
                         PartitionStrategy partitionStrategy = (PartitionStrategy) content.get("PARTITION_STRATEGY");
@@ -63,25 +62,25 @@ public class TrilobitaCluster<T> {
                         trilobitaEnvironment.setPartitioner(new Partitioner<>(partitionStrategy));
                         trilobitaEnvironment.createMasterServer(machineId, 10, false);
                     case START_SIGNAL:
-                        //log.info("[START SIGNAL] Starting the cluster");
+                        ////log.info("[START SIGNAL] Starting the cluster");
                         break;
                     case FINISH_SIGNAL:
-                        //log.info("[FINISH SIGNAL] Finishing the cluster");
+                        ////log.info("[FINISH SIGNAL] Finishing the cluster");
                         break;
                     case HEARTBEAT:
-                        //log.info("[HEARTBEAT] Heartbeat from the cluster");
+                        ////log.info("[HEARTBEAT] Heartbeat from the cluster");
                         break;
                     case PARTITION:
-                        //log.info("[PARTITION] Partitioning the graph");
+                        ////log.info("[PARTITION] Partitioning the graph");
                         break;
                     case FUNCTIONAL:
-                        //log.info("[FUNCTIONAL] Functional message from the cluster");
+                        ////log.info("[FUNCTIONAL] Functional message from the cluster");
                         break;
                     case NORMAL:
-                        //log.info("[NORMAL] Normal message from the cluster");
+                        ////log.info("[NORMAL] Normal message from the cluster");
                         break;
                     default:
-                        //log.info("[UNKNOWN] Unknown message from the cluster");
+                        ////log.info("[UNKNOWN] Unknown message from the cluster");
                         break;
                 }
 

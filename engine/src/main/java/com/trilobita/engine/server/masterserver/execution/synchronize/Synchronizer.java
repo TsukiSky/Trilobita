@@ -38,7 +38,6 @@ public class Synchronizer<T> {
      * @param snapshot the snapshot to synchronize
      */
     public void synchronize(Snapshot<T> snapshot) {
-        // TODO: SYNC should synchronize everything, not just the graph
         snapshot.store();
         masterServer.setGraph(snapshot.getGraph());
         masterServer.setWorkerIds(snapshot.getAliveWorkerIds());
@@ -50,7 +49,6 @@ public class Synchronizer<T> {
      * do snapshot and sync the graph with other masters
      */
     public void snapshotAndSync(Graph<T> graph) {
-        log.info("[Snapshot] doing a snapshot");
         Snapshot<T> snapshot = Snapshot.createSnapshot(
                 masterServer.getExecutionManager().getSuperstep().get(),
                 masterServer.getExecutionManager().getSuperstep().get(),

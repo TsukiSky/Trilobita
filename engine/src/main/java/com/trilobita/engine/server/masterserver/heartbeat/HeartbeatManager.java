@@ -52,13 +52,13 @@ public class HeartbeatManager {
             public void handleFault(List<Integer> errors) {
                 isHandlingFault = true;
                 for (Integer id : errors){
-                    log.info("[Fault] server {} is down, start repartitioning...", id);
+                    log.info("[Fault] Worker {} is down, start repartitioning graph", id);
                     masterServer.getWorkerIds().remove((Integer) id);
                     workerHeartBeatChecker.getHeartbeats().remove(id);
                 }
-                log.info("worker ids: {}", masterServer.getWorkerIds());
+                log.info("[Fault] Alive worker ids: {}", masterServer.getWorkerIds());
                 masterServer.getExecutionManager().partitionGraph(masterServer.getWorkerIds());
-                log.info("finished repartitioning...");
+                log.info("[Fault] Finished fault handling");
                 isHandlingFault = false;
             }
         });
@@ -69,7 +69,7 @@ public class HeartbeatManager {
                     return;
                 }
                 // if all id with greater id has died, become the master
-                log.info("[Fault] detected current master is down, trying to become master...");
+                log.info("[Fault] detected current master is down, electing a new master");
                 masterServer.isPrimary = true;
                 masterServer.getExecutionManager().partitionGraph(masterServer.getWorkerIds());
                 masterServer.getMasterFunctionableRunner().becomePrimary();

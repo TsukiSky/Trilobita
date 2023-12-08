@@ -31,7 +31,7 @@ public class MinValueAggregator extends Aggregator<Double> {
                         values.add(vertex.getValue().getValue());
                 }
                 Double min_value = this.reduce(values);
-                log.info("[MinValueAggregator] Min vertex vale calculated by {}: {}", this.getServerId(), min_value);
+                log.info("[MinAggregator] Min vertex vale calculated by Server {}: {}", this.getServerId(), min_value);
                 return min_value;
         }
 

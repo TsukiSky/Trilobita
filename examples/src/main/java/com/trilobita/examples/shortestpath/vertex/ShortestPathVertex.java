@@ -40,7 +40,6 @@ public class ShortestPathVertex extends Vertex<Double> implements Serializable {
 
     @Override
     public void compute() {
-//        startSuperstep();
         try {
             Thread.sleep(10);
         } catch (InterruptedException e) {
@@ -60,13 +59,8 @@ public class ShortestPathVertex extends Vertex<Double> implements Serializable {
         Double minvalue = Double.MAX_VALUE;
         if (!allvalue.isEmpty()) {
             minvalue = Collections.min(allvalue);
-            //log.info("[COMPUTE] Min value received: {}", minvalue);
-        } else {
-            //log.info("[COMPUTE] The list is empty");
         }
         if (minvalue < this.getValue().getValue()) {
-            //log.info("[COMPUTE] Min value received: {} ", minvalue);
-            //log.info("[COMPUTE] Current value: {}", this.getValue().getValue());
             this.getValue().setValue(minvalue);
             this.sendMail();
         }
@@ -81,7 +75,6 @@ public class ShortestPathVertex extends Vertex<Double> implements Serializable {
     public void sendMail() {
         // finished all the job, generate out mail
         for (Edge edge : this.getEdges()) {
-            //log.info("the vertex value {} and edge value {}", this.getValue().getValue(), (double) edge.getState().getValue());
             ShortestPathValue shortestPathValue = new ShortestPathValue(this.getValue().getValue() + (double) edge.getState().getValue());
             Message msg = new Message(shortestPathValue);
             int vertexId = edge.getToVertexId();

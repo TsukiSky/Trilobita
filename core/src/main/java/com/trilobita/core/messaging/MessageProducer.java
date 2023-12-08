@@ -25,6 +25,7 @@ import java.util.concurrent.ExecutionException;
 @Slf4j
 public class MessageProducer {
     static Producer<Object, Object> producer = new KafkaProducer<>(MessageAdmin.getInstance().props);
+
     private MessageProducer() {
         producer = new KafkaProducer<>(MessageAdmin.getInstance().props);
     }
@@ -53,7 +54,7 @@ public class MessageProducer {
         try {
             MessageAdmin.getInstance().createIfNotExist(topic);
         } catch (ExecutionException | InterruptedException exception) {
-            //log.error("produce create topic: {}", exception.getMessage());
+            log.error("produce create topic: {}", exception.getMessage());
         }
     }
 
@@ -61,7 +62,7 @@ public class MessageProducer {
         try {
             MessageAdmin.getInstance().createIfNotExist(topic);
         } catch (ExecutionException | InterruptedException exception) {
-            //log.error("produce create topic: {}", exception.getMessage());
+            log.error("produce create topic: {}", exception.getMessage());
         }
         doProduce(key, value, topic);
     }
@@ -72,18 +73,13 @@ public class MessageProducer {
         }
         UUID finalKey = key;
 
-//        try (final org.apache.kafka.clients.producer.Producer<Object, Object> producer = new KafkaProducer<>(
-//                MessageAdmin.getInstance().props)) {
-            producer.send(new ProducerRecord<>(topic, finalKey.toString(), value), (event, ex) -> {
-                if (ex != null) {
-                    //log.error("[Message] error producing message: ", ex);
-                } else {
-                    if (LOG_FLAG) {
-                        //log.info("[Message] produced event to topic {}: key = {} value = {}", topic, finalKey, value);
-                    }
+        producer.send(new ProducerRecord<>(topic, finalKey.toString(), value), (event, ex) -> {
+            if (ex != null) {
+            } else {
+                if (LOG_FLAG) {
                 }
-            });
-//        }
+            }
+        });
     }
 
     /**

@@ -84,7 +84,7 @@ public class PageRankMasterRunner {
         try {
             return GraphLoader.loadGraph("data/graph/PageRankGraph.json", PageRankVertex.class, false, PageRankValue.class);// or null
         } catch (Exception e) {
-            //log.error("Failed to create graph from JSON", e);
+            log.error("[GraphLoader] Failed to create graph from JSON", e);
             return new Graph<>(new ArrayList<>());
         }
     }

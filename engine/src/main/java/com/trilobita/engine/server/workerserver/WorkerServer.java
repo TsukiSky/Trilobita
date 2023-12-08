@@ -57,7 +57,7 @@ public class WorkerServer<T> extends AbstractServer<T> {
             @Override
             @SuppressWarnings("unchecked")
             public void handleMessage(UUID key, Mail mail, int partition, long offset) throws InterruptedException, ExecutionException {
-                log.info("receiving message from server.........");
+                log.info("[Signal] Receive VertexGroup from master");
                 Monitor.start();
                 Metrics.setWorkerStartTime();
                 WorkerServer.this.executionManager.waitForFutures(); // in case of fault, repartition is needed
@@ -77,12 +77,10 @@ public class WorkerServer<T> extends AbstractServer<T> {
                     Metrics.Superstep.incrementEdgeNum(vertex.getEdges().size());
                     vertex.setServerQueue(getOutMailQueue());
                 }
-                log.info("[Partition] Vertex Group: {}", vertexGroup);
                 Message message = new Message();
                 message.setContent(WorkerServer.this.getServerId());
                 Mail mailToConfirmReceive = new Mail();
                 mailToConfirmReceive.setMessage(message);
-                // TODO: wait for functionables to register themselves
                 MessageProducer.produce(null, mailToConfirmReceive,"CONFIRM_RECEIVE");
             }
         });
@@ -91,11 +89,8 @@ public class WorkerServer<T> extends AbstractServer<T> {
             @Override
             public void handleMessage(UUID key, Mail mail, int partition, long offset) throws InterruptedException {
                 if (getVertexGroup() != null) {
+//                    log.info("[Signal] Receive <Superstep Start> from master");
                     boolean doSnapshot = (boolean) mail.getMessage().getContent();
-                    log.info("is doing snapshot: {}", doSnapshot);
-
-//                    Metrics.Superstep.computeSuperstepDuration();
-//                    Metrics.Superstep.setSuperstepStartTime();
                     superstep(doSnapshot);
                 }
             }
@@ -103,12 +98,13 @@ public class WorkerServer<T> extends AbstractServer<T> {
         this.stopSignalConsumer = new MessageConsumer("STOP", this.getServerId(), new MessageConsumer.MessageHandler() {
             @Override
             public void handleMessage(UUID key, Mail value, int partition, long offset) throws InterruptedException {
-                log.info("[Complete] shutdown all the services");
+                log.info("[Signal] Receive <Stop> from master");
                 shutdown();
             }
         });
         this.heartbeatSender = new HeartbeatSender(this.getServerId(), true);
         this.functionableRunner = WorkerFunctionableRunner.getInstance(serverId);
+        log.info("[WorkerServer] Worker {} initialized with a parallelism of {}", serverId, parallelism);
     }
 
     /**
@@ -130,15 +126,13 @@ public class WorkerServer<T> extends AbstractServer<T> {
      */
     private void superstep(boolean doSnapshot) throws InterruptedException {
         superstep++;
-        log.info("[Superstep] entering a new super step...");
+        log.info("[Superstep] Start Superstep {}", superstep);
         Metrics.Superstep.setSuperstepStartTime();
         this.executionManager.setDoSnapshot(doSnapshot);
         this.executionManager.execute();
 
-        // todo: check whether all vertices are shouldStop
         boolean stop = true;
         for (Vertex<T> v: this.vertexGroup.getVertices()){
-            log.info("should stop: {}, status: {}", v.isShouldStop(), v.getStatus());
             if (!v.isShouldStop() && v.getStatus() == Vertex.VertexStatus.ACTIVE) {
                 stop = false;
                 break;
@@ -173,9 +167,9 @@ public class WorkerServer<T> extends AbstractServer<T> {
      * Send a complete signal to the master server
      */
     public void sendCompleteSignal(boolean doSnapshot, boolean complete) {
-        log.info("[Superstep] super step {} completed", superstep);
+        log.info("[Superstep] Superstep {} completed", superstep);
+        log.info("#############################################################################################");
         if (doSnapshot) {
-            log.info("[Graph] {}", this.vertexGroup);
             MessageProducer.produceFinishSignal(this.vertexGroup.getVertexValues(), this.snapshotMails, complete);
         } else {
             MessageProducer.produceFinishSignal(new HashMap<>(), new ArrayList<>(), false);

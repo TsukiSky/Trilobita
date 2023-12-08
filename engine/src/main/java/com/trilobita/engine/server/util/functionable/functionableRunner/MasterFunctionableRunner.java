@@ -81,7 +81,7 @@ public class MasterFunctionableRunner extends FunctionableRunner {
         this.isPrimary = true;
         try {
             this.functionableConsumer.start();
-            log.info("functionableConsumer started.");
+            log.info("[Functionable] Functionable Handler started.");
         } catch (ExecutionException | InterruptedException e) {
             throw new RuntimeException(e);
         }
@@ -94,7 +94,6 @@ public class MasterFunctionableRunner extends FunctionableRunner {
         if (!this.isPrimary) {
             return;
         }
-        log.info("Received functional values: {}", this.functionalValues);
         for (Map.Entry<String, CopyOnWriteArrayList<Computable<?>>> entry : this.functionalValues.entrySet()) {
             String instanceName = entry.getKey();
             CopyOnWriteArrayList<Computable<?>> values = entry.getValue();
@@ -105,7 +104,7 @@ public class MasterFunctionableRunner extends FunctionableRunner {
                     functionable.sendMail(functionable.getNewFunctionableValue(), true);
                     values.clear(); // reset FunctionableValues
                 } else {
-                    log.info("No matching functionable found.");
+                    log.info("[Functionable] No matching functionable found.");
                 }
             }
         }
@@ -128,7 +127,7 @@ public class MasterFunctionableRunner extends FunctionableRunner {
             }
         } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
                  | NoSuchMethodException | SecurityException | ClassNotFoundException e) {
-            log.error("Error registerFunctionable:", e);
+            log.error("[Functionable] Error registering Functionable: ", e);
         }
     }
 
