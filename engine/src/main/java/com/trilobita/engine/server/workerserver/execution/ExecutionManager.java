@@ -22,7 +22,7 @@ import java.util.concurrent.*;
 public class ExecutionManager<T> {
     public final WorkerServer<T> server;
     private final ExecutorService executorService;
-    private final List<Future<?>> futures = new ArrayList<>();
+    private final List<Future<?>> futures = new CopyOnWriteArrayList<>();
     @Setter
     private boolean doSnapshot = false;
 
