@@ -13,7 +13,7 @@ public class HeartbeatSender {
     private final ScheduledExecutorService heartbeatExecutor;
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
 
-    private long delayed = 1; // in second
+    private long delayed = 2000; // in milliseconds
     private long period = 500; // in milliseconds
 
     private final int serverId;
@@ -26,7 +26,7 @@ public class HeartbeatSender {
     }
 
     public void start() {
-        start(1, 1);
+        start(this.delayed, this.period);
     }
 
     public void start(long delayed, long period) {
