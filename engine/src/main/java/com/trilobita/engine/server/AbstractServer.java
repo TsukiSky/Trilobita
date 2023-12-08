@@ -3,6 +3,7 @@ package com.trilobita.engine.server;
 import com.trilobita.core.common.Mail;
 import com.trilobita.core.graph.VertexGroup;
 import com.trilobita.core.messaging.MessageConsumer;
+import com.trilobita.core.messaging.MessageProducer;
 import com.trilobita.engine.server.masterserver.partition.strategy.PartitionStrategy;
 import com.trilobita.core.exception.TrilobitaException;
 import lombok.Getter;
@@ -38,6 +39,7 @@ public abstract class AbstractServer<T> {
             @Override
             public void handleMessage(UUID key, Mail value, int partition, long offset) {
                 AbstractServer.this.inMailQueue.add(value);
+                MessageProducer.produce(null, new Mail(), "VALUE_RECEIVE_CONFIRM");
             }
         });
     }

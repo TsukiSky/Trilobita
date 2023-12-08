@@ -28,7 +28,9 @@ public class ExecutionManager<T> {
     private final AtomicInteger nCompleteWorker = new AtomicInteger(0);
     private final AtomicInteger nConfirmWorker = new AtomicInteger(0);
     @Getter
-    private AtomicInteger superstep = new AtomicInteger(0);
+    private final AtomicInteger superstep = new AtomicInteger(0);
+
+    private Integer superstepSnapshot = 0;
 
     public ExecutionManager(MasterServer<T> masterServer, int snapshotFrequency) {
         this.masterServer = masterServer;
@@ -68,10 +70,16 @@ public class ExecutionManager<T> {
                 nConfirmWorker.getAndAdd(1);
                 if (nConfirmWorker.get() == masterServer.getWorkerIds().size()) {
                     // send start message to all workers
+                    nFinishWorker.set(0);
+                    nCompleteWorker.set(0);
+                    nConfirmWorker.set(0);
+                    masterServer.getHeartbeatManager().setIsHandlingFault(false);
                     MessageProducer.produce(null, new Mail(), "CONFIRM_START");
                 }
             }
         });
+
+        // check when a worker receives the message from other servers
 
         // create the complete signal consumer
         this.completeSignalConsumer = new MessageConsumer(Mail.MailType.FINISH_SIGNAL.ordinal(), masterServer.getServerId(), new MessageConsumer.MessageHandler() {
@@ -88,6 +96,11 @@ public class ExecutionManager<T> {
                 HashMap<Integer, Computable<T>> vertexValues = (HashMap<Integer, Computable<T>>) content.get("VERTEX_VALUES");
                 List<Mail> snapshotMails = (List<Mail>) content.get("SNAPSHOT_MAILS");
                 boolean complete = (boolean) content.get("COMPLETE");
+                Integer workerSuperstep = (Integer) content.get("SUPERSTEP");
+                if (workerSuperstep > superstep.get()) {
+                    return;
+                }
+                log.info("[Complete signal] {}", complete);
                 if (complete) {
                     nCompleteWorker.addAndGet(1);
                 }
@@ -108,10 +121,12 @@ public class ExecutionManager<T> {
                     masterServer.getMasterFunctionableRunner().runFunctionableTasks();
                     Metrics.Superstep.computeMasterDuration();
                     Monitor.stopAndStartNewSuperstepMaster();
+                    log.info("[Complete workers] {}", nCompleteWorker);
                     // check if the master needs to do a snapshot
                     if (isDoingSnapshot()) {
                         log.info("[Snapshot] Do Snapshot and Synchronization");
                         synchronizer.snapshotAndSync(masterServer.getGraph());
+                        superstepSnapshot = superstep.get();
                     }
                     // check whether all workers have finished
                     if (nCompleteWorker.get() == masterServer.getWorkerIds().size()) {
@@ -119,7 +134,7 @@ public class ExecutionManager<T> {
                         masterServer.shutdown();
                     } else {
                         // start a new superstep
-                        Thread.sleep(50);
+                        Thread.sleep(500);
                         Metrics.Superstep.setMasterSuperStepStartTime();
                         superstep();
                     }
@@ -153,6 +168,7 @@ public class ExecutionManager<T> {
         nFinishWorker.set(0);
         nCompleteWorker.set(0);
         nConfirmWorker.set(0);
+        superstep.set(superstepSnapshot);
         Map<Integer, VertexGroup<T>> vertexGroups = this.masterServer.getGraphPartitioner().partition(this.masterServer.getGraph(), aliveWorkerIds);
         vertexGroups.forEach((workerId, vertexGroup) -> {
             List<Mail> mails = new ArrayList<>();
@@ -165,6 +181,7 @@ public class ExecutionManager<T> {
             objectMap.put("PARTITION", vertexGroup);
             objectMap.put("PARTITION_STRATEGY", this.masterServer.getGraphPartitioner().getPartitionStrategy());
             objectMap.put("MAILS", mails);
+            objectMap.put("SUPERSTEP", superstep.get());
             MessageProducer.producePartitionGraphMessage(objectMap, workerId);
         });
     }
