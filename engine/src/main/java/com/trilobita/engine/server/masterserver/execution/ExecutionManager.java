@@ -133,7 +133,7 @@ public class ExecutionManager<T> {
      */
     public void superstep() {
         log.info("#############################################################################################");
-        log.info("[Superstep] Start Supertep: {}", this.superstep);
+        log.info("[Superstep] Start Supertep");
         this.superstep.addAndGet(1);
         nFinishWorker.set(0);
         nCompleteWorker.set(0);

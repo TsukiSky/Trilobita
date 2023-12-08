@@ -76,7 +76,7 @@ public class HeartbeatChecker {
     public void start(){
         if (!isHandlingFault) {
             heartbeatExecutor.scheduleAtFixedRate(this::check, 5, 1, TimeUnit.SECONDS);
-            log.info("[Heartbeat] Heartbeat service starts in 5 seconds");
+//            log.info("[Heartbeat] Heartbeat service starts in 5 seconds");
         } else {
             log.info("[Heartbeat] Heartbeat service is running");
         }

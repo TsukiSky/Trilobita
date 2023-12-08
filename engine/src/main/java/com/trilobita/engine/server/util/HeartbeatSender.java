@@ -34,7 +34,7 @@ public class HeartbeatSender {
         this.period = period;
         if (isRunning.compareAndSet(false, true)) {
             heartbeatExecutor.scheduleAtFixedRate(this::sendHeartbeat, this.delayed, this.period, TimeUnit.MILLISECONDS);
-            log.info("[Heartbeat] Heartbeat service starts in {} second", delayed);
+            log.info("[Heartbeat] Heartbeat service starts in {} second", delayed/1000);
         } else {
             log.info("[Heartbeat] Heartbeat sending service is running");
         }
