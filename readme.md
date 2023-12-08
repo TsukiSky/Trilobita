@@ -82,7 +82,7 @@ We implement two examples in the `examples` module, which can be run by the foll
 
 **Example 1: PageRank Algorithm**
 
-Navigate to the PageRank example directory: `Trilobita\examples\src\main\java\com\trilobita\examples\pagerank`
+Navigate to the PageRank example directory: `examples\src\main\java\com\trilobita\examples\pagerank`
 
 Compile files:
 
@@ -90,7 +90,7 @@ Compile files:
 javac *.java
 ```
 
-Run Worker Server:
+Run Worker Server: (You might need to indicate the Worker Id in the filename)
 
 ``````
 java WorkerServer.java
@@ -104,7 +104,7 @@ java MasterServer.java
 
 **Example 2: Shortest Path Search Algorithm**
 
-Navigate to the Shortest Path Search example directory: `Trilobita\examples\src\main\java\com\trilobita\examples\shortestpath`
+Navigate to the Shortest Path Search example directory: `examples\src\main\java\com\trilobita\examples\shortestpath`
 
 Compile files:
 
@@ -112,7 +112,7 @@ Compile files:
 javac *.java
 ```
 
-Run Worker Server:
+Run Worker Server: (You might need to indicate the Worker Id in the filename)
 
 ``````
 java WorkerServer.java
@@ -123,6 +123,15 @@ Run Master Server:
 ``````
 java MasterServer.java
 ``````
+
+### Reports
+
+Our reports can be found on:
+
+* [Checkpoint 1 Report](https://github.com/TsukiSky/Trilobita/blob/main/docs/report/Checkpoint%201%20Report.pdf)
+* [Checkpoint 2 Report](https://github.com/TsukiSky/Trilobita/blob/main/docs/report/Checkpoint%202%20Report.pdf)
+* [Checkpoint 3 report](https://github.com/TsukiSky/Trilobita/blob/main/docs/report/Checkpoint%203%20Report.pdf)
+* [Final Report](https://github.com/TsukiSky/Trilobita/blob/main/docs/report/Final%20Report.pdf)
 
 ## License
 
